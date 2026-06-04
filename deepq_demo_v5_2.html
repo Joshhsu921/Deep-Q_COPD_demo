@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTC DeepQ — COPD 照護缺口攔截系統 Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f7fa;--bg2:#ffffff;--bg3:#f0f3f7;--bg4:#e2e8f0;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text1:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --dq:#0284c7;--dq-dim:rgba(2,132,199,0.08);--dq-border:rgba(2,132,199,0.22);
+  --lgreen:#059669;--lg-dim:rgba(5,150,105,0.08);--lg-border:rgba(5,150,105,0.22);
+  --amber:#d97706;--am-dim:rgba(217,119,6,0.08);--am-border:rgba(217,119,6,0.22);
+  --danger:#dc2626;--da-dim:rgba(220,38,38,0.06);--da-border:rgba(220,38,38,0.20);
+  --teal:#0f766e;--tl-dim:rgba(15,118,110,0.08);--tl-border:rgba(15,118,110,0.22);
+  --success:#059669;
+  --mono:'IBM Plex Mono',monospace;--sans:'Noto Sans TC',sans-serif;
+}
+html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height:100%;overflow:hidden;}
+.shell{display:flex;height:100vh;overflow:hidden;}
+
+/* sidebar */
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+.sb-mark{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--dq);margin-bottom:3px;}
+.sb-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.sb-sec{padding:14px 12px 6px;font-size:10px;font-family:var(--mono);letter-spacing:.10em;color:var(--text3);text-transform:uppercase;}
+.nav-item{margin:0 8px 2px;padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text2);transition:all .18s;border:1px solid transparent;}
+.nav-item:hover{background:var(--bg3);color:var(--text1);}
+.nav-item.active{background:var(--dq-dim);border-color:var(--dq-border);color:var(--dq);}
+.nav-item .ic{width:16px;text-align:center;font-size:14px;flex-shrink:0;}
+.nav-item .num{margin-left:auto;font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:10px;background:var(--da-dim);color:var(--danger);border:1px solid var(--da-border);}
+.sb-footer{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.8;}
+.sdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:5px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* main */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0;}
+.tb-title{font-family:var(--mono);font-size:12px;color:var(--text2);letter-spacing:.06em;}
+.pill{padding:3px 10px;border-radius:20px;font-size:11px;font-family:var(--mono);border:1px solid;}
+.pill-b{background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);}
+.pill-g{background:var(--lg-dim);color:var(--lgreen);border-color:var(--lg-border);}
+.pill-a{background:var(--am-dim);color:var(--amber);border-color:var(--am-border);}
+.tb-r{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent;}
+.content::-webkit-scrollbar{width:5px;}
+.content::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px;}
+
+/* panels */
+.panel{display:none;animation:fadeUp .3s ease;}
+.panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* shared */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.card-sm{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.slbl{font-family:var(--mono);font-size:10px;letter-spacing:.10em;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+.t1{font-size:14px;font-weight:500;color:var(--text1);}
+.t2{font-size:13px;color:var(--text2);line-height:1.75;}
+.t3{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.tag{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-family:var(--mono);border:1px solid;margin:2px 2px 2px 0;}
+.tag-r{background:var(--da-dim);color:var(--danger);border-color:var(--da-border);}
+.tag-a{background:var(--am-dim);color:var(--amber);border-color:var(--am-border);}
+.tag-b{background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);}
+.tag-g{background:var(--lg-dim);color:var(--lgreen);border-color:var(--lg-border);}
+.tag-t{background:var(--tl-dim);color:var(--teal);border-color:var(--tl-border);}
+.fkey{font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;}
+.fval{font-size:13px;color:var(--text2);line-height:1.7;}
+.frow{margin-bottom:12px;}.frow:last-child{margin-bottom:0;}
+.note-b{background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:12px 14px;margin-top:12px;}
+.note-t{font-family:var(--mono);font-size:11px;color:var(--dq);font-weight:500;margin-bottom:5px;}
+.note-v{font-size:13px;color:var(--text2);line-height:1.75;}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3);}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.divider span{padding:3px 10px;border:1px solid var(--border);border-radius:4px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.two-col{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;}
+
+/* stage 1 */
+.s1-grid{display:grid;grid-template-columns:245px minmax(0,1fr);gap:18px;align-items:start;}
+.phone-frame{border:1px solid var(--border2);border-radius:22px;overflow:hidden;background:var(--bg3);}
+.phone-bar{background:var(--lgreen);padding:11px 14px;display:flex;align-items:center;gap:9px;}
+.phone-bar .pav{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);font-size:11px;color:#fff;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.phone-bar .pn{color:#fff;font-size:12px;font-weight:500;}
+.phone-bar .ps{color:rgba(255,255,255,.75);font-size:10px;}
+.chat-body{padding:12px;display:flex;flex-direction:column;gap:10px;background:#f8fafb;min-height:320px;}
+.mrow{display:flex;gap:7px;align-items:flex-end;}
+.mrow.out{flex-direction:row-reverse;}
+.aiv{width:22px;height:22px;border-radius:50%;background:var(--lgreen);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0;}
+.bub{max-width:175px;padding:9px 11px;border-radius:12px;font-size:11px;line-height:1.6;color:var(--text1);background:var(--bg2);border:1px solid var(--border);}
+.bub.ai{border-radius:3px 12px 12px 12px;}
+.bub.out{background:var(--lgreen);color:#fff;border:none;border-radius:12px 12px 3px 12px;}
+.bub.warn{background:var(--am-dim);border-color:var(--am-border);}
+.bub.emergency{background:#fff0f0;border:2px solid var(--danger);}
+.wtag{font-family:var(--mono);font-size:10px;color:var(--amber);font-weight:500;margin-bottom:5px;}
+.etag{font-family:var(--mono);font-size:10px;color:var(--danger);font-weight:500;margin-bottom:5px;}
+.chip{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;border:1px solid;margin:2px 1px;}
+.chip-on{background:var(--lg-dim);border-color:var(--lg-border);color:var(--lgreen);}
+.chip-off{background:var(--bg4);border-color:var(--border);color:var(--text3);}
+/* inline consent in chat */
+.consent-inline{background:var(--bg2);border:1px solid var(--dq-border);border-radius:12px;padding:14px 16px;}
+.citem{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);line-height:1.6;padding:7px 0;border-bottom:1px solid var(--border);}
+.citem:last-of-type{border-bottom:none;}
+.citem i{color:var(--dq);font-size:14px;margin-top:1px;flex-shrink:0;}
+.cbtns{display:flex;gap:8px;margin-top:12px;}
+.cbtn-y{flex:1;padding:9px;border-radius:8px;background:var(--dq);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);transition:opacity .2s;}
+.cbtn-y:hover{opacity:.85;}
+.cbtn-n{padding:9px 14px;border-radius:8px;background:none;color:var(--text2);font-size:13px;border:1px solid var(--border2);cursor:pointer;font-family:var(--sans);}
+/* pacs consent card */
+.pacs-card{background:var(--bg3);border:1px solid var(--dq-border);border-radius:12px;padding:16px;}
+
+/* stage 2 */
+.s2-grid{display:grid;grid-template-columns:195px minmax(0,1fr);gap:14px;}
+.pt-list{display:flex;flex-direction:column;gap:6px;}
+.ptcard{padding:11px 13px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;transition:border-color .15s;}
+.ptcard:hover{border-color:var(--border2);}
+.ptcard.active{border:2px solid var(--dq);background:var(--dq-dim);}
+.ptcard.active .pt-nm{color:var(--dq);}
+.pt-nm{font-size:14px;font-weight:500;color:var(--text1);margin-bottom:2px;}
+.pt-mt{font-size:11px;font-family:var(--mono);color:var(--text2);}
+.pt-bdg{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);border:1px solid;}
+.pt-header{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.av{width:42px;height:42px;border-radius:50%;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.av-b{background:var(--dq-dim);color:var(--dq);}
+.av-a{background:var(--am-dim);color:var(--amber);}
+.av-t{background:var(--tl-dim);color:var(--teal);}
+.pt-hn{font-size:16px;font-weight:500;color:var(--text1);}
+.pt-hm{font-size:11px;font-family:var(--mono);color:var(--text2);margin-top:2px;}
+.kpis{display:flex;gap:8px;margin-left:auto;}
+.kpi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 13px;text-align:center;min-width:82px;}
+.kpi-l{font-size:10px;font-family:var(--mono);color:var(--text3);}
+.kpi-v{font-size:14px;font-weight:500;margin-top:2px;}
+.alert-box{border-radius:12px;padding:14px 16px;border:1px solid;margin-bottom:12px;}
+.ab-warn{background:var(--am-dim);border-color:var(--am-border);}
+.ab-danger{background:var(--da-dim);border-color:var(--da-border);}
+.ab-info{background:var(--dq-dim);border-color:var(--dq-border);}
+.ab-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.ab-title{font-size:13px;font-weight:500;}
+.abt-warn{color:var(--amber);}
+.abt-danger{color:var(--danger);}
+.abt-info{color:var(--dq);}
+.conf-bdg{margin-left:auto;font-size:10px;font-family:var(--mono);padding:2px 9px;border-radius:4px;border:1px solid;}
+.cb-warn{background:var(--am-dim);color:var(--amber);border-color:var(--am-border);}
+.cb-danger{background:var(--da-dim);color:var(--danger);border-color:var(--da-border);}
+.cb-info{background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);}
+/* gap badge */
+.gap-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);border:1px solid;}
+.ev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ev-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+.ev-src{font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.ev-src i{font-size:13px;}
+.ev-body{font-size:12px;color:var(--text2);line-height:1.7;}
+.ev-body strong{color:var(--text1);font-weight:500;}
+.ev-cite{font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:6px;}
+.intercept{background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:11px 13px;margin-top:12px;}
+.int-t{font-family:var(--mono);font-size:11px;color:var(--dq);font-weight:500;margin-bottom:4px;}
+.int-b{font-size:12px;color:var(--text2);line-height:1.7;}
+.action-card{background:var(--bg2);border:2px solid var(--dq-border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.act-t{font-size:13px;font-weight:500;color:var(--dq);display:flex;align-items:center;gap:7px;}
+.order{display:flex;align-items:flex-start;gap:9px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 11px;}
+.chk{width:15px;height:15px;border-radius:4px;border:2px solid;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
+.chk-done{border-color:var(--dq);background:var(--dq-dim);}
+.chk-empty{border-color:var(--border2);background:none;}
+.ord-l{font-size:13px;font-weight:500;color:var(--text1);}
+.ord-s{font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:2px;}
+.ord-badge-ai{font-size:10px;font-family:var(--mono);color:var(--dq);border:1px solid var(--dq-border);padding:1px 5px;border-radius:3px;background:var(--dq-dim);margin-left:5px;}
+.ord-badge-opt{font-size:10px;font-family:var(--mono);color:var(--text3);border:1px solid var(--border);padding:1px 5px;border-radius:3px;margin-left:5px;}
+/* btn row */
+.btn-row{display:flex;gap:8px;}
+.hitl-btn{padding:11px;border-radius:8px;background:var(--dq);color:#fff;font-size:13px;font-weight:700;font-family:var(--sans);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .2s;flex:2;}
+.hitl-btn:hover:not(:disabled){opacity:.85;}
+.hitl-btn.done{background:var(--success);cursor:default;}
+.snooze-btn{flex:1;padding:11px;border-radius:8px;background:none;color:var(--text2);font-size:12px;font-family:var(--sans);border:1px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .2s;}
+.snooze-btn:hover:not(:disabled){background:var(--bg3);}
+.snooze-btn.done{background:var(--am-dim);border-color:var(--am-border);color:var(--amber);cursor:default;}
+.hitl-note{font-size:10px;font-family:var(--mono);color:var(--text3);text-align:center;margin-top:6px;}
+.ord-hint{font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:2px;}
+
+/* ── PACS AI panel ── */
+.pacs-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.pacs-header{background:#0f172a;padding:9px 13px;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:#94a3b8;}
+.pacs-header strong{color:#e2e8f0;}
+.pacs-viewer{position:relative;background:#111827;display:flex;gap:2px;padding:10px;}
+.xray-wrap{position:relative;flex:1;}
+.xray-label{position:absolute;top:5px;left:7px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.5);z-index:2;}
+.xray-label.ai-label{color:rgba(96,165,250,.9);}
+.xray-svg{width:100%;height:130px;display:block;}
+.pacs-legend{padding:7px 10px;display:flex;gap:10px;flex-wrap:wrap;background:#0f172a;}
+.leg-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:#94a3b8;}
+.leg-dot{width:8px;height:8px;border-radius:2px;}
+.pacs-finding{padding:8px 10px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:#cbd5e1;font-family:var(--mono);line-height:1.7;background:#0f172a;}
+.pacs-finding strong{color:#60a5fa;}
+.conf-bar-wrap{margin-top:4px;display:flex;align-items:center;gap:7px;font-size:10px;color:#64748b;}
+.conf-bar{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:2px;background:#60a5fa;}
+
+/* ── HIS timeline ── */
+.his-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.his-header{padding:9px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;}
+.his-header-lbl{font-family:var(--mono);font-size:11px;color:var(--text2);font-weight:500;}
+.his-badge{font-family:var(--mono);font-size:10px;margin-left:auto;padding:2px 8px;border-radius:4px;border:1px solid;}
+.his-body{padding:10px 12px;display:flex;flex-direction:column;gap:0;}
+.his-row{display:grid;grid-template-columns:70px 1fr;gap:0;position:relative;}
+.his-row:not(:last-child)::after{content:'';position:absolute;left:34px;top:22px;bottom:-4px;width:1px;background:var(--border);}
+.his-date{font-family:var(--mono);font-size:10px;color:var(--text3);padding-top:4px;line-height:1.4;}
+.his-card{margin-bottom:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.his-card.mis{border-color:var(--da-border);background:var(--da-dim);}
+.his-card.warn{border-color:var(--am-border);background:var(--am-dim);}
+.his-dept{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:3px;display:flex;align-items:center;gap:5px;}
+.his-dx{font-size:12px;color:var(--text1);font-weight:500;margin-bottom:3px;}
+.his-drug{font-size:11px;color:var(--text2);}
+.his-flag{font-size:10px;font-family:var(--mono);padding:1px 7px;border-radius:3px;border:1px solid;display:inline-block;margin-top:4px;}
+.his-flag-r{background:var(--da-dim);color:var(--danger);border-color:var(--da-border);}
+.his-flag-a{background:var(--am-dim);color:var(--amber);border-color:var(--am-border);}
+.his-flag-g{background:var(--lg-dim);color:var(--lgreen);border-color:var(--lg-border);}
+.his-ai-box{background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:7px;padding:7px 10px;margin-top:6px;font-size:11px;color:var(--dq);line-height:1.65;}
+
+/* ── EMR workflow ── */
+.emr-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.workflow-steps{display:flex;align-items:center;padding:10px 14px;gap:0;border-bottom:1px solid var(--border);background:var(--bg3);}
+.wf-step{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);}
+.wf-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
+.wf-num.done{background:var(--dq);color:#fff;}
+.wf-num.active{background:var(--amber);color:#fff;}
+.wf-num.pending{background:var(--bg4);color:var(--text3);}
+.wf-lbl{color:var(--text2);}
+.wf-lbl.active-lbl{color:var(--amber);font-weight:500;}
+.wf-lbl.done-lbl{color:var(--dq);}
+.wf-lbl.pending-lbl{color:var(--text3);}
+.wf-arrow{margin:0 8px;color:var(--border2);font-size:11px;}
+.emr-body{padding:12px 14px;}
+.emr-field{margin-bottom:10px;}
+.emr-field-lbl{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.emr-src-tag{padding:1px 6px;border-radius:3px;border:1px solid;font-size:10px;}
+.emr-src-ai{background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);}
+.emr-src-dr{background:var(--bg4);color:var(--text3);border-color:var(--border);}
+.emr-textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;font-size:12px;color:var(--text1);font-family:var(--sans);line-height:1.6;resize:none;}
+.emr-textarea.typing{border-color:var(--amber);background:#fffbeb;}
+.ai-suggest-bar{background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:7px;padding:7px 10px;margin-top:6px;display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--dq);line-height:1.6;}
+.ai-suggest-bar i{margin-top:1px;flex-shrink:0;}
+.gen-btn{width:100%;margin-top:10px;padding:10px;border-radius:8px;background:var(--dq);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .2s;}
+.gen-btn:hover:not(:disabled){opacity:.85;}
+.gen-btn:disabled{background:var(--bg4);color:var(--text3);cursor:default;}
+.gen-btn.done{background:var(--success);}
+
+/* ── new 3-col layout ── */
+.cdss-top{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.cdss-mid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.cdss-action{background:var(--bg2);border:2px solid var(--dq-border);border-radius:12px;padding:14px 16px;}
+
+/* stage 3 */
+.m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.met-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;}
+.met-n{font-size:30px;font-weight:500;font-family:var(--mono);color:var(--text1);}
+.met-u{font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:2px;}
+.met-d{font-size:12px;color:var(--text2);margin-top:8px;line-height:1.6;}
+.met-c{font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:4px;}
+.gap3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.gap-card{background:var(--bg2);border-radius:12px;padding:14px;border:1px solid var(--border);}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.cmp-bad{background:var(--da-dim);border:1px solid var(--da-border);border-radius:12px;padding:14px;}
+.cmp-good{background:var(--lg-dim);border:1px solid var(--lg-border);border-radius:12px;padding:14px;}
+.cmp-h{font-size:11px;font-family:var(--mono);font-weight:500;margin-bottom:10px;}
+.ch-bad{color:var(--danger);}
+.ch-good{color:var(--lgreen);}
+.cmp-row{font-size:13px;color:var(--text2);line-height:1.75;padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:7px;}
+.cmp-row:last-child{border-bottom:none;}
+.tl{display:flex;flex-direction:column;}
+.tl-r{display:flex;gap:14px;padding-bottom:18px;}
+.tl-r:last-child{padding-bottom:0;}
+.tl-col{display:flex;flex-direction:column;align-items:center;width:26px;flex-shrink:0;}
+.tl-dot{width:26px;height:26px;border-radius:50%;background:var(--bg2);border:1px solid;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.tl-dot.b{border-color:var(--dq-border);color:var(--dq);}
+.tl-dot.g{border-color:var(--lg-border);color:var(--lgreen);}
+.tl-dot.a{border-color:var(--am-border);color:var(--amber);}
+.tl-line{flex:1;width:1px;background:var(--border);margin-top:5px;}
+.tl-right{flex:1;}
+.tl-ph{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;}
+.tl-ti{font-size:15px;font-weight:500;color:var(--text1);margin-bottom:5px;}
+.tl-bo{font-size:13px;color:var(--text2);line-height:1.75;}
+
+/* spirometry bars */
+.spiro-bar-wrap{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.spiro-bar{flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;}
+.spiro-fill{height:100%;border-radius:4px;transition:width .5s;}
+.spiro-val{font-family:var(--mono);font-size:11px;font-weight:600;min-width:36px;text-align:right;}
+.adv-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);}
+.adv-row:last-child{border-bottom:none;}
+/* ai-tech tabs */
+.ai-tab{padding:5px 11px;border-radius:6px;font-size:11px;font-family:var(--mono);border:1px solid var(--border2);background:none;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ai-tab:hover{background:var(--bg3);}
+.ai-tab.active-tab{background:var(--dq);color:#fff;border-color:var(--dq);}
+.detect-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.detect-row:last-child{border-bottom:none;}
+.detect-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.conf-chip{margin-left:auto;font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:4px;border:1px solid;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-mark">HTC DEEPQ</div>
+    <div class="sb-sub">CDSS v2.0 · Clinical AI</div>
+  </div>
+  <div class="sb-sec">Demo 場景</div>
+  <div class="nav-item active" onclick="switchPanel('p1',this)">
+    <span class="ic"><i class="fa-brands fa-line"></i></span>院前 LINE 問診
+  </div>
+  <div class="nav-item" onclick="switchPanel('p2',this)">
+    <span class="ic"><i class="fa-solid fa-display"></i></span>院內 CDSS 介面
+    <span class="num">3</span>
+  </div>
+  <div class="nav-item" onclick="switchPanel('p3',this)">
+    <span class="ic"><i class="fa-solid fa-chart-line"></i></span>產品價值論述
+  </div>
+  <div class="sb-sec" style="margin-top:10px;">系統模組</div>
+  <div class="nav-item" style="cursor:default;opacity:.4"><span class="ic"><i class="fa-solid fa-x-ray"></i></span>PACS AI 探勘</div>
+  <div class="nav-item" style="cursor:default;opacity:.4"><span class="ic"><i class="fa-solid fa-hospital"></i></span>HIS 整合</div>
+  <div class="nav-item" style="cursor:default;opacity:.4"><span class="ic"><i class="fa-solid fa-shield-halved"></i></span>法規合規模組</div>
+  <div class="sb-footer">
+    <div><span class="sdot"></span>HIS / PACS 連線中</div>
+    <div style="margin-top:3px"><span class="sdot"></span>LINE Gateway 連線中</div>
+    <div style="margin-top:8px;color:var(--text3)">TFDA 輔助決策分類<br>Human-in-the-Loop 架構</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <span class="tb-title">COPD 照護缺口攔截系統 Demo</span>
+    <span class="pill pill-b">Pre-COPD · 未確診 · 追蹤中斷</span>
+    <span class="pill pill-g">院前 Chatbot 已授權</span>
+    <span class="pill pill-a">高風險預警 3 件</span>
+    <div class="tb-r" id="clock">2026/05/27</div>
+  </div>
+
+  <div class="content">
+
+    <!-- P1 LINE interactive -->
+    <div id="p1" class="panel active">
+      <div class="s1-grid">
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="slbl">LINE 官方帳號 · 蘭醫生呼吸健康管家</div>
+          <div class="phone-frame">
+            <div class="phone-bar">
+              <div class="pav">蘭</div>
+              <div><div class="pn">HTC DeepQ 蘭醫生</div><div class="ps">智慧呼吸健康管家</div></div>
+            </div>
+            <div id="chat-body" class="chat-body" style="min-height:360px;max-height:460px;overflow-y:auto;"></div>
+          </div>
+          <div id="choice-area" style="display:flex;flex-direction:column;gap:6px;"></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:8px 12px;font-size:11px;font-family:var(--mono);color:var(--text3);display:flex;align-items:center;gap:8px;">
+            <span style="white-space:nowrap;">COPD-PS 評分</span>
+            <div style="flex:1;background:var(--bg4);border-radius:4px;height:6px;overflow:hidden;position:relative;">
+              <div id="prog-bar" style="height:100%;background:var(--lgreen);border-radius:4px;width:0%;transition:width .4s;"></div>
+              <div style="position:absolute;top:0;left:50%;width:1px;height:100%;background:var(--danger);opacity:.4;" title="≥5分閾值"></div>
+            </div>
+            <span id="prog-txt" style="white-space:nowrap;">0 / ≥5分</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <div id="insight-card" class="card" style="border-left:3px solid var(--dq);border-radius:0 12px 12px 0;">
+            <div class="t1" style="margin-bottom:8px;display:flex;align-items:center;gap:7px;">
+              <i class="fa-solid fa-compass" style="color:var(--dq)"></i>
+              <span id="insight-title">漸進式問法設計原則</span>
+            </div>
+            <div id="insight-body" class="t2">蘭醫生不直接問「你有沒有 COPD 症狀」，而是從<strong>生活功能變化</strong>切入，讓病患不設防地揭露隱性資訊。<br><br>點擊左側選項，體驗完整的漸進式對話流程 →</div>
+          </div>
+
+          <div class="card">
+            <div class="t1" style="margin-bottom:10px;display:flex;align-items:center;gap:7px;"><i class="fa-brands fa-line" style="color:var(--lgreen)"></i>LINE 問診結果 → AI 整合流程</div>
+            <div style="display:flex;flex-direction:column;gap:0;">
+              <div style="display:flex;align-items:flex-start;gap:10px;">
+                <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+                  <div style="width:28px;height:28px;border-radius:50%;background:var(--lgreen);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-clipboard-check" style="color:#fff;font-size:11px;"></i></div>
+                  <div style="width:1px;height:18px;background:var(--lg-border);"></div>
+                </div>
+                <div style="background:var(--bg3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);flex:1;margin-bottom:4px;">
+                  <strong style="color:var(--text1)">① COPD-PS 問卷填答 → 分數計算</strong><br>
+                  <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
+                    <span style="background:var(--da-dim);border:1px solid var(--da-border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--danger);font-family:var(--mono);font-weight:600;">≥ 5 分 → 觸發 AI 分析</span>
+                    <span style="background:var(--bg4);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--text3);font-family:var(--mono);">＜ 5 分 → 歸檔</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:10px;">
+                <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+                  <div style="width:28px;height:28px;border-radius:50%;background:var(--dq);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-magnifying-glass" style="color:#fff;font-size:11px;"></i></div>
+                  <div style="width:1px;height:18px;background:var(--dq-border);"></div>
+                </div>
+                <div style="background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);flex:1;margin-bottom:4px;">
+                  <strong style="color:var(--dq)">② AI 自動分析影像與肺功能報告</strong><br>
+                  <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
+                    <span style="background:var(--bg2);border:1px solid var(--dq-border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--dq);font-family:var(--mono);">PACS · 胸部影像重判</span>
+                    <span style="background:var(--bg2);border:1px solid var(--dq-border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--dq);font-family:var(--mono);">HIS · Spirometry 紀錄</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:10px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-display" style="color:#fff;font-size:11px;"></i></div>
+                <div style="background:var(--bg3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);flex:1;">
+                  <strong style="color:var(--text1)">③ 整合結果 → CDSS 判定與建議</strong><br>問卷 + 影像 + 肺功能三路訊號整合，醫師開啟病歷即看到風險摘要與建議醫囑
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- DeepQ AI 技術展示卡 -->
+          <div class="card" style="border-left:3px solid var(--dq);border-radius:0 12px 12px 0;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px;">
+              <i class="fa-solid fa-brain" style="color:var(--dq);font-size:15px;"></i>
+              <span class="t1">DeepQ Vision · AI 影像分析技術</span>
+              <span style="margin-left:auto;font-size:9px;font-family:var(--mono);color:var(--dq);background:var(--dq-dim);border:1px solid var(--dq-border);padding:2px 7px;border-radius:4px;letter-spacing:.06em;">CORE TECH</span>
+            </div>
+            <div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;">
+              <button class="ai-tab active-tab" id="tab-mining" onclick="switchAiTab('mining')">機會性探勘</button>
+              <button class="ai-tab" id="tab-detect" onclick="switchAiTab('detect')">AI 偵測項目</button>
+              <button class="ai-tab" id="tab-trend" onclick="switchAiTab('trend')">縱向趨勢追蹤</button>
+            </div>
+
+            <!-- Tab 1: 機會性影像探勘 -->
+            <div id="ai-tab-mining">
+              <div style="font-size:12px;color:var(--text2);line-height:1.75;margin-bottom:10px;">
+                DeepQ Vision 不需要新的影像——它直接<strong style="color:var(--text1);">重判患者既有的歷史影像</strong>，從被遺忘的舊 X 光與 CT 中找出早期 COPD 線索。
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:flex-start;gap:9px;background:var(--bg3);border-radius:8px;padding:9px 11px;">
+                  <i class="fa-solid fa-database" style="color:var(--dq);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
+                  <div style="font-size:11px;color:var(--text2);line-height:1.65;">
+                    <strong style="color:var(--text1);">PACS API 串接</strong><br>
+                    掛號當下即時呼叫 PACS，無需放射科醫師操作，全程靜默執行
+                  </div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:9px;background:var(--bg3);border-radius:8px;padding:9px 11px;">
+                  <i class="fa-solid fa-microscope" style="color:var(--amber);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
+                  <div style="font-size:11px;color:var(--text2);line-height:1.65;">
+                    <strong style="color:var(--text1);">Deep Learning 推論</strong><br>
+                    以 ResNet / Vision Transformer 為基礎，輸出結構化影像發現與信心分數
+                  </div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:9px;background:var(--bg3);border-radius:8px;padding:9px 11px;">
+                  <i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
+                  <div style="font-size:11px;color:var(--text2);line-height:1.65;">
+                    <strong style="color:var(--text1);">原始報告未標記 ≠ 正常</strong><br>
+                    本 Demo 中三位患者的舊影像，原報告均為「無特殊發現」，DeepQ 重判後發現隱性變化
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: AI 偵測項目 -->
+            <div id="ai-tab-detect" style="display:none;">
+              <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px;">胸部 X 光 / CT · COPD 相關偵測指標</div>
+              <div class="detect-row">
+                <div class="detect-icon" style="background:rgba(251,191,36,.15);"><i class="fa-solid fa-lungs" style="color:var(--amber);font-size:12px;"></i></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肺過度充氣</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Hyperinflation · 肺容積增加</div>
+                </div>
+                <span class="conf-chip" style="background:var(--am-dim);color:var(--amber);border-color:var(--am-border);">早期指標</span>
+              </div>
+              <div class="detect-row">
+                <div class="detect-icon" style="background:rgba(217,119,6,.15);"><i class="fa-solid fa-cloud" style="color:var(--amber);font-size:12px;"></i></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肺氣腫變化</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Emphysema · 肺實質破壞</div>
+                </div>
+                <span class="conf-chip" style="background:var(--da-dim);color:var(--danger);border-color:var(--da-border);">高特異性</span>
+              </div>
+              <div class="detect-row">
+                <div class="detect-icon" style="background:rgba(220,38,38,.12);"><i class="fa-solid fa-minus" style="color:var(--danger);font-size:12px;"></i></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">橫膈膜扁平</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Diaphragm Flattening · 桶狀胸</div>
+                </div>
+                <span class="conf-chip" style="background:var(--da-dim);color:var(--danger);border-color:var(--da-border);">高特異性</span>
+              </div>
+              <div class="detect-row">
+                <div class="detect-icon" style="background:rgba(2,132,199,.12);"><i class="fa-solid fa-expand" style="color:var(--dq);font-size:12px;"></i></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肋間隙增寬</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Rib Spacing · 胸廓重塑</div>
+                </div>
+                <span class="conf-chip" style="background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);">輔助指標</span>
+              </div>
+              <div class="detect-row">
+                <div class="detect-icon" style="background:rgba(15,118,110,.12);"><i class="fa-solid fa-heart-pulse" style="color:var(--teal);font-size:12px;"></i></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">心臟垂直化</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Vertical Heart · 繼發性改變</div>
+                </div>
+                <span class="conf-chip" style="background:var(--tl-dim);color:var(--teal);border-color:var(--tl-border);">輔助指標</span>
+              </div>
+              <div style="margin-top:9px;background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:6px;padding:7px 10px;font-size:10px;color:var(--dq);font-family:var(--mono);">
+                輸出格式：結構化 JSON → HL7 FHIR · 信心分數 0–100%
+              </div>
+            </div>
+
+            <!-- Tab 3: 縱向趨勢追蹤 -->
+            <div id="ai-tab-trend" style="display:none;">
+              <div style="font-size:12px;color:var(--text2);line-height:1.75;margin-bottom:10px;">
+                單張影像只能看現況。DeepQ Vision 串接同一患者的<strong style="color:var(--text1);">跨年度影像序列</strong>，量化疾病進展速度。
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">
+                  <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:5px;display:flex;align-items:center;gap:6px;">
+                    <i class="fa-solid fa-chart-line" style="color:var(--dq);"></i>Emphysema Index 縱向追蹤
+                  </div>
+                  <div style="display:flex;align-items:flex-end;gap:5px;height:44px;padding:0 4px;">
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
+                      <div style="width:100%;background:var(--amber);border-radius:3px 3px 0 0;opacity:.6;" style="height:18px;"></div>
+                      <div style="width:100%;height:18px;background:var(--amber);border-radius:3px 3px 0 0;opacity:.6;"></div>
+                      <div style="font-size:9px;color:var(--text3);font-family:var(--mono);">2年前</div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
+                      <div style="width:100%;height:26px;background:var(--amber);border-radius:3px 3px 0 0;opacity:.8;"></div>
+                      <div style="font-size:9px;color:var(--text3);font-family:var(--mono);">1年前</div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
+                      <div style="width:100%;height:36px;background:var(--danger);border-radius:3px 3px 0 0;"></div>
+                      <div style="font-size:9px;color:var(--danger);font-family:var(--mono);font-weight:600;">本次↑↑</div>
+                    </div>
+                  </div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:5px;">指數 0.61 → 0.74 → 0.82 · <span style="color:var(--danger);">進展超過年齡預期</span></div>
+                </div>
+                <div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">
+                  <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                    <i class="fa-solid fa-arrows-left-right" style="color:var(--dq);"></i>跨掃描對齊技術
+                  </div>
+                  <div style="font-size:11px;color:var(--text2);line-height:1.65;">以解剖標記點自動對齊不同時間點影像，排除體位差異，確保測量可比性</div>
+                </div>
+                <div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">
+                  <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                    <i class="fa-solid fa-bell" style="color:var(--amber);"></i>進展速度異常警示
+                  </div>
+                  <div style="font-size:11px;color:var(--text2);line-height:1.65;">AI 計算個人化進展曲線，與同年齡族群基準比較，<strong>超過預期速度即觸發臨床警示</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /DeepQ AI 技術展示卡 -->
+
+          <div id="nlp-card" class="card" style="display:none;">
+            <div class="t1" style="margin-bottom:8px;display:flex;align-items:center;gap:7px;"><i class="fa-solid fa-tags" style="color:var(--dq)"></i>NLP 結構化輸出 → HL7 FHIR → HIS</div>
+            <div id="nlp-tags"></div>
+            <div class="t2" style="margin-top:9px;">非結構化對話自動轉為結構化格式，直接寫入 HIS，醫師不需手動輸入，減少門診前置時間。</div>
+          </div>
+
+          <div id="consent-wrap" style="display:none;">
+            <div style="background:var(--lg-dim);border:1px solid var(--lg-border);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:13px;font-weight:500;color:var(--lgreen);margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+                <i class="fa-solid fa-circle-check"></i>進階資料授權完成 · AI 分析啟動中
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);">
+                  <i class="fa-solid fa-x-ray" style="color:var(--dq);width:14px;text-align:center;"></i>
+                  <span>歷史胸部影像（PACS）<span style="font-family:var(--mono);font-size:10px;color:var(--lgreen);margin-left:6px;">→ AI 重判中</span></span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);">
+                  <i class="fa-solid fa-lungs" style="color:var(--dq);width:14px;text-align:center;"></i>
+                  <span>肺功能檢查報告（HIS）<span style="font-family:var(--mono);font-size:10px;color:var(--lgreen);margin-left:6px;">→ 紀錄調閱中</span></span>
+                </div>
+              </div>
+              <div style="margin-top:10px;font-size:10px;color:var(--text3);font-family:var(--mono);">
+                資料僅供本次就診主治醫師及 AI 輔助系統使用，不對外共享
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- P2 CDSS -->
+    <div id="p2" class="panel">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;font-size:11px;font-family:var(--mono);color:var(--text2);">
+        <span class="sdot"></span>DeepQ CDSS · COPD 照護缺口攔截系統&nbsp;·&nbsp;
+        <span style="background:var(--dq-dim);color:var(--dq);border:1px solid var(--dq-border);padding:1px 8px;border-radius:4px;">HIS 連線中</span>
+        <span style="background:var(--dq-dim);color:var(--dq);border:1px solid var(--dq-border);padding:1px 8px;border-radius:4px;">PACS AI 運行中</span>
+        <span style="background:var(--am-dim);color:var(--amber);border:1px solid var(--am-border);padding:1px 8px;border-radius:4px;">高風險預警 3 件</span>
+        <span style="margin-left:auto;color:var(--text3);">今日門診 · 2026/05/27</span>
+      </div>
+      <div class="s2-grid">
+        <div class="pt-list">
+          <div class="slbl">高風險攔截名單</div>
+          <div class="ptcard active" id="pb0" onclick="switchPt(0)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;">
+              <div class="pt-nm">王大明</div>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--lgreen);background:var(--lg-dim);border:1px solid var(--lg-border);padding:1px 5px;border-radius:3px;">⚡ 08:42觸發</span>
+            </div>
+            <div class="pt-mt">68歲 · 男 · 胸腔內科</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:5px;">
+              <span class="pt-bdg" style="background:var(--am-dim);color:var(--amber);border-color:var(--am-border);margin-top:0;">Pre-COPD 高風險</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--danger);background:var(--da-dim);border:1px solid var(--da-border);padding:1px 5px;border-radius:3px;">路徑A</span>
+            </div>
+          </div>
+          <div class="ptcard" id="pb1" onclick="switchPt(1)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;">
+              <div class="pt-nm">陳阿嬌</div>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--lgreen);background:var(--lg-dim);border:1px solid var(--lg-border);padding:1px 5px;border-radius:3px;">⚡ 09:11觸發</span>
+            </div>
+            <div class="pt-mt">72歲 · 女 · 家醫科</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:5px;">
+              <span class="pt-bdg" style="background:var(--da-dim);color:var(--danger);border-color:var(--da-border);margin-top:0;">未確診 COPD</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--danger);background:var(--da-dim);border:1px solid var(--da-border);padding:1px 5px;border-radius:3px;">路徑A</span>
+            </div>
+          </div>
+          <div class="ptcard" id="pb2" onclick="switchPt(2)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;">
+              <div class="pt-nm">林志明</div>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--lgreen);background:var(--lg-dim);border:1px solid var(--lg-border);padding:1px 5px;border-radius:3px;">⚡ 09:58觸發</span>
+            </div>
+            <div class="pt-mt">55歲 · 男 · 骨科</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:5px;">
+              <span class="pt-bdg" style="background:var(--tl-dim);color:var(--teal);border-color:var(--tl-border);margin-top:0;">追蹤中斷 3 年</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--teal);background:var(--tl-dim);border:1px solid var(--tl-border);padding:1px 5px;border-radius:3px;">路徑B</span>
+            </div>
+          </div>
+          <div style="margin-top:6px;padding:12px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text3);line-height:1.8;font-family:var(--mono);">
+            今日門診共 42 人<br>AI 預警：3 人<br>其餘 39 人無預警<br><br>
+            <span style="color:var(--text2)">Ambient AI 原則<br>只在高風險時出現<br>不改變醫師動線</span>
+          </div>
+        </div>
+        <div id="pt-detail"></div>
+      </div>
+    </div>
+
+    <!-- P3 Value -->
+    <div id="p3" class="panel">
+      <div class="slbl" style="margin-bottom:14px;">核心差異化論述 · 商業落地路徑</div>
+      <div class="m-grid">
+        <div class="met-card"><div class="met-n">~67%</div><div class="met-u">5-year conversion rate</div><div class="met-d">40 PY + 症狀族群<br>發展為 GOLD I+ 的比率</div><div class="met-c">Lange et al., AJRCCM 2022</div></div>
+        <div class="met-card"><div class="met-n">6–8 年</div><div class="met-u">平均確診延誤</div><div class="met-d">台灣 COPD 從症狀出現<br>到確診的平均時間</div><div class="met-c">NHRI 2021</div></div>
+        <div class="met-card"><div class="met-n">+32%</div><div class="met-u">Spirometry 開立率提升</div><div class="met-d">CDSS 介入後高風險族群<br>肺功能檢測率提升</div><div class="met-c">Kotz et al., 2021</div></div>
+      </div>
+      <div class="divider"><span>三大攔截缺口</span></div>
+      <div class="gap3">
+        <div class="gap-card" style="border-left:3px solid var(--amber);border-radius:0 12px 12px 0;">
+          <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:7px;">缺口 1 · Pre-COPD</div>
+          <div class="t2" style="font-size:12px;">外觀正常偏誤：理學檢查正常但舊影像有早期肺氣腫跡象，傳統流程開止咳藥返家。</div>
+        </div>
+        <div class="gap-card" style="border-left:3px solid var(--danger);border-radius:0 12px 12px 0;">
+          <div style="font-size:12px;font-weight:500;color:var(--danger);margin-bottom:7px;">缺口 2 · 未確診 COPD</div>
+          <div class="t2" style="font-size:12px;">慣性誤診迴圈：多年被診斷為氣喘，從未做過肺功能，職業曝露史被忽略。</div>
+        </div>
+        <div class="gap-card" style="border-left:3px solid var(--teal);border-radius:0 12px 12px 0;">
+          <div style="font-size:12px;font-weight:500;color:var(--teal);margin-bottom:7px;">缺口 3 · 追蹤中斷</div>
+          <div class="t2" style="font-size:12px;">跨科別接觸點：確診後自行停止回診，以其他主訴就醫時 AI 主動抓住機會提醒。</div>
+        </div>
+      </div>
+      <div class="divider"><span>傳統流程 vs DeepQ 生態系</span></div>
+      <div class="cmp-grid">
+        <div class="cmp-bad">
+          <div class="cmp-h ch-bad">傳統流程（無 AI）</div>
+          <div class="cmp-row"><span style="color:var(--danger)">✕</span>病患自述「有點喘」，理學檢查正常</div>
+          <div class="cmp-row"><span style="color:var(--danger)">✕</span>急診 X 光從未被重新調閱</div>
+          <div class="cmp-row"><span style="color:var(--danger)">✕</span>慣性診斷為氣喘，開止咳藥返家</div>
+          <div class="cmp-row"><span style="color:var(--danger)">✕</span>其他科別就醫時 COPD 追蹤完全斷線</div>
+          <div class="cmp-row"><span style="color:var(--danger)">✕</span>數年後確診中重度 COPD</div>
+        </div>
+        <div class="cmp-good">
+          <div class="cmp-h ch-good">DeepQ 生態系流程</div>
+          <div class="cmp-row"><span style="color:var(--lgreen)">✓</span>院前 Chatbot 個資同意前置 + 偵測 Pack-Years + 症狀</div>
+          <div class="cmp-row"><span style="color:var(--lgreen)">✓</span>PACS AI 機會性挖掘歷史影像</div>
+          <div class="cmp-row"><span style="color:var(--lgreen)">✓</span>CDSS 跨診次整合打斷誤診迴圈</div>
+          <div class="cmp-row"><span style="color:var(--lgreen)">✓</span>任意接觸點（含跨科別）觸發追蹤提醒</div>
+          <div class="cmp-row"><span style="color:var(--lgreen)">✓</span>早期確診 → 介入 → 延緩惡化</div>
+        </div>
+      </div>
+      <div class="divider"><span>商業落地路徑</span></div>
+      <div class="tl">
+        <div class="tl-r"><div class="tl-col"><div class="tl-dot b"><i class="fa-solid fa-plug" style="font-size:10px"></i></div><div class="tl-line"></div></div><div class="tl-right"><div class="tl-ph">Phase 1 · 導入期 (0–6M)</div><div class="tl-ti">PACS AI 模組先行</div><div class="tl-bo">技術風險最低，只需接 PACS API，不動 HIS 主流程。醫師感受到「舊影像被喚醒」的即時價值，快速建立信任基礎。<br><span style="font-family:var(--mono);font-size:11px;color:var(--dq);background:var(--dq-dim);padding:2px 7px;border-radius:4px;border:1px solid var(--dq-border);display:inline-block;margin-top:6px;">PACS AI 模組可獨立部署，不依賴 LINE 整合，進入門檻最低</span></div></div></div>
+        <div class="tl-r"><div class="tl-col"><div class="tl-dot g"><i class="fa-brands fa-line" style="font-size:10px"></i></div><div class="tl-line"></div></div><div class="tl-right"><div class="tl-ph">Phase 2 · 擴展期 (6–18M)　←　本 Demo 展示此階段</div><div class="tl-ti">LINE Chatbot 院前問診串接</div><div class="tl-bo">HIS 整合建立後，加入 NLP 問診模組。個資同意書前置流程依個資法完成法規對齊，院前 → 院內閉環成形。</div></div></div>
+        <div class="tl-r"><div class="tl-col"><div class="tl-dot a"><i class="fa-solid fa-chart-line" style="font-size:10px"></i></div></div><div class="tl-right"><div class="tl-ph">Phase 3 · 成熟期 (18M+)</div><div class="tl-ti">全程照護缺口閉環 + Outcome-based Pricing</div><div class="tl-bo">HIS + PACS + LINE 三路閉環。跨科別追蹤模組上線。收費邏輯從「賣模組」轉向「共享改善成效」的價值定價，醫院以早期確診率向健保申報科技加值。</div></div></div>
+      </div>
+      <div class="note-b" style="margin-top:16px;">
+        <div class="note-t"><i class="fa-solid fa-scale-balanced"></i> Ambient AI 設計原則（醫師接受度關鍵）</div>
+        <div class="note-v">AI 不改變醫師的工作流程，只在需要注意的當下靜靜出現。今日門診 42 人中，39 人旁邊什麼都沒有——只有 3 位高風險病患名字旁會亮起提示。醫師動線：開病歷 → 一眼看到預警 → 核實 → 逐項確認醫囑。整個 AI 介入不超過 15 秒，但避免了 6–8 年的確診延誤。</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+const PTS=[
+  {id:0,nm:"王大明",age:"68歲",sex:"男",dept:"胸腔內科 · 林醫師",avc:"av-b",avt:"王",
+   gap:"缺口 1 · Pre-COPD",gapC:"cb-warn",
+   actionPath:'A', copdps:{score:9,items:['呼吸困難·常常: 2分','每天咳痰: 2分','活動有點受限: 1分','吸菸>100根: 2分','年齡≥60歲: 2分']},
+   kpis:[{l:"COPD-PS 評分",v:"9分 · 陽性",c:"color:var(--danger);font-weight:600"},{l:"COPD 診斷狀態",v:"Pre-COPD",c:"color:var(--amber)"},{l:"肺功能紀錄",v:"從未檢測",c:"color:var(--danger)"}],
+   ac:"ab-warn",at:"Pre-COPD 高風險主動預警",atc:"abt-warn",cb:"cb-warn",ai:"fa-triangle-exclamation",aic:"var(--amber)",
+   conf:"文獻 5 年轉化率 ~67%",
+   ev:[{src:"LINE Chatbot 院前問診",ic:"fa-brands fa-line",icol:"var(--lgreen)",body:"40 <strong>Pack-Years</strong>（已戒5年）<br>晨間慢性咳嗽、大量咳痰<br>勞力性呼吸困難（爬樓梯）",cite:""},
+       {src:"PACS AI · 機會性影像探勘",ic:"fa-solid fa-x-ray",icol:"var(--dq)",body:"來源：<strong>2026/02 急診胸部 X 光</strong><br>DeepQ：雙側肺上葉<br><strong>早期肺氣腫變化</strong>（Emphysema）",cite:"Bhatt et al., NEJM 2023"}],
+   emr:[{k:"主訴",v:"最近半年爬樓梯越來越喘，偶爾伴隨晨間咳嗽。",src:"LINE 院前問診",pre:true},{k:"理學檢查",v:"Chest: Clear. No distinct wheezing today.",src:"今日問診",pre:false}],
+   int:"理學檢查今日正常 → 傳統流程極可能只開止咳藥返家。AI 在此注入跨場景證據，阻止「外觀正常偏誤」，打斷 6–8 年確診延誤。",
+   tags:[{t:"Pack-Years: 40",c:"tag-r"},{t:"慢性咳嗽",c:"tag-a"},{t:"咳痰",c:"tag-a"},{t:"已戒菸5年",c:"tag-b"}],
+   orders:[
+     {l:"肺功能測試（Spirometry）",s:"Post-Bronchodilator · 診斷標準：Post-BD FEV1/FVC < 0.70 · 今日候診區可執行",ok:true},
+     {l:"轉介衛教：COPD 預防與自我管理",s:"搭配 LINE 模組後續追蹤",ok:true},
+     {l:"低劑量 CT 排程",s:"若 Spirometry 確診後考量",ok:false}
+   ]},
+  {id:1,nm:"陳阿嬌",age:"72歲",sex:"女",dept:"家醫科 · 張醫師（第5次就診）",avc:"av-a",avt:"陳",
+   gap:"缺口 2 · 未確診 COPD",gapC:"cb-danger",
+   actionPath:'A', copdps:{score:8,items:['呼吸困難·常常: 2分','每天咳痰: 2分','活動明顯受限: 2分','未吸菸: 0分','年齡≥70歲: 2分']},
+   kpis:[{l:"COPD-PS 評分",v:"8分 · 陽性",c:"color:var(--danger);font-weight:600"},{l:"COPD 診斷狀態",v:"疑似 COPD",c:"color:var(--danger)"},{l:"肺功能紀錄",v:"從未檢測",c:"color:var(--danger)"}],
+   ac:"ab-danger",at:"Undiagnosed COPD · 慣性誤診主動攔截",atc:"abt-danger",cb:"cb-danger",ai:"fa-shield-exclamation",aic:"var(--danger)",
+   conf:"3年4次門診均誤判為氣喘",
+   ev:[{src:"HIS 歷史門診彙整（AI 跨診次）",ic:"fa-solid fa-notes-medical",icol:"var(--amber)",body:"3年內4次「季節性咳嗽/老化氣喘」診斷<br>每次開立支氣管擴張劑，<strong>從未轉介肺功能</strong><br>LINE 問診揭露：<strong>職業粉塵暴露 20年</strong>",cite:""},
+       {src:"PACS AI · 歷史影像重新判讀",ic:"fa-solid fa-x-ray",icol:"var(--dq)",body:"來源：<strong>2025/11 肺炎追蹤胸部 X 光</strong><br>DeepQ 重判：<strong>過度充氣 + 橫膈膜扁平</strong><br>原報告：「無明顯異常」（未用 AI）",cite:"Lamprecht et al., Lancet 2015"}],
+   emr:[{k:"主訴",v:"老毛病又犯了，咳嗽咳了快一個月，走平路也有點喘。",src:"掛號時填寫",pre:true},{k:"過去處置（3年跨診次）",v:"每次診斷「氣喘/老年性咳嗽」，開立 Salbutamol PRN。",src:"HIS 歷史紀錄",pre:true}],
+   int:"三年來的慣性診斷掩蓋了真正的 COPD。AI 整合跨診次 HIS 資料並重新判讀舊影像，在第 5 次就診時主動打斷誤診迴圈。職業粉塵暴露是非吸菸者 COPD 的重要危險因子。\n\n注意：GOLD 分級需以 Post-BD Spirometry 確認（FEV1/FVC < 0.70），目前 mMRC ≥2 為症狀嚴重度評估，GOLD 分期待肺功能確認後補登。",
+   tags:[{t:"職業粉塵暴露20年",c:"tag-r"},{t:"慢性咳嗽",c:"tag-a"},{t:"走路喘 mMRC≥2",c:"tag-a"},{t:"3年未做Spirometry",c:"tag-r"}],
+   orders:[
+     {l:"立即排定肺功能測試（Spirometry）",s:"Post-Bronchodilator · 確診標準：Post-BD FEV1/FVC < 0.70",ok:true},
+     {l:"暫緩 COPD 診斷碼，改標記「疑似 COPD 待確認」",s:"避免 Spirometry 結果出爐前以氣喘累積錯誤用藥紀錄",ok:true},
+     {l:"轉介胸腔內科確診",s:"家醫科完成初步篩檢後轉介",ok:false}
+   ]},
+  {id:2,nm:"林志明",age:"55歲",sex:"男",dept:"骨科 · 陳醫師（腰椎退化門診）",avc:"av-t",avt:"林",
+   gap:"缺口 3 · 追蹤中斷",gapC:"cb-info",
+   actionPath:'B', copdps:{score:7,items:['呼吸困難·常常: 2分','偶爾咳痰: 1分','活動有點受限: 1分','吸菸>100根: 2分','年齡50–59歲: 1分']},
+   kpis:[{l:"COPD-PS 評分",v:"7分 · 陽性",c:"color:var(--amber);font-weight:600"},{l:"COPD 診斷狀態",v:"GOLD I（確診）",c:"color:var(--teal)"},{l:"肺功能紀錄",v:"FEV1 78%（3年前）",c:"color:var(--amber)"}],
+   ac:"ab-info",at:"COPD 確診後追蹤中斷 · 跨科別主動通知",atc:"abt-info",cb:"cb-info",ai:"fa-bell-concierge",aic:"var(--dq)",
+   conf:"COPD 病患 3 年未回胸腔科",
+   ev:[{src:"HIS 診斷碼追蹤（AI 主動掃描）",ic:"fa-solid fa-stethoscope",icol:"var(--teal)",body:"<strong>2023/03 確診 GOLD I COPD</strong><br>確診後僅回診 1 次，此後 3 年無胸腔科紀錄<br>今日以「腰痛」掛骨科——接觸點出現",cite:""},
+       {src:"LINE Chatbot 近況問卷",ic:"fa-brands fa-line",icol:"var(--lgreen)",body:"自述「近半年爬樓梯更喘」<br>用藥已自行停止（「覺得沒差」）<br>未做過 <strong>CAT 問卷</strong> 或 <strong>mMRC 評估</strong>",cite:"Vestbo et al., AJRCCM 2022"}],
+   emr:[{k:"本次就診主訴",v:"腰椎退化，下背痛 3 個月，要求止痛藥。",src:"掛號時填寫",pre:true},{k:"骨科醫師診療計畫",v:"腰椎 MRI 排程，鎮痛治療計畫。",src:"今日問診",pre:false}],
+   int:"COPD 病患不一定掛胸腔科。此病患今日以「腰痛」掛骨科，若無 AI 跨科預警，追蹤中斷將繼續被忽略。骨科醫師只需 30 秒確認提醒，不影響本次骨科診療。",
+   tags:[{t:"GOLD I 確診",c:"tag-t"},{t:"追蹤中斷3年",c:"tag-r"},{t:"症狀惡化",c:"tag-a"},{t:"自行停藥",c:"tag-r"}],
+   orders:[
+     {l:"骨科醫師告知 + 系統記錄知悉時間戳記",s:"30 秒完成，不影響本次骨科診療 · HIS 自動記錄醫師已知悉，供後續追蹤稽核",ok:true},
+     {l:"系統自動發送 LINE 提醒給病患",s:"「您的 COPD 已3年未追蹤，請預約胸腔科」· 系統記錄發送狀態與病患點閱率",ok:true},
+     {l:"開立轉介單至胸腔科",s:"",ok:false}
+   ]}
+];
+const confirmed={};
+const snoozed={};
+
+function switchPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  if(id==='p2') renderPt(0);
+}
+function switchPt(i){
+  document.querySelectorAll('.ptcard').forEach((c,j)=>c.classList.toggle('active',j===i));
+  renderPt(i);
+}
+/* ═══ per-patient PACS multi-image comparison data ═══ */
+const PACS_DATA = [
+  {
+    scans:[
+      {
+        date:'2024/03',label:'2年前',
+        finding:'輕微肺過度充氣（早期）',conf:61,origReport:'原報告：無特殊發現',origFlag:'miss',
+        lung:{cx1:55,cy1:42,rx1:36,ry1:32,cx2:115,cy2:42,rx2:36,ry2:32,diaph:72},
+        regions:[{x:30,y:20,w:24,h:26,color:'rgba(251,191,36,0.15)',stroke:'rgba(251,191,36,0.45)',lbl:'早期'}]
+      },
+      {
+        date:'2025/08',label:'8個月前',
+        finding:'雙上肺葉肺氣腫進展',conf:74,origReport:'原報告：輕度充氣',origFlag:'miss',
+        lung:{cx1:55,cy1:43,rx1:37,ry1:33,cx2:115,cy2:43,rx2:37,ry2:33,diaph:74},
+        regions:[
+          {x:26,y:17,w:27,h:30,color:'rgba(251,191,36,0.20)',stroke:'rgba(251,191,36,0.60)',lbl:'進展↑'},
+          {x:107,y:17,w:27,h:30,color:'rgba(251,191,36,0.20)',stroke:'rgba(251,191,36,0.60)',lbl:'進展↑'},
+        ]
+      },
+      {
+        date:'2026/02',label:'本次（最新）',
+        finding:'雙側早期肺氣腫＋橫膈膜輕度下移',conf:82,origReport:'原報告：無特殊發現',origFlag:'miss',
+        lung:{cx1:55,cy1:44,rx1:38,ry1:34,cx2:115,cy2:44,rx2:38,ry2:34,diaph:76},
+        regions:[
+          {x:24,y:14,w:30,h:34,color:'rgba(251,191,36,0.25)',stroke:'rgba(251,191,36,0.75)',lbl:'肺氣腫↑↑'},
+          {x:106,y:14,w:30,h:34,color:'rgba(251,191,36,0.25)',stroke:'rgba(251,191,36,0.75)',lbl:'肺氣腫↑↑'},
+          {x:20,y:66,w:130,h:10,color:'rgba(239,68,68,0.12)',stroke:'rgba(239,68,68,0.5)',lbl:'橫膈膜↓'},
+        ]
+      }
+    ],
+    aiTrend:'AI 縱向追蹤：2年內肺氣腫指數從 0.61 → 0.82，<strong>進展速度超過年齡預期</strong>，符合早期 COPD 惡化模式。'
+  },
+  {
+    scans:[
+      {
+        date:'2023/11',label:'2年前',
+        finding:'雙肺紋理增加（非特異性）',conf:55,origReport:'原報告：無明顯異常',origFlag:'miss',
+        lung:{cx1:55,cy1:42,rx1:36,ry1:32,cx2:115,cy2:42,rx2:36,ry2:32,diaph:72},
+        regions:[{x:22,y:58,w:126,h:12,color:'rgba(239,68,68,0.08)',stroke:'rgba(239,68,68,0.3)',lbl:'紋理↑'}]
+      },
+      {
+        date:'2025/11',label:'本次（最新）',
+        finding:'過度充氣＋橫膈膜扁平，桶狀胸形態',conf:91,origReport:'原報告：無明顯異常（未使用AI）',origFlag:'miss',
+        lung:{cx1:55,cy1:43,rx1:39,ry1:35,cx2:115,cy2:43,rx2:39,ry2:35,diaph:78},
+        regions:[
+          {x:20,y:62,w:130,h:14,color:'rgba(239,68,68,0.18)',stroke:'rgba(239,68,68,0.65)',lbl:'橫膈膜扁平'},
+          {x:22,y:10,w:126,h:56,color:'rgba(251,191,36,0.10)',stroke:'rgba(251,191,36,0.40)',lbl:'過度充氣'},
+        ]
+      }
+    ],
+    aiTrend:'AI 跨年比較：橫膈膜角度從正常 → 扁平，肺容積增加 <strong>約 18%</strong>，兩次報告均標記「正常」——DeepQ 重判發現隱性進展。'
+  },
+  {
+    scans:[
+      {
+        date:'2023/03',label:'確診時',
+        finding:'COPD GOLD I 確診基準影像，FEV1/FVC=0.65',conf:95,origReport:'原報告：COPD 確診（胸腔科）',origFlag:'ok',
+        lung:{cx1:55,cy1:43,rx1:37,ry1:33,cx2:115,cy2:43,rx2:37,ry2:33,diaph:74},
+        regions:[{x:22,y:12,w:124,h:56,color:'rgba(16,185,129,0.12)',stroke:'rgba(16,185,129,0.50)',lbl:'GOLD I 基準'}]
+      },
+      {
+        date:'2026/05',label:'本次（3年後）',
+        finding:'肺容積增加，橫膈膜進一步下移，疑似惡化',conf:88,origReport:'AI 主動比對確診基準影像',origFlag:'miss',
+        lung:{cx1:55,cy1:45,rx1:39,ry1:36,cx2:115,cy2:45,rx2:39,ry2:36,diaph:79},
+        regions:[
+          {x:22,y:10,w:124,h:58,color:'rgba(251,191,36,0.12)',stroke:'rgba(251,191,36,0.45)',lbl:'容積擴大'},
+          {x:20,y:67,w:130,h:12,color:'rgba(239,68,68,0.15)',stroke:'rgba(239,68,68,0.55)',lbl:'橫膈膜↓↓'},
+        ]
+      }
+    ],
+    aiTrend:'AI 縱向比對：與確診基準（2023）相比，肺容積增加、橫膈膜位置下降，<strong>3年追蹤中斷期間疾病持續進展</strong>。'
+  }
+];
+
+/* ═══ DeepQ AI advantage data ═══ */
+const DEEPQ_ADV = [
+  { // 王大明
+    scans: 3, missedByRad: 3,
+    findings: [
+      { label:'雙上肺葉肺氣腫', conf:82, missed:true },
+      { label:'肺過度充氣（進展）', conf:74, missed:true },
+      { label:'橫膈膜輕度下移', conf:68, missed:true }
+    ],
+    insight:'3 次影像均標記「正常」，DeepQ 偵測到 2 年內 Emphysema Index 從 0.61 升至 0.82，進展速度超過年齡預期。',
+    impact:'阻止「外觀正常偏誤」，提前介入減少 6–8 年確診延誤'
+  },
+  { // 陳阿嬌
+    scans: 2, missedByRad: 2,
+    findings: [
+      { label:'肺過度充氣＋桶狀胸', conf:91, missed:true },
+      { label:'橫膈膜扁平', conf:88, missed:true },
+      { label:'肺容積增加 ~18%', conf:79, missed:true }
+    ],
+    insight:'原報告兩次均「無明顯異常」，DeepQ 重判發現橫膈膜角度扁平化，符合 COPD 慣性進展特徵。',
+    impact:'打斷 3 年慣性誤診迴圈，在第 5 次就診時提供確診依據'
+  },
+  { // 林志明
+    scans: 2, missedByRad: 1,
+    findings: [
+      { label:'GOLD I 確診基準（2023）', conf:95, missed:false },
+      { label:'肺容積持續擴大（3年後）', conf:88, missed:true },
+      { label:'橫膈膜進一步下移', conf:84, missed:true }
+    ],
+    insight:'確診時影像正常記錄，3 年追蹤中斷後 DeepQ 比對基準影像，發現容積增加與橫膈膜下移，疑似 GOLD I → II 惡化。',
+    impact:'跨科別接觸點（骨科）即時攔截，避免再次錯失追蹤'
+  }
+];
+
+/* ═══ Spirometry / 肺功能整合資料 ═══ */
+const SPIRO_DATA = [
+  { // 王大明
+    status: 'none',
+    urgency: 'high',
+    statusLabel: '從未執行',
+    history: [],
+    callToAction: '今日候診區可立即安排 Post-BD Spirometry',
+    note: '40 PY 吸菸史 + COPD-PS 9分，確診標準：Post-BD FEV1/FVC < 0.70'
+  },
+  { // 陳阿嬌
+    status: 'none',
+    urgency: 'high',
+    statusLabel: '3年 5次就診 · 0次檢查',
+    history: [],
+    callToAction: '立即排定 Post-BD Spirometry — 確診或排除 COPD',
+    note: '職業粉塵暴露 20年，非吸菸者 COPD 須以 Spirometry 確診，不可以氣喘替代診斷'
+  },
+  { // 林志明
+    status: 'confirmed',
+    urgency: 'medium',
+    statusLabel: 'GOLD I 確診（2023/03）',
+    history: [
+      { date: '2023/03', fev1pct: 78, fvc: 3.8, fev1fvc: 0.65, gold: 'I', note: '確診基準' }
+    ],
+    projected: { fev1pct: 68, gold: 'I–II', note: 'AI 估算（3年進展速率）' },
+    callToAction: '重做 Post-BD Spirometry — 評估是否進展至 GOLD II',
+    note: '正常年齡相關 FEV1 下降約 30mL/年，本患者自行停藥且症狀惡化，下降速度可能加快'
+  }
+];
+
+/* ═══ per-patient COPD care journey data ═══ */
+const JOURNEY_DATA = [
+  {
+    currentNode: 2, // 0-indexed, currently stuck here
+    stuckLabel: '卡關：從未安排 Spirometry',
+    stuckColor: 'var(--danger)',
+    nodes:[
+      {
+        id:0, date:'2023/06', phase:'首次警示',
+        icon:'fa-triangle-exclamation', color:'var(--amber)',
+        title:'胸腔內科：運動後喘',
+        detail:'建議做 Spirometry，病患未回診追蹤',
+        status:'done', statusLabel:'已完成', statusColor:'var(--lgreen)',
+        source:'HIS'
+      },
+      {
+        id:1, date:'2024–2025', phase:'診斷碼',
+        icon:'fa-rotate', color:'var(--danger)',
+        title:'3次誤判為季節性咳嗽 / 氣喘',
+        detail:'家醫科 × 2、內科 × 1，每次開 Salbutamol PRN，無 COPD 鑑別',
+        status:'miss', statusLabel:'慣性誤診', statusColor:'var(--danger)',
+        source:'HIS 跨診次'
+      },
+      {
+        id:2, date:'迄今', phase:'Spirometry',
+        icon:'fa-circle-xmark', color:'var(--danger)',
+        title:'肺功能檢查：從未執行',
+        detail:'5次就診 0次 Spirometry，無法確診或排除 COPD',
+        status:'blocked', statusLabel:'⚠ 目前卡關', statusColor:'var(--danger)',
+        source:'HIS',
+        current: true
+      },
+      {
+        id:3, date:'待完成', phase:'確診 / 排除',
+        icon:'fa-stethoscope', color:'var(--text3)',
+        title:'Post-BD Spirometry → 診斷碼確認',
+        detail:'FEV1/FVC < 0.70 → COPD 確診；今日門診可安排',
+        status:'pending', statusLabel:'待執行', statusColor:'var(--text3)',
+        source:''
+      },
+      {
+        id:4, date:'確診後', phase:'用藥 / 追蹤',
+        icon:'fa-pills', color:'var(--text3)',
+        title:'LAMA / LABA 維持治療 + 定期追蹤',
+        detail:'早期介入可延緩 GOLD 進展，降低急性發作風險',
+        status:'pending', statusLabel:'待啟動', statusColor:'var(--text3)',
+        source:''
+      }
+    ],
+    aiSummary:'病患目前卡在「<strong>Spirometry 從未執行</strong>」節點。今日門診是近 3 年最具體的介入機會，候診區可當日完成肺功能檢查。'
+  },
+  {
+    currentNode: 1,
+    stuckLabel: '卡關：3年慣性誤診，從未做肺功能',
+    stuckColor: 'var(--danger)',
+    nodes:[
+      {
+        id:0, date:'2023/11', phase:'首次接觸',
+        icon:'fa-stethoscope', color:'var(--dq)',
+        title:'內科：支氣管氣喘（初診）',
+        detail:'職業粉塵 20 年暴露史未被問及，開 Salbutamol PRN',
+        status:'done', statusLabel:'已記錄', statusColor:'var(--lgreen)',
+        source:'HIS'
+      },
+      {
+        id:1, date:'2024–2026', phase:'診斷碼漂移',
+        icon:'fa-rotate', color:'var(--danger)',
+        title:'診斷碼漂移：氣喘→過敏→老年咳嗽',
+        detail:'4次就診診斷碼各不相同，掩蓋 COPD 可能，PACS 舊影像未重判',
+        status:'blocked', statusLabel:'⚠ 目前卡關', statusColor:'var(--danger)',
+        source:'HIS + PACS AI',
+        current: true
+      },
+      {
+        id:2, date:'迄今', phase:'Spirometry',
+        icon:'fa-circle-xmark', color:'var(--danger)',
+        title:'肺功能檢查：3年從未開立',
+        detail:'每次診斷均以「氣喘」結案，Spirometry 鑑別診斷缺席',
+        status:'miss', statusLabel:'關鍵缺口', statusColor:'var(--danger)',
+        source:'HIS'
+      },
+      {
+        id:3, date:'待完成', phase:'鑑別診斷',
+        icon:'fa-magnifying-glass', color:'var(--text3)',
+        title:'氣喘 vs COPD 鑑別 → 正確診斷碼',
+        detail:'Post-BD Spirometry + 職業史完整記錄 → 改正診斷，建立正確用藥計畫',
+        status:'pending', statusLabel:'待執行', statusColor:'var(--text3)',
+        source:''
+      },
+      {
+        id:4, date:'確診後', phase:'用藥 / 轉介',
+        icon:'fa-hospital', color:'var(--text3)',
+        title:'轉介胸腔內科 + LAMA 維持治療',
+        detail:'家醫科完成初步確認後轉介，避免繼續以氣喘藥物延誤治療',
+        status:'pending', statusLabel:'待啟動', statusColor:'var(--text3)',
+        source:''
+      }
+    ],
+    aiSummary:'病患卡在「<strong>診斷碼慣性誤判</strong>」迴圈中。PACS AI 重判舊影像已發現 COPD 特徵，今日是打斷 3 年誤診的關鍵窗口。'
+  },
+  {
+    currentNode: 3,
+    stuckLabel: '卡關：確診後追蹤中斷 3 年',
+    stuckColor: 'var(--amber)',
+    nodes:[
+      {
+        id:0, date:'2023/03', phase:'確診',
+        icon:'fa-circle-check', color:'var(--lgreen)',
+        title:'胸腔內科：COPD GOLD I 確診',
+        detail:'Post-BD FEV1/FVC = 0.65，開立 Tiotropium（LAMA）維持治療',
+        status:'done', statusLabel:'確診完成', statusColor:'var(--lgreen)',
+        source:'HIS + Spirometry'
+      },
+      {
+        id:1, date:'2023/06', phase:'用藥',
+        icon:'fa-pills', color:'var(--lgreen)',
+        title:'LAMA 用藥啟動（僅回診 1 次）',
+        detail:'確診後回診 1 次，用藥調整正常，但此後未再回診',
+        status:'done', statusLabel:'已啟動', statusColor:'var(--lgreen)',
+        source:'HIS'
+      },
+      {
+        id:2, date:'2024/02', phase:'追蹤',
+        icon:'fa-calendar-xmark', color:'var(--danger)',
+        title:'定期追蹤：中斷',
+        detail:'健檢時家醫科有記錄，但 COPD 追蹤未更新，Spirometry 未重做',
+        status:'miss', statusLabel:'追蹤中斷', statusColor:'var(--danger)',
+        source:'HIS'
+      },
+      {
+        id:3, date:'2026/05 今日', phase:'接觸點',
+        icon:'fa-bone', color:'var(--amber)',
+        title:'骨科就診：跨科別接觸點出現',
+        detail:'自述近半年更喘、已自行停用 Tiotropium。若無 AI 警示，將再次錯失追蹤。',
+        status:'blocked', statusLabel:'⚠ 目前卡關', statusColor:'var(--amber)',
+        source:'HIS + LINE 問診',
+        current: true
+      },
+      {
+        id:4, date:'待完成', phase:'重啟追蹤',
+        icon:'fa-rotate-right', color:'var(--text3)',
+        title:'通知 + 預約胸腔科重新評估',
+        detail:'30 秒告知骨科醫師 → LINE 提醒病患 → 重做 Spirometry 更新 GOLD 分期',
+        status:'pending', statusLabel:'待執行', statusColor:'var(--text3)',
+        source:''
+      }
+    ],
+    aiSummary:'病患已確診 GOLD I，但追蹤中斷 3 年且自行停藥。今日骨科就診是<strong>跨科別接觸點</strong>，骨科醫師只需 30 秒確認，AI 自動發送 LINE 提醒，不影響本次骨科診療。'
+  }
+];
+
+function buildDeepQAdvantage(i) {
+  const d = DEEPQ_ADV[i];
+  const findingsHtml = d.findings.map(f => {
+    const barColor = f.missed ? (f.conf >= 85 ? 'var(--danger)' : f.conf >= 70 ? 'var(--amber)' : 'var(--dq)') : 'var(--lgreen)';
+    const badge = f.missed
+      ? `<span style="font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--da-dim);color:var(--danger);border:1px solid var(--da-border);">原報告遺漏</span>`
+      : `<span style="font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--lg-dim);color:var(--lgreen);border:1px solid var(--lg-border);">原報告記錄</span>`;
+    return `
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        <span style="font-size:11px;color:var(--text1);">${f.label}</span>
+        ${badge}
+        <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:${barColor};font-weight:600;">${f.conf}%</span>
+      </div>
+      <div class="spiro-bar-wrap" style="gap:6px;">
+        <div class="spiro-bar"><div class="spiro-fill" style="width:${f.conf}%;background:${barColor};"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+    <div style="background:#0f172a;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+      <i class="fa-solid fa-brain" style="color:#60a5fa;font-size:13px;"></i>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:#e2e8f0;">DeepQ Vision · AI 影像分析優勢</span>
+      <span style="margin-left:auto;font-size:9px;font-family:var(--mono);color:#60a5fa;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);padding:1px 7px;border-radius:3px;">CORE TECHNOLOGY</span>
+    </div>
+    <div style="padding:10px 12px;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="flex:1;background:var(--da-dim);border:1px solid var(--da-border);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--danger);">${d.missedByRad}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">原報告<br>遺漏發現</div>
+        </div>
+        <div style="flex:1;background:var(--lg-dim);border:1px solid var(--lg-border);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--lgreen);">${d.findings.length}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">AI 偵測<br>結構化發現</div>
+        </div>
+        <div style="flex:1;background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--dq);">${d.scans}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">歷史影像<br>機會性重判</div>
+        </div>
+      </div>
+      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:7px;">AI 偵測信心分數</div>
+      ${findingsHtml}
+      <div style="background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:7px;padding:7px 10px;margin-top:4px;">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--dq);font-weight:600;margin-bottom:3px;">AI 洞察</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.65;">${d.insight}</div>
+        <div style="margin-top:5px;font-size:10px;font-family:var(--mono);color:var(--lgreen);"><i class="fa-solid fa-arrow-right" style="margin-right:4px;"></i>${d.impact}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildSpirometry(i) {
+  const d = SPIRO_DATA[i];
+  const urgencyColor = d.urgency === 'high' ? 'var(--danger)' : 'var(--amber)';
+  const urgencyBg    = d.urgency === 'high' ? 'var(--da-dim)'  : 'var(--am-dim)';
+  const urgencyBdr   = d.urgency === 'high' ? 'var(--da-border)' : 'var(--am-border)';
+
+  let bodyHtml = '';
+  if (d.status === 'none') {
+    bodyHtml = `
+      <div style="background:${urgencyBg};border:1px solid ${urgencyBdr};border-radius:8px;padding:10px 12px;margin-bottom:8px;text-align:center;">
+        <i class="fa-solid fa-circle-xmark" style="color:${urgencyColor};font-size:20px;margin-bottom:5px;display:block;"></i>
+        <div style="font-size:12px;font-weight:600;color:${urgencyColor};">${d.statusLabel}</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:8px;">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:3px;">GOLD 分期</div>
+        <div style="font-size:11px;color:var(--text3);">無法評估 — Spirometry 未執行</div>
+      </div>`;
+  } else {
+    const h = d.history[0];
+    const fev1Color = h.fev1pct >= 80 ? 'var(--lgreen)' : h.fev1pct >= 50 ? 'var(--amber)' : 'var(--danger)';
+    const ratioColor = h.fev1fvc < 0.70 ? 'var(--danger)' : 'var(--lgreen)';
+    const proj = d.projected;
+    bodyHtml = `
+      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:6px;">最近一次 Spirometry · ${h.date} ${h.note ? `<span style="color:var(--lgreen);">(${h.note})</span>` : ''}</div>
+      <div style="margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:3px;"><span>FEV₁ % predicted</span><span class="spiro-val" style="color:${fev1Color};">${h.fev1pct}%</span></div>
+        <div class="spiro-bar"><div class="spiro-fill" style="width:${h.fev1pct}%;background:${fev1Color};"></div></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:3px;"><span>FEV₁/FVC ratio</span><span class="spiro-val" style="color:${ratioColor};">${h.fev1fvc}</span></div>
+        <div class="spiro-bar"><div class="spiro-fill" style="width:${Math.round(h.fev1fvc*100)}%;background:${ratioColor};"></div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <div style="flex:1;background:var(--bg3);border-radius:6px;padding:7px 8px;text-align:center;">
+          <div style="font-size:9px;font-family:var(--mono);color:var(--text3);">確診分期</div>
+          <div style="font-size:15px;font-weight:600;color:var(--teal);font-family:var(--mono);margin-top:2px;">GOLD ${h.gold}</div>
+        </div>
+        <div style="flex:2;background:var(--am-dim);border:1px solid var(--am-border);border-radius:6px;padding:7px 8px;">
+          <div style="font-size:9px;font-family:var(--mono);color:var(--amber);margin-bottom:2px;">AI 估算（3年後）</div>
+          <div style="font-size:11px;color:var(--text2);">FEV₁ ~${proj.fev1pct}%&nbsp;·&nbsp;GOLD <strong>${proj.gold}</strong></div>
+          <div style="font-size:9px;font-family:var(--mono);color:var(--text3);margin-top:2px;">自行停藥加速進展</div>
+        </div>
+      </div>`;
+  }
+
+  return `
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;background:var(--bg3);">
+      <i class="fa-solid fa-lungs" style="color:var(--teal);font-size:13px;"></i>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text2);">肺功能數據整合 · Spirometry</span>
+      <span style="margin-left:auto;font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:${urgencyBg};color:${urgencyColor};border:1px solid ${urgencyBdr};">${d.statusLabel}</span>
+    </div>
+    <div style="padding:10px 12px;">
+      ${bodyHtml}
+      <div style="background:var(--da-dim);border:1px solid var(--da-border);border-radius:7px;padding:7px 10px;">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--danger);font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-stethoscope"></i>建議行動</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.65;">${d.callToAction}</div>
+        <div style="margin-top:5px;font-size:10px;font-family:var(--mono);color:var(--text3);">${d.note}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* 每位病患醫囑點選狀態 */
+const orderChecked = [{},{},{}];
+
+function buildJourney(i) {
+  const d = JOURNEY_DATA[i];
+  const nodes = d.nodes;
+
+  const nodeHtml = nodes.map((n, ni) => {
+    const isLast = ni === nodes.length - 1;
+    const isCurrent = !!n.current;
+
+    // status styling
+    const cardBg = isCurrent
+      ? (n.status==='blocked' ? 'background:var(--da-dim);border:2px solid var(--da-border);' : 'background:var(--am-dim);border:2px solid var(--am-border);')
+      : n.status==='done' ? 'background:var(--lg-dim);border:1px solid var(--lg-border);'
+      : n.status==='miss' ? 'background:var(--da-dim);border:1px solid var(--da-border);'
+      : 'background:var(--bg3);border:1px solid var(--border);opacity:.6;';
+
+    const dotBg = n.status==='done' ? 'var(--lgreen)'
+      : n.status==='blocked' ? n.color
+      : n.status==='miss' ? 'var(--danger)'
+      : 'var(--bg4)';
+    const dotBorder = n.status==='pending' ? '2px dashed var(--border2)' : 'none';
+
+    const sourceBadge = n.source ? `<span style="font-size:9px;font-family:var(--mono);color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:3px;margin-left:auto;">${n.source}</span>` : '';
+
+    const currentPulse = isCurrent ? `
+      <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${n.statusColor};margin-right:5px;animation:pulse 1.5s infinite;"></span>` : '';
+
+    return `
+    <div style="display:flex;gap:0;align-items:stretch;">
+      <!-- dot + line -->
+      <div style="display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;padding-top:10px;">
+        <div style="width:22px;height:22px;border-radius:50%;background:${dotBg};border:${dotBorder};display:flex;align-items:center;justify-content:center;flex-shrink:0;${isCurrent?'box-shadow:0 0 0 3px rgba(220,38,38,0.2);':''}">
+          <i class="fa-solid ${n.icon}" style="font-size:9px;color:${n.status==='pending'?'var(--text3)':'#fff'};"></i>
+        </div>
+        ${!isLast ? `<div style="flex:1;width:2px;background:${n.status==='done'?'var(--lgreen)':n.status==='miss'?'var(--danger)':'var(--border2)'};min-height:12px;margin-top:3px;${n.status==='pending'?'background:repeating-linear-gradient(to bottom,var(--border2) 0,var(--border2) 4px,transparent 4px,transparent 8px);':''}"></div>` : ''}
+      </div>
+      <!-- card -->
+      <div style="flex:1;margin-left:8px;margin-bottom:${isLast?'0':'8px'};">
+        <div style="${cardBg}border-radius:8px;padding:8px 10px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+            <span style="font-family:var(--mono);font-size:9px;color:var(--text3);">${n.date}</span>
+            <span style="font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:${dotBg};color:#fff;opacity:${n.status==='pending'?'.5':'1'};">${n.phase}</span>
+            ${sourceBadge}
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
+            ${currentPulse}
+            <span style="font-size:12px;font-weight:500;color:${isCurrent?n.statusColor:n.status==='pending'?'var(--text3)':'var(--text1)'};">${n.title}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.6;">${n.detail}</div>
+          <div style="margin-top:5px;">
+            <span style="font-size:10px;font-family:var(--mono);color:${n.statusColor};${isCurrent?'font-weight:600;':''}">${n.statusLabel}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;background:var(--bg3);">
+      <i class="fa-solid fa-route" style="color:var(--dq);font-size:13px;"></i>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text2);">COPD 照護旅程</span>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid;background:var(--da-dim);color:var(--danger);border-color:var(--da-border);">
+        <i class="fa-solid fa-location-pin" style="font-size:9px;margin-right:3px;"></i>${d.stuckLabel}
+      </span>
+    </div>
+    <div style="padding:10px 12px;overflow-y:auto;max-height:380px;">
+      ${nodeHtml}
+      <div style="background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:7px;padding:7px 10px;margin-top:8px;font-size:11px;color:var(--text2);line-height:1.65;">
+        <i class="fa-solid fa-robot" style="color:var(--dq);margin-right:5px;"></i>${d.aiSummary}
+      </div>
+    </div>
+  </div>`;
+}
+
+const HIS_DATA = [
+  {
+    summary:'AI 跨診次分析：<strong>5次就診，0次肺功能檢查</strong>。每次均開立支氣管擴張劑但無確診流程。吸菸史 40 PY 從未被結構化記錄至 HIS。',
+    aiPattern:'偵測到「外觀正常偏誤」：理學檢查無喘鳴 → 反覆開止咳藥返家，缺乏影像交叉比對。',
+    rows:[
+      {date:'2026/02',dept:'急診',ic:'fa-solid fa-truck-medical',icol:'var(--danger)',dx:'急性喘鳴 / 規則排除',drug:'Prednisolone · Ventolin nebulizer',flag:'a',flagTxt:'未調閱 PACS AI',miss:false,warn:true},
+      {date:'2025/09',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'季節性咳嗽（氣喘紀錄）',drug:'Salbutamol PRN · Montelukast',flag:'r',flagTxt:'Spirometry 未開立 ×3',miss:true,warn:false},
+      {date:'2024/11',dept:'內科門診',ic:'fa-solid fa-stethoscope',icol:'var(--dq)',dx:'慢性咳嗽 / 過敏性鼻炎',drug:'Cetirizine · Salbutamol PRN',flag:'r',flagTxt:'吸菸史未記錄',miss:true,warn:false},
+      {date:'2023/06',dept:'胸腔內科',ic:'fa-solid fa-lungs',icol:'var(--teal)',dx:'運動後喘（排除心因性）',drug:'Salbutamol PRN',flag:'a',flagTxt:'Spirometry 建議未執行',miss:false,warn:true},
+    ]
+  },
+  {
+    summary:'AI 跨診次分析：<strong>3年 4 次就診均診斷為氣喘</strong>，職業粉塵暴露 20 年從未被記錄。診斷碼漂移：氣喘 → 季節過敏 → 老年咳嗽。',
+    aiPattern:'偵測到「慣性誤診迴圈」：相同症狀反覆以不同診斷碼紀錄，掩蓋 COPD 可能性。PACS 舊影像從未重判。',
+    rows:[
+      {date:'2026/01',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'老年性咳嗽 / 喉嚨過敏',drug:'Loratadine · Ambroxol',flag:'r',flagTxt:'第4次誤診碼',miss:true,warn:false},
+      {date:'2025/03',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'季節過敏 / 氣喘發作',drug:'Salbutamol · Fluticasone inh.',flag:'r',flagTxt:'職業史空白',miss:true,warn:false},
+      {date:'2024/08',dept:'耳鼻喉科',ic:'fa-solid fa-head-side-cough',icol:'var(--amber)',dx:'慢性喉炎 / 胃食道逆流',drug:'PPI · Prednisolone短程',flag:'a',flagTxt:'跨科別未整合',miss:false,warn:true},
+      {date:'2023/11',dept:'內科門診',ic:'fa-solid fa-stethoscope',icol:'var(--dq)',dx:'支氣管氣喘（初診）',drug:'Salbutamol PRN · SABA',flag:'r',flagTxt:'COPD 未鑑別診斷',miss:true,warn:false},
+    ]
+  },
+  {
+    summary:'AI 追蹤掃描：<strong>確診 GOLD I 後 3 年無胸腔科回診</strong>。今日以「腰痛」掛骨科，AI 在非相關科別接觸點主動觸發追蹤提醒。',
+    aiPattern:'偵測到「追蹤中斷＋接觸點機會」：病患今日掛骨科，若無跨科別預警，COPD 追蹤將再次錯過。自行停藥風險升高。',
+    rows:[
+      {date:'2026/05',dept:'骨科（今日）',ic:'fa-solid fa-bone',icol:'var(--teal)',dx:'腰椎退化 / 下背痛',drug:'Diclofenac · 物理治療',flag:'b',flagTxt:'⚡ 跨科別預警觸發',miss:false,warn:false},
+      {date:'2025/10',dept:'骨科',ic:'fa-solid fa-bone',icol:'var(--teal)',dx:'膝關節炎',drug:'Celecoxib',flag:'a',flagTxt:'COPD 追蹤再次錯過',miss:false,warn:true},
+      {date:'2024/02',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'定期健檢',drug:'高血壓用藥調整',flag:'a',flagTxt:'Spirometry 未更新',miss:false,warn:true},
+      {date:'2023/03',dept:'胸腔內科',ic:'fa-solid fa-lungs',icol:'var(--teal)',dx:'COPD GOLD I 確診',drug:'Tiotropium · LAMA 維持治療',flag:'g',flagTxt:'確診後僅回診1次',miss:false,warn:false},
+    ]
+  }
+];
+
+function makeLungSVG(scan, showAnnotations) {
+  const l = scan.lung;
+  const rects = showAnnotations ? scan.regions.map(r=>`
+    <rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="3"
+      fill="${r.color}" stroke="${r.stroke}" stroke-width="1.5" stroke-dasharray="4 2"/>
+    <text x="${r.x+2}" y="${r.y-2}" font-size="6.5" fill="${r.stroke}" font-family="monospace">${r.lbl}</text>
+  `).join('') : '';
+  return `<svg viewBox="0 0 170 82" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+    <rect width="170" height="82" fill="#1e293b"/>
+    <ellipse cx="${l.cx1}" cy="${l.cy1}" rx="${l.rx1}" ry="${l.ry1}" fill="#2d3f55" opacity=".9"/>
+    <ellipse cx="${l.cx2}" cy="${l.cy2}" rx="${l.rx2}" ry="${l.ry2}" fill="#2d3f55" opacity=".9"/>
+    <rect x="72" y="10" width="26" height="62" fill="#1a2840"/>
+    <path d="M${67-l.rx1*0.2} ${l.diaph} Q85 ${l.diaph+6} ${103+l.rx2*0.2} ${l.diaph}" stroke="#4b5563" stroke-width="1.5" fill="none"/>
+    <line x1="85" y1="4" x2="85" y2="${l.diaph-2}" stroke="#4b5563" stroke-width="2"/>
+    ${rects}
+  </svg>`;
+}
+
+function buildPACS(ptIdx) {
+  const d = PACS_DATA[ptIdx];
+  const scans = d.scans;
+  const cols = scans.length;
+  const scanCols = scans.map((s,si)=>{
+    const origColor = s.origFlag==='ok' ? '#10b981' : '#f87171';
+    const origIcon  = s.origFlag==='ok' ? '✓' : '✕';
+    return `
+    <div style="display:flex;flex-direction:column;gap:0;flex:1;min-width:0;">
+      <div style="background:#0f172a;padding:4px 7px;font-family:monospace;font-size:9px;color:#94a3b8;display:flex;align-items:center;gap:5px;border-bottom:1px solid rgba(255,255,255,.06);">
+        <span style="color:#e2e8f0;font-weight:600;">${s.date}</span>
+        <span style="background:rgba(96,165,250,.12);color:#93c5fd;padding:1px 5px;border-radius:3px;border:1px solid rgba(96,165,250,.25);">${s.label}</span>
+        <span style="margin-left:auto;color:#64748b;">信心 <span style="color:#60a5fa;">${s.conf}%</span></span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;background:#111827;">
+        <div style="position:relative;border-right:1px solid rgba(255,255,255,.06);">
+          <div style="position:absolute;top:3px;left:4px;font-size:8px;font-family:monospace;color:rgba(255,255,255,.4);z-index:2;">原始</div>
+          <div style="height:90px;">${makeLungSVG(s,false)}</div>
+        </div>
+        <div style="position:relative;">
+          <div style="position:absolute;top:3px;left:4px;font-size:8px;font-family:monospace;color:rgba(96,165,250,.8);z-index:2;">AI標註</div>
+          <div style="height:90px;">${makeLungSVG(s,true)}</div>
+        </div>
+      </div>
+      <div style="background:#0f172a;padding:5px 7px;font-size:10px;color:#cbd5e1;font-family:monospace;line-height:1.55;border-top:1px solid rgba(255,255,255,.06);">
+        ${s.finding}
+        <div style="margin-top:3px;font-size:9px;color:${origColor};">${origIcon} ${s.origReport}</div>
+      </div>
+    </div>`;
+  }).join(`<div style="width:2px;background:#0f172a;flex-shrink:0;"></div>`);
+
+  return `
+  <div class="pacs-panel">
+    <div class="pacs-header">
+      <i class="fa-solid fa-x-ray" style="color:#60a5fa"></i>
+      <strong>PACS AI 縱向影像比較</strong>
+      <span style="margin-left:4px;color:#64748b;">${cols} 次影像</span>
+      <span style="margin-left:auto;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:1px 8px;border-radius:4px;">DeepQ Vision v2</span>
+    </div>
+    <div style="display:flex;background:#0f172a;">${scanCols}</div>
+    <div class="pacs-legend">
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(251,191,36,.6);border:1px solid rgba(251,191,36,.8)"></div>肺氣腫/充氣異常</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,.5);border:1px solid rgba(239,68,68,.7)"></div>橫膈膜異常</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(16,185,129,.5);border:1px solid rgba(16,185,129,.7)"></div>確診基準線</div>
+    </div>
+    <div class="pacs-finding">
+      <i class="fa-solid fa-arrow-trend-up" style="color:#60a5fa;margin-right:5px;"></i>${d.aiTrend}
+    </div>
+  </div>`
+}
+
+function buildHIS(i) {
+  const d = HIS_DATA[i];
+  const flagColors = {r:'his-flag-r', a:'his-flag-a', g:'his-flag-g', b:'his-flag his-flag-g'};
+  const rows = d.rows.map(r => `
+    <div class="his-row">
+      <div class="his-date">${r.date}<br><i class="${r.ic}" style="color:${r.icol};font-size:11px;margin-top:3px;display:block;"></i></div>
+      <div class="his-card ${r.miss?'mis':r.warn?'warn':''}">
+        <div class="his-dept">${r.dept}</div>
+        <div class="his-dx">${r.dx}</div>
+        <div class="his-drug" style="color:var(--text3);font-size:10px;font-family:var(--mono);">${r.drug}</div>
+        <span class="his-flag ${r.flag==='b'?'his-flag-g':flagColors[r.flag]}">${r.flagTxt}</span>
+      </div>
+    </div>`).join('');
+
+  return `
+  <div class="his-panel">
+    <div class="his-header">
+      <i class="fa-solid fa-clock-rotate-left" style="color:var(--amber);font-size:13px;"></i>
+      <span class="his-header-lbl">HIS 跨診次歷史彙整</span>
+      <span class="his-badge" style="background:var(--am-dim);color:var(--amber);border-color:var(--am-border);">AI 自動聚合</span>
+    </div>
+    <div class="his-body">
+      <div class="his-ai-box" style="margin-bottom:10px;">
+        <i class="fa-solid fa-robot" style="margin-right:6px;"></i>${d.summary}
+      </div>
+      ${rows}
+      <div class="his-ai-box" style="margin-top:6px;background:var(--da-dim);border-color:var(--da-border);color:var(--danger);">
+        <i class="fa-solid fa-triangle-exclamation" style="margin-right:6px;"></i><strong>AI 模式偵測：</strong>${d.aiPattern}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* EMR 模擬打字狀態 */
+const EMR_CHIEF = [
+  '最近半年爬樓梯越來越喘，偶爾伴隨晨間咳嗽。',
+  '老毛病又犯了，咳嗽快一個月，走平路也喘。',
+  '腰椎退化，下背痛 3 個月，要求止痛藥。'
+];
+const EMR_AI_SUGGEST = [
+  '⚡ AI 即時比對：本次主訴「喘 + 咳嗽」與 HIS 歷史紀錄高度一致。偵測到 40 PY 吸菸史 + 5 次就診 0 次肺功能。建議確認 Spirometry 優先序。',
+  '⚡ AI 即時比對：「慢性咳嗽 + 走路喘」與歷史 4 次氣喘診斷模式相符，但職業粉塵暴露 20 年未被鑑別。PACS 重判提示 COPD 可能性高。',
+  '⚡ AI 跨科別偵測：本次主訴為腰痛（骨科），但 HIS 存有 GOLD I COPD 確診（2023），距上次胸腔科回診已 3 年。COPD 追蹤中斷警示已啟動。'
+];
+
+let emrTyping = {};
+
+function buildEMR(i, aiGenerated) {
+  const done = confirmed[i], snooz = snoozed[i];
+  const p = PTS[i];
+  const tags = p.tags.map(t=>`<span class="tag ${t.c}">${t.t}</span>`).join('');
+  const ords = p.orders.map((o,oi)=>{
+    const isChecked = orderChecked[i][oi] !== undefined ? orderChecked[i][oi] : o.ok;
+    const chkClass = isChecked ? 'chk-done' : 'chk-empty';
+    const chkIcon  = isChecked ? '<i class="fa-solid fa-check" style="font-size:9px;color:var(--dq)"></i>' : '';
+    const badge    = o.ok ? '<span class="ord-badge-ai">AI 建議</span>' : '<span class="ord-badge-opt">選填</span>';
+    const rowStyle = isChecked
+      ? 'background:var(--dq-dim);border-color:var(--dq-border);cursor:pointer;'
+      : 'background:var(--bg3);border-color:var(--border);cursor:pointer;opacity:.75;';
+    return `<div class="order" style="${rowStyle}transition:all .15s;" onclick="toggleOrder(${i},${oi})" title="點擊切換">
+      <div class="chk ${chkClass}" style="transition:all .15s;">${chkIcon}</div>
+      <div style="flex:1;">
+        <div class="ord-l">${o.l}${badge}</div>
+        ${o.s?`<div class="ord-s">${o.s}</div>`:''}
+      </div>
+      <i class="fa-solid ${isChecked?'fa-toggle-on':'fa-toggle-off'}" style="color:${isChecked?'var(--dq)':'var(--text3)'};font-size:16px;flex-shrink:0;"></i>
+    </div>`;
+  }).join('');
+
+  const wfStep = aiGenerated ? 3 : (emrTyping[i] ? 2 : 1);
+  const wf = [
+    {n:1,lbl:'HIS 掛號 → AI 觸發',state: wfStep>=1?'done':'pending'},
+    {n:2,lbl:'醫師輸入主訴',state: wfStep===2?'active':wfStep>2?'done':'pending'},
+    {n:3,lbl:'AI 生成路徑建議',state: wfStep===3?'active':wfStep>3?'done':'pending'},
+    {n:4,lbl:'醫師確認醫囑',state: done?'done':wfStep===3?'active':'pending'},
+  ];
+  const wfHtml = wf.map((s,idx)=>`
+    ${idx>0?'<span class="wf-arrow">›</span>':''}
+    <div class="wf-step">
+      <div class="wf-num ${s.state}">${s.state==='done'?'<i class="fa-solid fa-check" style="font-size:8px"></i>':s.n}</div>
+      <span class="wf-lbl ${s.state==='active'?'active-lbl':s.state==='done'?'done-lbl':'pending-lbl'}">${s.lbl}</span>
+    </div>`).join('');
+
+  const chiefVal = emrTyping[i] || aiGenerated ? EMR_CHIEF[i] : '';
+  const aiBarHtml = emrTyping[i] && !aiGenerated ? `
+    <div class="ai-suggest-bar">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <div>${EMR_AI_SUGGEST[i]}</div>
+    </div>` : '';
+
+  // Path triage
+  const isPathA = p.actionPath === 'A';
+  const pathHeader = isPathA ? `
+    <div style="background:var(--da-dim);border:2px solid var(--da-border);border-radius:10px;padding:10px 14px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--danger);background:var(--da-dim);border:1px solid var(--da-border);padding:2px 8px;border-radius:4px;">路徑 A · 未確診路徑</span>
+        <span style="font-size:12px;font-weight:500;color:var(--danger);">首要目標：完成 Spirometry → 確立診斷碼</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);">
+        <span style="font-family:var(--mono);padding:2px 6px;background:var(--bg4);border-radius:3px;">① Spirometry</span>
+        <i class="fa-solid fa-arrow-right" style="color:var(--text3);font-size:9px;"></i>
+        <span style="font-family:var(--mono);padding:2px 6px;background:var(--bg4);border-radius:3px;">② COPD 確診 / 排除</span>
+        <i class="fa-solid fa-arrow-right" style="color:var(--text3);font-size:9px;"></i>
+        <span style="font-family:var(--mono);padding:2px 6px;background:var(--bg4);border-radius:3px;">③ 用藥計畫</span>
+      </div>
+    </div>` : `
+    <div style="background:var(--tl-dim);border:2px solid var(--tl-border);border-radius:10px;padding:10px 14px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--teal);background:var(--tl-dim);border:1px solid var(--tl-border);padding:2px 8px;border-radius:4px;">路徑 B · 確診後重啟路徑</span>
+        <span style="font-size:12px;font-weight:500;color:var(--teal);">首要目標：重新評估 GOLD 分期 → 重啟用藥</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);">
+        <span style="font-family:var(--mono);padding:2px 6px;background:var(--bg4);border-radius:3px;">① 當科醫師知悉</span>
+        <i class="fa-solid fa-arrow-right" style="color:var(--text3);font-size:9px;"></i>
+        <span style="font-family:var(--mono);padding:2px 6px;background:var(--bg4);border-radius:3px;">② LINE 通知病患</span>
+        <i class="fa-solid fa-arrow-right" style="color:var(--text3);font-size:9px;"></i>
+        <span style="font-family:var(--mono);padding:2px 6px;background:var(--bg4);border-radius:3px;">③ 重做 Spirometry</span>
+      </div>
+    </div>`;
+
+  const aiResultHtml = aiGenerated ? `
+    <div style="margin-top:10px;">
+      <div class="fkey" style="margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+        <i class="fa-solid fa-tags" style="color:var(--dq)"></i> AI 萃取信號標籤
+        <span class="emr-src-tag emr-src-ai">基於 LINE + HIS + PACS</span>
+      </div>
+      ${tags}
+    </div>
+    <div style="margin-top:10px;">
+      <div class="fkey" style="margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+        <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--dq)"></i> AI 建議干預清單
+        <span style="font-size:10px;font-family:var(--mono);color:var(--text3);">依 GOLD 2024 共識 · 點擊項目可切換</span>
+      </div>
+      ${pathHeader}
+      <div id="orders-wrap-${i}">${ords}</div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="hitl-btn ${done?'done':''}" onclick="doConfirm(${i})" ${done||snooz?'disabled':''}>
+          ${done?'<i class="fa-solid fa-circle-check"></i> 醫囑已寫入 HIS':'<i class="fa-solid fa-check-double"></i> 確認醫囑（Human-in-the-Loop）'}
+        </button>
+        <button class="snooze-btn ${snooz?'done':''}" onclick="doSnooze(${i})" ${snooz||done?'disabled':''}>
+          ${snooz?'<i class="fa-solid fa-clock"></i> 下次追蹤':'<i class="fa-regular fa-clock"></i> 知悉·下次追蹤'}
+        </button>
+      </div>
+      <div class="hitl-note">最終決策權在醫師 · 符合 TFDA 輔助決策規範</div>
+    </div>` : '';
+
+  const genBtnHtml = !aiGenerated ? `
+    <button class="gen-btn" id="genbtn-${i}" onclick="doGenAI(${i})"
+      ${emrTyping[i]?'':'disabled'} style="${emrTyping[i]?'':'opacity:.4'}">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      ${emrTyping[i]?'醫師已輸入 → 生成 AI 建議干預清單':'請先輸入本次主訴'}
+    </button>` : '';
+
+  return `
+  <div class="emr-panel">
+    <div class="workflow-steps">${wfHtml}</div>
+    <div class="emr-body">
+      <div style="background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:7px;padding:7px 10px;margin-bottom:10px;font-size:11px;font-family:var(--mono);color:var(--dq);display:flex;align-items:center;gap:7px;">
+        <i class="fa-solid fa-bolt"></i>
+        <strong>掛號前</strong>已完成：LINE 問診結構化 + PACS AI 重判 + HIS 跨診次聚合 · 不需醫師操作
+      </div>
+      <div class="emr-field">
+        <div class="emr-field-lbl">
+          本次主訴
+          <span class="emr-src-tag emr-src-dr">醫師輸入</span>
+          <span style="font-size:10px;color:var(--text3);font-family:var(--mono);">— AI 即時比對 HIS 歷史</span>
+        </div>
+        <textarea class="emr-textarea ${emrTyping[i]&&!aiGenerated?'typing':''}" id="chief-${i}" rows="2"
+          placeholder="醫師輸入本次主訴…（點擊模擬輸入）"
+          onclick="simulateTyping(${i})"
+          readonly>${chiefVal}</textarea>
+        ${aiBarHtml}
+      </div>
+      ${genBtnHtml}
+      ${aiResultHtml}
+    </div>
+  </div>`;
+}
+
+function simulateTyping(i) {
+  if (emrTyping[i] || confirmed[i]) return;
+  emrTyping[i] = true;
+  const ta = document.getElementById(`chief-${i}`);
+  if (ta) {
+    ta.classList.add('typing');
+    ta.value = '';
+    const txt = EMR_CHIEF[i];
+    let j = 0;
+    const iv = setInterval(()=>{
+      ta.value += txt[j++];
+      if (j >= txt.length) {
+        clearInterval(iv);
+        renderPt(i);
+      }
+    }, 40);
+  }
+}
+
+function doGenAI(i) {
+  aiGenDone[i] = true;
+  renderPt(i);
+}
+
+const aiGenDone = {};
+
+function toggleOrder(ptIdx, ordIdx) {
+  const cur = orderChecked[ptIdx][ordIdx];
+  const p = PTS[ptIdx];
+  const defaultVal = p.orders[ordIdx].ok;
+  orderChecked[ptIdx][ordIdx] = cur !== undefined ? !cur : !defaultVal;
+  // re-render just the order list to avoid losing typing state
+  const ordersWrap = document.getElementById(`orders-wrap-${ptIdx}`);
+  if (ordersWrap) {
+    const p2 = PTS[ptIdx];
+    ordersWrap.innerHTML = p2.orders.map((o,oi)=>{
+      const isChecked = orderChecked[ptIdx][oi] !== undefined ? orderChecked[ptIdx][oi] : o.ok;
+      const chkClass = isChecked ? 'chk-done' : 'chk-empty';
+      const chkIcon  = isChecked ? '<i class="fa-solid fa-check" style="font-size:9px;color:var(--dq)"></i>' : '';
+      const badge    = o.ok ? '<span class="ord-badge-ai">AI 建議</span>' : '<span class="ord-badge-opt">選填</span>';
+      const rowStyle = isChecked ? 'background:var(--dq-dim);border-color:var(--dq-border);' : 'background:var(--bg3);border-color:var(--border);opacity:.75;';
+      return `<div class="order" style="${rowStyle}cursor:pointer;transition:all .15s;" onclick="toggleOrder(${ptIdx},${oi})">
+        <div class="chk ${chkClass}" style="transition:all .15s;">${chkIcon}</div>
+        <div style="flex:1;"><div class="ord-l">${o.l}${badge}</div>${o.s?`<div class="ord-s">${o.s}</div>`:''}</div>
+        <i class="fa-solid ${isChecked?'fa-toggle-on':'fa-toggle-off'}" style="color:${isChecked?'var(--dq)':'var(--text3)'};font-size:16px;flex-shrink:0;"></i>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderPt(i){
+  const p=PTS[i], done=confirmed[i], snooz=snoozed[i];
+
+  // HIS trigger timeline strip
+  const triggerTimes = ['08:42','09:11','09:58'];
+  const triggerTime = triggerTimes[i];
+  const copdpsBadgeColor = p.copdps.score >= 5 ? 'var(--danger)' : 'var(--amber)';
+  const copdpsBadgeBg   = p.copdps.score >= 5 ? 'var(--da-dim)' : 'var(--am-dim)';
+  const copdpsBadgeBorder = p.copdps.score >= 5 ? 'var(--da-border)' : 'var(--am-border)';
+  const copdpsItemsHtml = p.copdps.items.map(it=>`<span style="font-size:9px;color:var(--text3);font-family:var(--mono);">${it}</span>`).join('<span style="color:var(--border2);margin:0 3px;">·</span>');
+
+  document.getElementById('pt-detail').innerHTML=`
+    <!-- HIS 掛號觸發時序 -->
+    <div style="background:var(--bg2);border:1px solid var(--dq-border);border-radius:10px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--dq);">⚡ HIS 掛號觸發</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3);">${triggerTime} 掛號</span>
+      <i class="fa-solid fa-arrow-right" style="color:var(--border2);font-size:9px;"></i>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text2);">AI 靜默比對啟動</span>
+      <i class="fa-solid fa-arrow-right" style="color:var(--border2);font-size:9px;"></i>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text2);">PACS 重判完成</span>
+      <i class="fa-solid fa-arrow-right" style="color:var(--border2);font-size:9px;"></i>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text2);">HIS 跨診次聚合完成</span>
+      <i class="fa-solid fa-arrow-right" style="color:var(--border2);font-size:9px;"></i>
+      <span style="background:var(--lg-dim);border:1px solid var(--lg-border);padding:1px 7px;border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--lgreen);font-weight:600;">信號就緒 · 醫師進診間前完成</span>
+      <div style="margin-left:auto;background:${copdpsBadgeBg};border:1px solid ${copdpsBadgeBorder};border-radius:4px;padding:2px 8px;font-family:var(--mono);font-size:10px;color:${copdpsBadgeColor};font-weight:600;">COPD-PS ${p.copdps.score}分 · ${p.copdps.score>=5?'陽性':'低風險'}</div>
+    </div>
+    <!-- COPD-PS item breakdown -->
+    <div style="background:var(--bg3);border-radius:8px;padding:6px 14px;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-right:4px;">COPD-PS 計分：</span>
+      ${copdpsItemsHtml}
+    </div>
+    <div class="pt-header">
+      <div class="av ${p.avc}">${p.avt}</div>
+      <div><div class="pt-hn">${p.nm}</div><div class="pt-hm">${p.age} · ${p.sex} · ${p.dept}</div></div>
+      <div class="kpis">${p.kpis.map(k=>`<div class="kpi"><div class="kpi-l">${k.l}</div><div class="kpi-v" style="${k.c}">${k.v}</div></div>`).join('')}</div>
+    </div>
+    <div class="alert-box ${p.ac}" style="margin-bottom:12px;">
+      <div class="ab-head">
+        <i class="fa-solid ${p.ai}" style="font-size:16px;color:${p.aic}"></i>
+        <span class="ab-title ${p.atc}">${p.at}</span>
+        <span class="gap-badge ${p.gapC}">${p.gap}</span>
+        <span class="conf-bdg ${p.cb}" style="margin-left:auto;">${p.conf}</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      ${buildPACS(i)}
+      ${buildHIS(i)}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      ${buildDeepQAdvantage(i)}
+      ${buildSpirometry(i)}
+    </div>
+    <div>${buildEMR(i, !!aiGenDone[i])}</div>
+  `;
+}
+function doConfirm(i){confirmed[i]=true;renderPt(i);}
+function doSnooze(i){snoozed[i]=true;renderPt(i);}
+function doConsent(){
+  const b=document.getElementById('cbtn');
+  b.disabled=true;b.style.background='var(--success)';
+  b.innerHTML='<i class="fa-solid fa-circle-check"></i> 授權完成';
+  document.getElementById('c-ok').style.display='block';
+}
+function updateClock(){
+  const n=new Date();
+  const s=`${n.getFullYear()}/${String(n.getMonth()+1).padStart(2,'0')}/${String(n.getDate()).padStart(2,'0')}  ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  const el=document.getElementById('clock');if(el)el.textContent=s;
+}
+updateClock();setInterval(updateClock,10000);
+renderPt(0);
+
+/* ═══════════════════════════════════════════
+   漸進式 LINE 對話引擎
+═══════════════════════════════════════════ */
+const STEPS = [
+  {
+    step: 0,
+    aiMsg: '您好！我是蘭醫生健康助理，您預約了本週四的門診。\n看診前有幾個簡單問題，大約 1 分鐘就好。\n\n開始前，請先確認資料使用方式：',
+    insight: { title:'第零層：同意書前置設計（合規關鍵）', body:'依據<strong>個資法</strong>及醫學倫理，任何健康資料收集前需取得明確同意。同意書前置不僅符合合規要求，也讓病患在填寫問卷時清楚知道資料用途，提升填答誠實度與信任感。<br><br>這也是 TFDA 審查 AI 問診系統時的<strong>必要設計要件</strong>。' },
+    consentMode: true
+  },
+  {
+    step: 'q1_screen',
+    aiMsg: '先確認一件事：\n您現在有沒有靜止不動時也喘不過氣，或同時伴隨胸痛？',
+    insight: { title:'安全篩：紅旗症狀前置偵測', body:'靜止性呼吸困難或合併胸痛屬於<strong>紅旗症狀</strong>，不應等待常規門診。<br><br>AI 在開始 COPD-PS 問卷前先排除緊急情境——這是病患安全設計的核心，也是 TFDA 審查 SaMD 系統的必要要件。' },
+    choices: [
+      { text: '有，現在很不舒服', next: 'emergency', score: 0 },
+      { text: '沒有，我還好', next: 'q1', score: 0 }
+    ]
+  },
+  {
+    step: 'q1',
+    aiMsg: '好的，謝謝。\n\n【問題 1 / 5】\n最近四週，您有多常感到呼吸不順或喘不過氣？',
+    insight: { title:'COPD-PS ① 呼吸困難頻率（0–2分）', body:'COPD-PS 第1題詢問過去 4 週呼吸困難的頻率：<br>• 從來沒有 / 很少 = <strong>0分</strong><br>• 有時候 = <strong>1分</strong><br>• 常常 / 幾乎整天 = <strong>2分</strong><br><br>用日常語言「喘不過氣」取代醫學術語，降低填答門檻，病患更容易如實回答。' },
+    choices: [
+      { text: '從來沒有', next: 'q2', score: 0 },
+      { text: '很少、偶爾一點點', next: 'q2', score: 0 },
+      { text: '有時候', next: 'q2', tag: { t:'偶發性呼吸困難', c:'tag-a' }, score: 1 },
+      { text: '常常（大部分時間）', next: 'q2', tag: { t:'呼吸困難·頻繁', c:'tag-r' }, score: 2 },
+      { text: '幾乎整天都這樣', next: 'q2', tag: { t:'呼吸困難·持續', c:'tag-r' }, score: 2 }
+    ]
+  },
+  {
+    step: 'q2',
+    aiMsg: '了解。\n\n【問題 2 / 5】\n您有沒有咳嗽咳出痰或黏液的情形？',
+    insight: { title:'COPD-PS ② 咳痰頻率（0–2分）', body:'COPD-PS 第2題詢問咳出痰或黏液的頻率：<br>• 從來沒有 / 只有感冒時 = <strong>0分</strong><br>• 每月幾天 / 幾乎每週 = <strong>1分</strong><br>• 每天都有 = <strong>2分</strong><br><br>慢性咳痰是最常被忽略的早期 COPD 症狀，病患往往習以為常，需主動詢問才會揭露。' },
+    choices: [
+      { text: '沒有', next: 'q3', score: 0 },
+      { text: '只有感冒或喉嚨不舒服時才有', next: 'q3', score: 0 },
+      { text: '每個月有幾天', next: 'q3', tag: { t:'偶發咳痰', c:'tag-a' }, score: 1 },
+      { text: '幾乎每週都有', next: 'q3', tag: { t:'慢性咳痰', c:'tag-a' }, score: 1 },
+      { text: '幾乎每天都有', next: 'q3', tag: { t:'慢性咳痰·每日', c:'tag-r' }, score: 2 }
+    ]
+  },
+  {
+    step: 'q3',
+    aiMsg: '謝謝。\n\n【問題 3 / 5】\n最近一年，您有沒有因為呼吸問題，做的事情比以前少了？',
+    insight: { title:'COPD-PS ③ 活動受限（0–2分）', body:'COPD-PS 第3題從「生活功能變化」切入，比直接問「你喘嗎」更能引出真實答案：<br>• 完全沒有 / 不太有 / 不確定 = <strong>0分</strong><br>• 有點這樣 = <strong>1分</strong><br>• 明顯減少很多 = <strong>2分</strong><br><br>這個問法讓病患不設防，是漸進式問診設計的核心。' },
+    choices: [
+      { text: '完全沒有這樣', next: 'q4', score: 0 },
+      { text: '不太有', next: 'q4', score: 0 },
+      { text: '不確定', next: 'q4', score: 0 },
+      { text: '有點這樣', next: 'q4', tag: { t:'活動量下降', c:'tag-a' }, score: 1 },
+      { text: '明顯少很多', next: 'q4', tag: { t:'活動明顯受限', c:'tag-r' }, score: 2 }
+    ]
+  },
+  {
+    step: 'q4',
+    aiMsg: '了解。\n\n【問題 4 / 5】\n您這輩子加起來，總共抽過超過 100 根菸嗎？\n（包含已戒菸的年數）',
+    insight: { title:'COPD-PS ④ 吸菸史（0 或 2 分）', body:'COPD-PS 第4題：終身吸菸超過 100 根 = <strong>2分</strong>，否則 0分。<br><br>以「100根」為門檻（≈ 每天 5 支抽 3 週），比籠統問「有沒有抽菸習慣」更精確。<br><br><strong>⚠ 設計原則：</strong>風險評估標籤僅出現在醫師端 CDSS，病患端只收到中性確認，避免引發未經解釋的焦慮。' },
+    choices: [
+      { text: '有，超過 100 根', next: 'q5', tag: { t:'吸菸史 >100根', c:'tag-r' }, score: 2 },
+      { text: '沒有', next: 'q5', score: 0 },
+      { text: '不確定', next: 'q5', score: 0 }
+    ]
+  },
+  {
+    step: 'q5',
+    aiMsg: '【問題 5 / 5】最後一題！\n請問您的年齡範圍？',
+    insight: { title:'COPD-PS ⑤ 年齡（0–2分）', body:'COPD-PS 第5題年齡分級計分：<br>• 35–49 歲 = <strong>0分</strong><br>• 50–59 歲 = <strong>1分</strong><br>• 60–69 歲 = <strong>2分</strong><br>• 70 歲以上 = <strong>2分</strong><br><br>HIS 整合後可自動帶入年齡，本題通常無需病患自填。這也是 COPD-PS 所有 5 題中<strong>唯一可被系統自動填入</strong>的題目。' },
+    choices: [
+      { text: '未滿 35 歲', next: 'end-check', score: 0 },
+      { text: '35–49 歲', next: 'end-check', score: 0 },
+      { text: '50–59 歲', next: 'end-check', tag: { t:'年齡 50–59歲', c:'tag-a' }, score: 1 },
+      { text: '60–69 歲', next: 'end-check', tag: { t:'年齡 60–69歲', c:'tag-r' }, score: 2 },
+      { text: '70 歲以上', next: 'end-check', tag: { t:'年齡 ≥70歲', c:'tag-r' }, score: 2 }
+    ]
+  }
+];
+
+const ENDINGS = {
+  'emergency': {
+    warn: false,
+    emergency: true,
+    aiMsg: '您描述的症狀需要盡快由醫師評估。\n\n建議您：\n• 立即聯繫您的門診醫師，或\n• 前往急診室就醫\n\n蘭醫生已將您的狀況標記為「需緊急評估」，並通知您的主治醫師。\n問卷暫停，請優先就醫。',
+    insight: { title:'緊急分流：紅旗症狀偵測', body:'靜止性呼吸困難或伴隨胸痛屬於<strong>紅旗症狀</strong>，不應等待常規門診。AI 偵測到這類描述後立即終止問卷，導流至緊急聯繫，同時觸發主治醫師通知。<br><br>這是 AI 問診系統的<strong>病患安全底線</strong>，也是 TFDA 審查 SaMD 系統時的必要設計要件。' },
+    tags: []
+  },
+  'end-high': {
+    warn: true,
+    aiMsg: '感謝您的回答！\n\n蘭醫生已整理好您的資訊，並同步至本週門診系統，醫師看診時會一併參考。\n\n看診時不用再重複說明，醫師已掌握您的狀況。',
+    insight: { title:'評估完成：高風險觸發（COPD-PS ≥5）', body:'AI 整合本次問診結果，在<strong>不提 COPD 的情況下</strong>完成風險分層。病患只感受到「AI 在幫我準備門診」，而非被診斷。<br><br>這是信任設計的核心：讓病患安心，讓醫師有料可用。' },
+    tags: []
+  },
+  'end-low': {
+    warn: false,
+    aiMsg: '感謝您的回答！\n\n您的資訊已整理完成，同步至本週門診系統，醫師看診時會一併參考。\n\n如果有任何不舒服，歡迎隨時透過蘭醫生告知。',
+    insight: { title:'評估完成：低風險歸檔（COPD-PS <5）', body:'低風險病患快速結束問卷，不過度打擾。AI 仍保留紀錄供 PACS 系統交叉比對——若影像發現異常，門診時仍可觸發預警。<br><br>低分不代表無風險，只代表<strong>不需要這次主動介入</strong>。' },
+    tags: []
+  },
+  'end-mid': {
+    warn: true,
+    aiMsg: '感謝您的回答。\n\n蘭醫生已整理完成，同步至本週門診系統。就診時醫師會進一步了解您的狀況。',
+    insight: { title:'評估完成：中風險提示', body:'分數接近閾值的病患，在門診系統中標記「建議確認呼吸狀況」，由醫師決定是否安排進一步檢查。' },
+    tags: []
+  },
+  'bypass': {
+    warn: false,
+    aiMsg: '沒問題！若您之後有任何健康問題想諮詢，隨時都可以告訴蘭醫生。\n\n祝您看診順利！',
+    insight: { title:'設計原則：尊重拒絕', body:'病患可以選擇不同意問卷。這是信任設計的一部分——<strong>不強迫填寫</strong>，才能讓願意填的人更放心。即使跳過，AI 仍從 HIS 背景風險因子進行被動偵測。' },
+    tags: []
+  }
+};
+
+let chatHistory = [];
+let collectedTags = [];
+let currentStep = 0;
+let copdpsScore = 0;
+const COPD_PS_MAX = 10;
+const COPD_PS_THRESHOLD = 5;
+
+function updateCopdps(delta) {
+  if (delta) copdpsScore += delta;
+  const pct = Math.min(100, Math.round(copdpsScore / COPD_PS_MAX * 100));
+  const isPos = copdpsScore >= COPD_PS_THRESHOLD;
+  const bar = document.getElementById('prog-bar');
+  const txt = document.getElementById('prog-txt');
+  if (bar) {
+    bar.style.width = pct + '%';
+    bar.style.background = isPos ? 'var(--danger)' : copdpsScore >= 3 ? 'var(--amber)' : 'var(--lgreen)';
+  }
+  if (txt) {
+    txt.textContent = isPos ? `COPD-PS: ${copdpsScore}分 · 陽性 ✓` : `${copdpsScore} / ≥5分`;
+    txt.style.color = isPos ? 'var(--danger)' : copdpsScore >= 3 ? 'var(--amber)' : 'var(--text3)';
+  }
+}
+
+function aiMsg(text, isWarn, isEmergency) {
+  const div = document.createElement('div');
+  div.className = 'mrow';
+  let bubClass = isEmergency ? 'emergency' : (isWarn ? 'warn' : 'ai');
+  let prefixTag = '';
+  if (isEmergency) prefixTag = '<div class="etag"><i class="fa-solid fa-triangle-exclamation"></i> 緊急評估提醒</div>';
+  else if (isWarn) prefixTag = '<div class="wtag"><i class="fa-solid fa-triangle-exclamation"></i> 初步評估</div>';
+  div.innerHTML = `<div class="aiv">AI</div><div class="bub ${bubClass}">${prefixTag}${text.replace(/\n/g,'<br>')}</div>`;
+  return div;
+}
+function userMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'mrow out';
+  div.innerHTML = `<div class="bub out">${text}</div>`;
+  return div;
+}
+function updateInsight(title, body) {
+  document.getElementById('insight-title').textContent = title;
+  document.getElementById('insight-body').innerHTML = body;
+}
+function updateProgress(done) {
+  const pct = Math.min(100, Math.round(done/totalSteps*100));
+  document.getElementById('prog-bar').style.width = pct+'%';
+  document.getElementById('prog-txt').textContent = done+' / '+totalSteps;
+}
+function scrollChat() {
+  const cb = document.getElementById('chat-body');
+  setTimeout(()=>{ cb.scrollTop = cb.scrollHeight; }, 80);
+}
+function renderChoices(choices) {
+  const area = document.getElementById('choice-area');
+  area.innerHTML = '';
+  choices.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'width:100%;padding:10px 14px;border-radius:8px;background:var(--bg2);border:1px solid var(--dq-border);color:var(--dq);font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;transition:background .15s;';
+    btn.onmouseover = () => btn.style.background = 'var(--dq-dim)';
+    btn.onmouseout = () => btn.style.background = 'var(--bg2)';
+    btn.innerHTML = '<i class="fa-regular fa-hand-pointer" style="margin-right:6px;font-size:11px;"></i>' + ch.text;
+    btn.onclick = () => handleChoice(ch);
+    area.appendChild(btn);
+  });
+}
+
+function renderConsentInline() {
+  const area = document.getElementById('choice-area');
+  area.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'consent-inline';
+  wrap.innerHTML = `
+    <div style="font-size:12px;font-weight:500;color:var(--text1);margin-bottom:9px;"><i class="fa-solid fa-shield-halved" style="color:var(--dq);margin-right:6px;"></i>資料使用說明</div>
+    <div class="citem"><i class="fa-solid fa-comment-medical"></i><span>本次問診內容將結構化轉為<strong>門診前臨床摘要</strong>，傳送至 HIS 供主治醫師參閱</span></div>
+    <div class="citem"><i class="fa-solid fa-lock"></i><span>資料僅供本次就診<strong>主治醫師</strong>使用，不對外共享</span></div>
+    <div class="citem" style="border:none;"><i class="fa-regular fa-circle-xmark" style="color:var(--text3);"></i><span>您可選擇「暫不同意」，問卷將不會開始</span></div>
+    <div class="cbtns">
+      <button class="cbtn-y" onclick="handleConsentYes()"><i class="fa-solid fa-check"></i> 我了解並同意</button>
+      <button class="cbtn-n" onclick="handleConsentNo()">暫不同意</button>
+    </div>
+  `;
+  area.appendChild(wrap);
+}
+
+function handleConsentYes() {
+  const cb = document.getElementById('chat-body');
+  cb.appendChild(userMsg('我了解並同意'));
+  document.getElementById('choice-area').innerHTML = '';
+  scrollChat();
+  setTimeout(() => proceedTo('q1_screen'), 500);
+}
+function handleConsentNo() {
+  const cb = document.getElementById('chat-body');
+  cb.appendChild(userMsg('暫不同意'));
+  document.getElementById('choice-area').innerHTML = '';
+  scrollChat();
+  setTimeout(() => proceedTo('bypass'), 500);
+}
+
+function renderSmokingInput(label, nextStep) {
+  const area = document.getElementById('choice-area');
+  area.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;';
+  wrap.innerHTML = `
+    <div style="font-size:12px;color:var(--text2);font-family:var(--sans);">請輸入您的吸菸資訊：</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:11px;color:var(--text3);font-family:var(--mono);">每天幾根</label>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input id="smoke-cigs" type="number" min="1" max="80" placeholder="例：20" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);font-size:13px;font-family:var(--sans);background:var(--bg3);color:var(--text1);outline:none;" />
+          <span style="font-size:12px;color:var(--text3);">根</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <label style="font-size:11px;color:var(--text3);font-family:var(--mono);">抽了幾年</label>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input id="smoke-years" type="number" min="1" max="70" placeholder="例：30" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);font-size:13px;font-family:var(--sans);background:var(--bg3);color:var(--text1);outline:none;" />
+          <span style="font-size:12px;color:var(--text3);">年</span>
+        </div>
+      </div>
+    </div>
+    <div id="py-preview" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text3);font-family:var(--mono);">計算中...</div>
+    <button id="smoke-submit" onclick="submitSmoking('${label}', ${nextStep})" style="padding:10px;border-radius:8px;background:var(--dq);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);">
+      <i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i>送出
+    </button>
+  `;
+  area.appendChild(wrap);
+  ['smoke-cigs','smoke-years'].forEach(id => {
+    document.getElementById(id).addEventListener('input', previewPY);
+  });
+}
+
+function previewPY() {
+  const cigs = parseFloat(document.getElementById('smoke-cigs').value) || 0;
+  const yrs  = parseFloat(document.getElementById('smoke-years').value) || 0;
+  const py   = ((cigs / 20) * yrs).toFixed(1);
+  const prev = document.getElementById('py-preview');
+  if (cigs > 0 && yrs > 0) {
+    prev.style.display = 'block';
+    // Neutral display to patient — no risk labelling
+    prev.innerHTML = `Pack-Years = (${cigs}根 ÷ 20) × ${yrs}年 = <strong>${py} PY</strong>`;
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+function submitSmoking(label, nextStep) {
+  const cigs = parseFloat(document.getElementById('smoke-cigs').value);
+  const yrs  = parseFloat(document.getElementById('smoke-years').value);
+  if (!cigs || !yrs) {
+    alert('請填入每天根數與年數');
+    return;
+  }
+  const py    = ((cigs / 20) * yrs).toFixed(1);
+  const tagC  = py >= 20 ? 'tag-r' : py >= 10 ? 'tag-a' : 'tag-g';
+  const tagT  = `Pack-Years: ${py}（${label}）`;
+  const userText = `每天 ${cigs} 根，抽了 ${yrs} 年（${label}）`;
+
+  // COPD-PS ④ 吸菸史計分（≥20PY=3, 10–20PY=2, 1–9PY=1, 0=0）
+  const pyScore = py >= 20 ? 3 : py >= 10 ? 2 : py >= 1 ? 1 : 0;
+  updateCopdps(pyScore);
+
+  collectedTags.push({ t: tagT, c: tagC });
+
+  const cb = document.getElementById('chat-body');
+  cb.appendChild(userMsg(userText));
+  document.getElementById('choice-area').innerHTML = '';
+  scrollChat();
+
+  // Update insight panel with risk info (physician-facing context)
+  const riskLabel = py >= 20 ? '高風險' : py >= 10 ? '中風險' : '低風險';
+  const riskColor = py >= 20 ? 'var(--danger)' : py >= 10 ? 'var(--amber)' : 'var(--lgreen)';
+  updateInsight(
+    `Pack-Years 計算結果（醫師端資訊）`,
+    `本次計算：<strong style="color:${riskColor};">${py} 包-年 · ${riskLabel}</strong><br><br>此風險標籤<strong>僅顯示於醫師端 CDSS</strong>，病患端只收到中性確認訊息，避免在無醫師解釋的情況下引發焦慮——符合病患安全設計原則。`
+  );
+
+  setTimeout(() => {
+    // Neutral acknowledgment to patient — no risk label
+    const ackDiv = document.createElement('div');
+    ackDiv.className = 'mrow';
+    ackDiv.innerHTML = `<div class="aiv">AI</div><div class="bub ai">了解，吸菸史已記錄，供醫師評估時參考。</div>`;
+    cb.appendChild(ackDiv);
+    scrollChat();
+    setTimeout(() => proceedTo(nextStep), 600);
+  }, 500);
+}
+
+function switchAiTab(tab) {
+  ['mining','detect','trend'].forEach(t => {
+    document.getElementById('ai-tab-' + t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('active-tab', t === tab);
+  });
+}
+
+function renderConsentInChat() {
+  const cb = document.getElementById('chat-body');
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'mrow';
+  msgDiv.innerHTML = `<div class="aiv">AI</div><div class="bub ai">還有一件事想請教您：<br>可以授權 AI 調閱您在本院的歷史資料嗎？這樣醫師看診時會有更完整的參考。</div>`;
+  cb.appendChild(msgDiv);
+
+  const cardRow = document.createElement('div');
+  cardRow.className = 'mrow';
+  cardRow.id = 'in-chat-consent-row';
+  cardRow.innerHTML = `
+    <div class="aiv" style="visibility:hidden;"></div>
+    <div class="consent-inline" style="max-width:210px;">
+      <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:8px;">
+        <i class="fa-solid fa-shield-halved" style="color:var(--dq);margin-right:5px;"></i>授權 AI 調閱項目
+      </div>
+      <div class="citem">
+        <i class="fa-solid fa-x-ray" style="color:var(--dq);"></i>
+        <span>歷史<strong>胸部影像</strong>（X光 / CT）</span>
+      </div>
+      <div class="citem" style="border:none;">
+        <i class="fa-solid fa-lungs" style="color:var(--dq);"></i>
+        <span><strong>肺功能檢查報告</strong>（Spirometry）</span>
+      </div>
+      <div class="cbtns">
+        <button class="cbtn-y" id="in-chat-yes" onclick="doInChatConsent()">
+          <i class="fa-solid fa-check"></i> 同意授權
+        </button>
+        <button class="cbtn-n" onclick="doInChatDecline()">暫不授權</button>
+      </div>
+    </div>`;
+  cb.appendChild(cardRow);
+  scrollChat();
+}
+
+function doInChatConsent() {
+  const row = document.getElementById('in-chat-consent-row');
+  if (row) row.remove();
+  const cb = document.getElementById('chat-body');
+  cb.appendChild(userMsg('同意授權'));
+  setTimeout(() => {
+    const ack = document.createElement('div');
+    ack.className = 'mrow';
+    ack.innerHTML = `<div class="aiv">AI</div><div class="bub ai"><i class="fa-solid fa-circle-check" style="color:var(--success);margin-right:5px;"></i>已收到，AI 分析啟動中。<br>醫師看診時會一併參考，祝您看診順利！</div>`;
+    cb.appendChild(ack);
+    scrollChat();
+    const cw = document.getElementById('consent-wrap');
+    cw.style.display = 'block';
+    cw.style.animation = 'fadeUp .4s ease';
+  }, 400);
+}
+
+function doInChatDecline() {
+  const row = document.getElementById('in-chat-consent-row');
+  if (row) row.remove();
+  const cb = document.getElementById('chat-body');
+  cb.appendChild(userMsg('暫不授權'));
+  setTimeout(() => {
+    const ack = document.createElement('div');
+    ack.className = 'mrow';
+    ack.innerHTML = `<div class="aiv">AI</div><div class="bub ai">沒問題！您的問卷資訊已同步至門診系統。<br>祝您看診順利！</div>`;
+    cb.appendChild(ack);
+    scrollChat();
+  }, 400);
+}
+
+function handleChoice(ch) {
+  const cb = document.getElementById('chat-body');
+  cb.appendChild(userMsg(ch.text));
+  if (ch.tag) collectedTags.push(ch.tag);
+  if (ch.score) updateCopdps(ch.score);
+  document.getElementById('choice-area').innerHTML = '';
+  scrollChat();
+  let nextKey = ch.next;
+  if (nextKey === 'end-check') {
+    nextKey = copdpsScore >= COPD_PS_THRESHOLD ? 'end-high' : 'end-low';
+  }
+  setTimeout(() => proceedTo(nextKey), 500);
+}
+
+function proceedTo(nextKey) {
+  const cb = document.getElementById('chat-body');
+
+  // Check endings
+  if (ENDINGS[nextKey]) {
+    const e = ENDINGS[nextKey];
+    setTimeout(() => {
+      cb.appendChild(aiMsg(e.aiMsg, e.warn, e.emergency));
+      updateInsight(e.insight.title, e.insight.body);
+      scrollChat();
+      if (!e.emergency) {
+        if (collectedTags.length > 0) {
+          const nlp = document.getElementById('nlp-card');
+          const tagArea = document.getElementById('nlp-tags');
+          tagArea.innerHTML = collectedTags.map(t=>`<span class="tag ${t.c}">${t.t}</span>`).join('');
+          const isPos = copdpsScore >= COPD_PS_THRESHOLD;
+          const scoreColor = isPos ? 'var(--danger)' : 'var(--amber)';
+          const scoreBg = isPos ? 'var(--da-dim)' : 'var(--am-dim)';
+          const scoreBorder = isPos ? 'var(--da-border)' : 'var(--am-border)';
+          tagArea.innerHTML += `<div style="margin-top:8px;background:${scoreBg};border:1px solid ${scoreBorder};border-radius:6px;padding:6px 10px;font-size:11px;font-family:var(--mono);color:${scoreColor};"><i class="fa-solid fa-clipboard-check" style="margin-right:5px;"></i>COPD-PS 評分：<strong>${copdpsScore} 分</strong> ${isPos ? '· 陽性（≥5分）→ 建議安排 Spirometry' : '· 低於閾值，仍需臨床評估'}</div>`;
+          nlp.style.display = 'block';
+          nlp.style.animation = 'fadeUp .4s ease';
+        }
+        // 高風險才在對話中詢問進階授權
+        if (e.warn) {
+          setTimeout(() => renderConsentInChat(), 900);
+        }
+      }
+    }, 400);
+    return;
+  }
+
+  const s = STEPS.find(x => x.step == nextKey);
+  if (!s) return;
+  if (nextKey !== 0 && nextKey !== 'q1_screen') currentStep++;
+
+  setTimeout(() => {
+    cb.appendChild(aiMsg(s.aiMsg, false));
+    updateInsight(s.insight.title, s.insight.body);
+    if (s.consentMode) {
+      renderConsentInline();
+    } else {
+      renderChoices(s.choices);
+    }
+    scrollChat();
+  }, 400);
+}
+
+function initChat() {
+  collectedTags = [];
+  currentStep = 0;
+  copdpsScore = 0;
+  const cb = document.getElementById('chat-body');
+  cb.innerHTML = '';
+  document.getElementById('choice-area').innerHTML = '';
+  document.getElementById('nlp-card').style.display = 'none';
+  document.getElementById('consent-wrap').style.display = 'none';
+  document.getElementById('prog-bar').style.width = '0%';
+  document.getElementById('prog-bar').style.background = 'var(--lgreen)';
+  document.getElementById('prog-txt').textContent = '0 / ≥5分';
+  document.getElementById('prog-txt').style.color = 'var(--text3)';
+  updateInsight('漸進式問法設計原則', '蘭醫生不直接問「你有沒有 COPD 症狀」，而是從<strong>生活功能變化</strong>切入，讓病患不設防地揭露隱性資訊。<br><br>點擊左側選項，體驗完整的漸進式對話流程 →');
+  const s0 = STEPS[0];
+  cb.appendChild(aiMsg(s0.aiMsg, false));
+  updateInsight(s0.insight.title, s0.insight.body);
+  renderConsentInline();
+}
+
+document.addEventListener('DOMContentLoaded', initChat);
+const origSwitch = switchPanel;
+window.switchPanel = function(id, el) {
+  origSwitch(id, el);
+  if (id === 'p1') initChat();
+};
+</script>
+</body>
+</html>
