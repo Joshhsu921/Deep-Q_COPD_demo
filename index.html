@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -411,6 +411,17 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
 .pacs-thumbs-scroll{scrollbar-width:thin;scrollbar-color:#1e293b transparent;}
 .pacs-thumbs-scroll::-webkit-scrollbar{height:4px;}
 .pacs-thumbs-scroll::-webkit-scrollbar-thumb{background:#1e293b;border-radius:2px;}
+/* ── GradCAM 熱力圖動畫 (pulse-heat) ── */
+.gradcam-heatmap{mix-blend-mode:screen;opacity:0.85;filter:blur(9px);animation:pulse-heat 3s infinite ease-in-out alternate;}
+.xray-anatomy{filter:blur(1.4px);}
+.ct-anatomy{filter:blur(1.1px);}
+.gradcam-heatmap.delay-1{animation-delay:0s;}
+.gradcam-heatmap.delay-2{animation-delay:1s;}
+.gradcam-heatmap.delay-3{animation-delay:2s;}
+@keyframes pulse-heat{0%{opacity:0.58;}100%{opacity:0.92;}}
+/* ── PACS 主影像容器：掃描線特效 ── */
+.pacs-main-frame{position:relative;overflow:hidden;}
+.pacs-main-frame::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.16) 50%);background-size:100% 4px;pointer-events:none;z-index:5;}
 </style>
 </head>
 <body>
@@ -419,7 +430,7 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
 <aside class="sidebar">
   <div class="sb-logo">
     <div class="sb-mark">HTC DEEPQ</div>
-    <div class="sb-sub">CDSS v2.0 · Clinical AI</div>
+    <div class="sb-sub">CDSS Demo · Clinical AI</div>
   </div>
   <div class="sb-sec">Demo 場景</div>
   <div class="nav-item active" onclick="switchPanel('p1',this)">
@@ -442,9 +453,6 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
 <div class="main">
   <div class="topbar">
     <span class="tb-title">COPD 照護缺口攔截系統 Demo</span>
-    <span class="pill pill-b">Pre-COPD · 未確診 · 追蹤中斷</span>
-    <span class="pill pill-g">院前 Chatbot 已授權</span>
-    <span class="pill pill-a">高風險預警 3 件</span>
     <div class="tb-r" id="clock">2026/05/27</div>
   </div>
 
@@ -706,7 +714,7 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
           <i class="fa-solid fa-bone" style="font-size:11px;"></i> 場景 3 &nbsp;·&nbsp; 骨科
         </button>
         <div style="width:1px;height:20px;background:rgba(255,255,255,.1);"></div>
-        <span style="font-family:var(--mono);font-size:10px;color:#475569;">3 種接觸點 · 3 種不同科別 Cloud HIS</span>
+        <span style="font-family:var(--mono);font-size:10px;color:#475569;">3 種接觸點 · 3 種不同科別 院內 HIS</span>
         <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
           <span style="font-size:10px;font-family:var(--mono);color:#475569;">⚡ AI 橫跨科別主動偵測，醫師無需操作</span>
         </div>
@@ -718,7 +726,7 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
 
         <!-- Header -->
         <div class="p2-hdr">
-          <span class="p2-hdr-logo">CLOUD<em>.</em>HIS<sup>®</sup></span>
+          <span class="p2-hdr-logo">DeepQ<em>.</em>HIS<sup>®</sup></span>
           <div class="p2-hdr-vsep"></div>
           <span class="p2-hdr-bc" id="p2-hdr-bc">門診作業 &rsaquo; 今日看診 &rsaquo; 胸腔內科門診</span>
           <div class="p2-hdr-r">
@@ -799,6 +807,9 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
       <!-- ══ PACS 影像頁 (Layer 3: 點影像按鈕進入) ══ -->
       <div id="p2-pacs-view" style="display:none;"></div>
 
+      <!-- ══ 肺功能／檢驗報告頁 (Layer 4: 點檢驗報告按鈕進入) ══ -->
+      <div id="p2-lab-view" style="display:none;"></div>
+
     </div>
 
     <!-- P3 Architecture -->
@@ -854,6 +865,9 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
               <marker id="arr-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
                 <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
               </marker>
+              <marker id="arr-lis" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#a855f7"/>
+              </marker>
               <filter id="nd-shadow" x="-20%" y="-20%" width="140%" height="140%">
                 <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.10)"/>
               </filter>
@@ -861,109 +875,122 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
 
             <!-- ── Zone labels ── -->
             <text x="24" y="22" font-size="9" fill="#94a3b8" font-family="monospace" letter-spacing="1">院前 PRE-VISIT</text>
-            <text x="240" y="22" font-size="9" fill="#94a3b8" font-family="monospace" letter-spacing="1">DeepQ AI CORE</text>
-            <text x="510" y="22" font-size="9" fill="#94a3b8" font-family="monospace" letter-spacing="1">院內 IN-CLINIC</text>
+            <text x="268" y="22" font-size="9" fill="#94a3b8" font-family="monospace" letter-spacing="1">DeepQ AI CORE</text>
+            <text x="516" y="22" font-size="9" fill="#94a3b8" font-family="monospace" letter-spacing="1">院內 IN-CLINIC</text>
             <line x1="220" y1="8" x2="220" y2="472" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
             <line x1="498" y1="8" x2="498" y2="472" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
 
             <!-- ── Arrows ── -->
             <!-- Patient → LINE -->
-            <line x1="72" y1="100" x2="72" y2="148" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="110" y1="91" x2="110" y2="106" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
             <!-- LINE → NLP -->
-            <line x1="118" y1="182" x2="235" y2="200" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-g)"/>
+            <line x1="156" y1="136" x2="250" y2="114" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-g)"/>
             <!-- NLP → Risk Engine -->
-            <line x1="340" y1="220" x2="340" y2="272" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arr-dq)"/>
-            <!-- HIS → Risk Engine -->
-            <line x1="220" y1="346" x2="290" y2="310" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
-            <!-- PACS AI → Risk Engine -->
-            <line x1="458" y1="346" x2="392" y2="310" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="338" y1="142" x2="338" y2="198" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arr-dq)"/>
             <!-- Risk Engine → CDSS -->
-            <line x1="340" y1="340" x2="340" y2="388" stroke="#0284c7" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr-dq)"/>
+            <line x1="338" y1="268" x2="338" y2="326" stroke="#0284c7" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr-dq)"/>
+            <!-- HIS → Risk Engine -->
+            <line x1="504" y1="94" x2="426" y2="224" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- LIS → Risk Engine -->
+            <line x1="504" y1="210" x2="426" y2="238" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arr-lis)"/>
+            <!-- PACS → Risk Engine -->
+            <line x1="504" y1="322" x2="426" y2="254" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arr-dq)"/>
             <!-- CDSS → Workstation -->
-            <line x1="392" y1="412" x2="520" y2="390" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arr-dq)"/>
-            <!-- Compliance → CDSS (side) -->
-            <line x1="340" y1="460" x2="340" y2="440" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+            <line x1="424" y1="354" x2="504" y2="416" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arr-dq)"/>
+            <!-- Compliance → CDSS -->
+            <line x1="338" y1="440" x2="338" y2="382" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr)"/>
 
             <!-- ── NODE: Patient ── -->
             <g class="anode" onclick="archSelect('patient')" id="an-patient">
-              <ellipse cx="72" cy="76" rx="42" ry="32" fill="white" stroke="#cbd5e1" stroke-width="1.5" filter="url(#nd-shadow)"/>
-              <text x="72" y="71" text-anchor="middle" font-size="18" fill="#475569">&#xf007;</text>
-              <text x="72" y="85" text-anchor="middle" font-size="9" fill="#64748b" font-family="sans-serif" font-weight="500">病患</text>
+              <ellipse cx="110" cy="65" rx="42" ry="26" fill="white" stroke="#cbd5e1" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="110" y="60" text-anchor="middle" font-size="18" fill="#475569">&#xf007;</text>
+              <text x="110" y="76" text-anchor="middle" font-size="9" fill="#64748b" font-family="sans-serif" font-weight="500">病患</text>
             </g>
 
             <!-- ── NODE: LINE Gateway ── -->
             <g class="anode" onclick="archSelect('line')" id="an-line">
-              <rect x="26" y="150" width="92" height="56" rx="10" fill="#dcfce7" stroke="#059669" stroke-width="1.5" filter="url(#nd-shadow)"/>
-              <text x="72" y="170" text-anchor="middle" font-size="10" fill="#059669" font-family="sans-serif" font-weight="600">LINE</text>
-              <text x="72" y="183" text-anchor="middle" font-size="9" fill="#065f46" font-family="sans-serif">Gateway</text>
-              <text x="72" y="195" text-anchor="middle" font-size="8" fill="#059669" font-family="monospace">NLP · Chatbot</text>
+              <rect x="64" y="108" width="92" height="56" rx="10" fill="#dcfce7" stroke="#059669" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="110" y="128" text-anchor="middle" font-size="10" fill="#059669" font-family="sans-serif" font-weight="600">LINE</text>
+              <text x="110" y="141" text-anchor="middle" font-size="9" fill="#065f46" font-family="sans-serif">Gateway</text>
+              <text x="110" y="153" text-anchor="middle" font-size="8" fill="#059669" font-family="monospace">NLP · Chatbot</text>
             </g>
 
             <!-- ── NODE: NLP Engine ── -->
             <g class="anode" onclick="archSelect('nlp')" id="an-nlp">
-              <rect x="248" y="172" width="184" height="56" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" filter="url(#nd-shadow)"/>
-              <text x="340" y="192" text-anchor="middle" font-size="10" fill="#1d4ed8" font-family="sans-serif" font-weight="600">NLP Engine</text>
-              <text x="340" y="205" text-anchor="middle" font-size="9" fill="#1e40af" font-family="sans-serif">症狀分析 · COPD-PS 計算</text>
-              <text x="340" y="218" text-anchor="middle" font-size="8" fill="#3b82f6" font-family="monospace">Pack-Years · 風險分層</text>
-            </g>
-
-            <!-- ── NODE: HIS ── -->
-            <g class="anode" onclick="archSelect('his')" id="an-his">
-              <rect x="148" y="318" width="144" height="56" rx="10" fill="white" stroke="#94a3b8" stroke-width="1.5" filter="url(#nd-shadow)"/>
-              <text x="220" y="340" text-anchor="middle" font-size="10" fill="#334155" font-family="sans-serif" font-weight="600">HIS 整合層</text>
-              <text x="220" y="353" text-anchor="middle" font-size="9" fill="#475569" font-family="sans-serif">病歷 · 診斷碼 · 用藥</text>
-              <text x="220" y="366" text-anchor="middle" font-size="8" fill="#64748b" font-family="monospace">HL7 FHIR · REST API</text>
-            </g>
-
-            <!-- ── NODE: PACS AI ── -->
-            <g class="anode" onclick="archSelect('pacs')" id="an-pacs">
-              <rect x="386" y="318" width="144" height="56" rx="10" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.5" filter="url(#nd-shadow)"/>
-              <text x="458" y="340" text-anchor="middle" font-size="10" fill="#0284c7" font-family="sans-serif" font-weight="600">PACS AI 模組</text>
-              <text x="458" y="353" text-anchor="middle" font-size="9" fill="#0369a1" font-family="sans-serif">影像探勘 · 過度充氣偵測</text>
-              <text x="458" y="366" text-anchor="middle" font-size="8" fill="#0284c7" font-family="monospace">Hyperinflation Index</text>
+              <rect x="252" y="88" width="172" height="54" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="338" y="108" text-anchor="middle" font-size="10" fill="#1d4ed8" font-family="sans-serif" font-weight="600">NLP Engine</text>
+              <text x="338" y="121" text-anchor="middle" font-size="9" fill="#1e40af" font-family="sans-serif">症狀分析 · COPD-PS 計算</text>
+              <text x="338" y="133" text-anchor="middle" font-size="8" fill="#3b82f6" font-family="monospace">Pack-Years · 風險分層</text>
             </g>
 
             <!-- ── NODE: Risk Engine (CORE) ── -->
             <g class="anode" onclick="archSelect('risk')" id="an-risk">
-              <rect x="264" y="274" width="152" height="64" rx="10" fill="#0284c7" stroke="#0369a1" stroke-width="2" filter="url(#nd-shadow)"/>
-              <text x="340" y="296" text-anchor="middle" font-size="10" fill="white" font-family="sans-serif" font-weight="700">Risk Engine</text>
-              <text x="340" y="310" text-anchor="middle" font-size="9" fill="#bae6fd" font-family="sans-serif">多模態融合 · 缺口判斷</text>
-              <text x="340" y="323" text-anchor="middle" font-size="8" fill="#7dd3fc" font-family="monospace">3-Gap Classifier</text>
+              <rect x="252" y="200" width="172" height="68" rx="10" fill="#0284c7" stroke="#0369a1" stroke-width="2" filter="url(#nd-shadow)"/>
+              <text x="338" y="221" text-anchor="middle" font-size="10" fill="white" font-family="sans-serif" font-weight="700">Risk Engine</text>
+              <text x="338" y="235" text-anchor="middle" font-size="9" fill="#bae6fd" font-family="sans-serif">多模態融合 · 縱向趨勢分析</text>
+              <text x="338" y="248" text-anchor="middle" font-size="8" fill="#7dd3fc" font-family="monospace">3-Gap · Spirometry Trend AI</text>
+              <text x="338" y="261" text-anchor="middle" font-size="7" fill="#93c5fd" font-family="monospace">NLP + HIS + LIS + PACS</text>
             </g>
 
             <!-- ── NODE: CDSS ── -->
             <g class="anode" onclick="archSelect('cdss')" id="an-cdss">
-              <rect x="264" y="390" width="152" height="52" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.5" filter="url(#nd-shadow)"/>
-              <text x="340" y="411" text-anchor="middle" font-size="10" fill="#f1f5f9" font-family="sans-serif" font-weight="700">CDSS Core</text>
-              <text x="340" y="425" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="sans-serif">臨床決策支援 · 警示生成</text>
-              <text x="340" y="437" text-anchor="middle" font-size="8" fill="#475569" font-family="monospace">Human-in-the-Loop</text>
+              <rect x="252" y="328" width="172" height="52" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="338" y="349" text-anchor="middle" font-size="10" fill="#f1f5f9" font-family="sans-serif" font-weight="700">CDSS Core</text>
+              <text x="338" y="363" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="sans-serif">臨床決策支援 · 警示生成</text>
+              <text x="338" y="375" text-anchor="middle" font-size="8" fill="#475569" font-family="monospace">Human-in-the-Loop</text>
             </g>
 
             <!-- ── NODE: Compliance ── -->
             <g class="anode" onclick="archSelect('compliance')" id="an-compliance">
-              <rect x="264" y="452" width="152" height="20" rx="5" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
-              <text x="340" y="465" text-anchor="middle" font-size="8" fill="#92400e" font-family="monospace">TFDA SaMD · 個資法合規層</text>
+              <rect x="252" y="442" width="172" height="20" rx="5" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+              <text x="338" y="455" text-anchor="middle" font-size="8" fill="#92400e" font-family="monospace">TFDA SaMD · 個資法合規層</text>
+            </g>
+
+            <!-- ── NODE: HIS ── -->
+            <g class="anode" onclick="archSelect('his')" id="an-his">
+              <rect x="506" y="66" width="152" height="52" rx="10" fill="white" stroke="#94a3b8" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="582" y="86" text-anchor="middle" font-size="10" fill="#334155" font-family="sans-serif" font-weight="600">HIS 整合層</text>
+              <text x="582" y="99" text-anchor="middle" font-size="9" fill="#475569" font-family="sans-serif">病歷 · 診斷碼 · 用藥</text>
+              <text x="582" y="111" text-anchor="middle" font-size="8" fill="#64748b" font-family="monospace">HL7 FHIR · REST API</text>
+            </g>
+
+            <!-- ── NODE: LIS / Spirometry ── -->
+            <g class="anode" onclick="archSelect('lis')" id="an-lis">
+              <rect x="506" y="182" width="152" height="52" rx="10" fill="#fdf4ff" stroke="#a855f7" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="582" y="202" text-anchor="middle" font-size="10" fill="#7e22ce" font-family="sans-serif" font-weight="600">LIS · 肺功能模組</text>
+              <text x="582" y="215" text-anchor="middle" font-size="9" fill="#6b21a8" font-family="sans-serif">Spirometry · DLCO · Body Pleth</text>
+              <text x="582" y="227" text-anchor="middle" font-size="8" fill="#a855f7" font-family="monospace">多次 BD · 縱向趨勢資料</text>
+            </g>
+
+            <!-- ── NODE: PACS AI ── -->
+            <g class="anode" onclick="archSelect('pacs')" id="an-pacs">
+              <rect x="506" y="298" width="152" height="52" rx="10" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="582" y="318" text-anchor="middle" font-size="10" fill="#0284c7" font-family="sans-serif" font-weight="600">PACS AI 模組</text>
+              <text x="582" y="331" text-anchor="middle" font-size="9" fill="#0369a1" font-family="sans-serif">影像探勘 · 過度充氣偵測</text>
+              <text x="582" y="343" text-anchor="middle" font-size="8" fill="#0284c7" font-family="monospace">Hyperinflation Index</text>
             </g>
 
             <!-- ── NODE: Workstation ── -->
             <g class="anode" onclick="archSelect('ws')" id="an-ws">
-              <rect x="510" y="360" width="148" height="64" rx="10" fill="#f0fdf4" stroke="#059669" stroke-width="1.5" filter="url(#nd-shadow)"/>
-              <text x="584" y="381" text-anchor="middle" font-size="10" fill="#059669" font-family="sans-serif" font-weight="600">醫師工作站</text>
-              <text x="584" y="395" text-anchor="middle" font-size="9" fill="#065f46" font-family="sans-serif">SOAP · 醫令 · 影像</text>
-              <text x="584" y="408" text-anchor="middle" font-size="9" fill="#065f46" font-family="sans-serif">ICD 建議 · 轉診單</text>
-              <text x="584" y="419" text-anchor="middle" font-size="8" fill="#059669" font-family="monospace">← 本 Demo P2 展示</text>
+              <rect x="506" y="400" width="152" height="56" rx="10" fill="#f0fdf4" stroke="#059669" stroke-width="1.5" filter="url(#nd-shadow)"/>
+              <text x="582" y="420" text-anchor="middle" font-size="10" fill="#059669" font-family="sans-serif" font-weight="600">醫師工作站</text>
+              <text x="582" y="433" text-anchor="middle" font-size="9" fill="#065f46" font-family="sans-serif">SOAP · 醫令 · ICD 建議</text>
+              <text x="582" y="446" text-anchor="middle" font-size="9" fill="#065f46" font-family="sans-serif">轉診單 · 肺功能趨勢檢視</text>
             </g>
 
-            <!-- ── Hint ── -->
-            <text x="340" y="144" text-anchor="middle" font-size="8" fill="#cbd5e1" font-family="monospace">▼ 症狀問診資料</text>
-            <text x="140" y="268" text-anchor="middle" font-size="8" fill="#cbd5e1" font-family="monospace" transform="rotate(-20,140,268)">病歷資料</text>
-            <text x="480" y="268" text-anchor="middle" font-size="8" fill="#cbd5e1" font-family="monospace" transform="rotate(20,480,268)">影像分析</text>
+            <!-- ── Hints ── -->
+            <text x="196" y="108" font-size="8" fill="#cbd5e1" font-family="monospace">症狀問診 ▶</text>
+            <text x="338" y="172" text-anchor="middle" font-size="8" fill="#bae6fd" font-family="monospace">▼ AI 推論</text>
+            <text x="338" y="318" text-anchor="middle" font-size="8" fill="#bae6fd" font-family="monospace">▼ 決策支援</text>
+            <text x="476" y="158" text-anchor="middle" font-size="8" fill="#cbd5e1" font-family="monospace" transform="rotate(-50,476,158)">院內資料</text>
+            <text x="468" y="390" text-anchor="middle" font-size="8" fill="#bae6fd" font-family="monospace" transform="rotate(42,468,390)">警示輸出</text>
           </svg>
           <div class="arch-legend">
             <span><span class="leg-dot" style="background:#059669"></span>院前入口</span>
             <span><span class="leg-dot" style="background:#0284c7"></span>DeepQ AI</span>
-            <span><span class="leg-dot" style="background:#94a3b8"></span>醫院系統</span>
             <span><span class="leg-dot" style="background:#0f172a"></span>決策核心</span>
+            <span><span class="leg-dot" style="background:#94a3b8"></span>醫院系統(HIS/PACS)</span>
+            <span><span class="leg-dot" style="background:#a855f7"></span>LIS 肺功能</span>
           </div>
         </div>
 
@@ -1012,9 +1039,7 @@ const PTS=[
      ]
    },
    orders:[
-     {l:"肺功能測試（Spirometry）",s:"Post-Bronchodilator · 診斷標準：Post-BD FEV1/FVC < 0.70 · 今日候診區可執行",ok:true},
-     {l:"轉介衛教：COPD 預防與自我管理",s:"搭配 LINE 模組後續追蹤",ok:true},
-     {l:"低劑量 CT 排程",s:"若 Spirometry 確診後考量",ok:false}
+     {l:"肺功能檢查",s:"",ok:true}
    ]},
   {id:1,nm:"陳阿嬌",age:"72歲",sex:"女",dept:"家醫科 · 張醫師（第5次就診）",avc:"av-a",avt:"陳",
    gap:"缺口 2 · 未確診 COPD",gapC:"cb-danger",
@@ -1027,7 +1052,7 @@ const PTS=[
    emr:[{k:"主訴",v:"老毛病又犯了，咳嗽咳了快一個月，走平路也有點喘。",src:"掛號時填寫",pre:true},{k:"過去處置（3年跨診次）",v:"每次診斷「氣喘/老年性咳嗽」，開立 Salbutamol PRN。",src:"HIS 歷史紀錄",pre:true}],
    int:"三年來的慣性診斷掩蓋了真正的 COPD。AI 整合跨診次 HIS 資料並重新判讀舊影像，在第 5 次就診時主動打斷誤診迴圈。職業粉塵暴露是非吸菸者 COPD 的重要危險因子。\n\n注意：GOLD 分級需以 Post-BD Spirometry 確認（FEV1/FVC < 0.70），目前 mMRC ≥2 為症狀嚴重度評估，GOLD 分期待肺功能確認後補登。",
    tags:[{t:"職業粉塵暴露20年",c:"tag-r"},{t:"慢性咳嗽",c:"tag-a"},{t:"走路喘 mMRC≥2",c:"tag-a"},{t:"3年未做Spirometry",c:"tag-r"}],
-   referralOrdIdx: 2,
+   referralOrdIdx: 1,
    icd:{
      his:[
        {code:'J45.909',desc:'氣喘，未指明，無併發症',enDesc:'Unspecified asthma, uncomplicated',type:'主診斷',flag:'wrong',note:'慣性誤診 × 4次'},
@@ -1043,9 +1068,8 @@ const PTS=[
      ]
    },
    orders:[
-     {l:"立即排定肺功能測試（Spirometry）",s:"Post-Bronchodilator · 確診標準：Post-BD FEV1/FVC < 0.70",ok:true},
-     {l:"暫緩 COPD 診斷碼，改標記「疑似 COPD 待確認」",s:"避免 Spirometry 結果出爐前以氣喘累積錯誤用藥紀錄",ok:true},
-     {l:"轉介胸腔內科確診",s:"家醫科完成初步篩檢後轉介",ok:false}
+     {l:"肺功能檢查",s:"",ok:true},
+     {l:"轉診胸腔內科",s:"",ok:false}
    ]},
   {id:2,nm:"林志明",age:"55歲",sex:"男",dept:"骨科 · 陳醫師（腰椎退化門診）",avc:"av-t",avt:"林",
    gap:"缺口 3 · 追蹤中斷",gapC:"cb-info",
@@ -1058,7 +1082,7 @@ const PTS=[
    emr:[{k:"本次就診主訴",v:"腰椎退化，下背痛 3 個月，要求止痛藥。",src:"掛號時填寫",pre:true},{k:"骨科醫師診療計畫",v:"腰椎 MRI 排程，鎮痛治療計畫。",src:"今日問診",pre:false}],
    int:"COPD 病患不一定掛胸腔科。此病患今日以「腰痛」掛骨科，若無 AI 跨科預警，追蹤中斷將繼續被忽略。骨科醫師只需 30 秒確認提醒，不影響本次骨科診療。",
    tags:[{t:"GOLD I 確診",c:"tag-t"},{t:"追蹤中斷3年",c:"tag-r"},{t:"症狀惡化",c:"tag-a"},{t:"自行停藥",c:"tag-r"}],
-   referralOrdIdx: 2,
+   referralOrdIdx: 1,
    icd:{
      his:[
        {code:'J44.1',desc:'COPD 急性惡化（確診）',enDesc:'COPD with acute exacerbation',type:'主診斷',flag:'confirmed',note:'2023/03 胸腔內科確診'},
@@ -1074,9 +1098,8 @@ const PTS=[
      ]
    },
    orders:[
-     {l:"骨科醫師告知 + 系統記錄知悉時間戳記",s:"30 秒完成，不影響本次骨科診療 · HIS 自動記錄醫師已知悉，供後續追蹤稽核",ok:true},
-     {l:"系統自動發送 LINE 提醒給病患",s:"「您的 COPD 已3年未追蹤，請預約胸腔科」· 系統記錄發送狀態與病患點閱率",ok:true},
-     {l:"開立轉介單至胸腔科",s:"",ok:false}
+     {l:"肺功能檢查",s:"",ok:true},
+     {l:"轉診胸腔內科",s:"",ok:true}
    ]}
 ];
 const confirmed={};
@@ -1121,12 +1144,20 @@ const ARCH_DATA = {
     tags:[{t:'PACS 整合',c:'ad-tag-b'},{t:'DICOM',c:'ad-tag-b'},{t:'機會性篩查',c:'ad-tag-a'}],
     badge:'TFDA SaMD Class IIa'
   },
+  lis:{
+    icon:'fa-solid fa-lungs',iconBg:'#fdf4ff',iconColor:'#7e22ce',
+    title:'LIS · 肺功能模組',sub:'SPIROMETRY · DLCO · BODY PLETHYSMOGRAPHY',
+    body:'從醫院 LIS（檢驗資訊系統）擷取肺功能報告，包含多次 Post-BD Spirometry（FEV₁、FVC、F/V Loop）、Body Plethysmography（TLC、FRC、RV）及 DLCO 擴散功能。DeepQ AI 自動整合跨次資料，進行縱向趨勢分析並投影未來肺功能軌跡。',
+    kv:[['資料來源','LIS · HL7 FHIR R4'],['涵蓋項目','Spirometry · Body Pleth · DLCO'],['核心能力','跨次 BD 趨勢分析 · AI 軌跡投影'],['參考標準','GLI-2012 · ATS/ERS 2019']],
+    tags:[{t:'Spirometry',c:'ad-tag-t'},{t:'DLCO',c:'ad-tag-t'},{t:'縱向趨勢 AI',c:'ad-tag-b'},{t:'GLI-2012',c:'ad-tag-a'}],
+    badge:'TFDA SaMD Class IIa'
+  },
   risk:{
     icon:'fa-solid fa-microchip',iconBg:'#eff6ff',iconColor:'#0284c7',
     title:'Risk Engine',sub:'MULTI-MODAL FUSION CORE',
-    body:'DeepQ 核心 AI 引擎。融合 NLP 問診資料、HIS 病歷、PACS 影像分析三路輸入，執行 3-Gap Classifier，判斷病患屬於哪個照護缺口，並生成臨床證據摘要供 CDSS 使用。',
-    kv:[['輸入','NLP + HIS + PACS 三路融合'],['模型','Ensemble · XGBoost + Transformer'],['輸出','Gap Class · Evidence Bundle · Priority'],['延遲','< 800ms 整合推論']],
-    tags:[{t:'多模態 AI',c:'ad-tag-b'},{t:'3-Gap Classifier',c:'ad-tag-b'},{t:'即時推論',c:'ad-tag-g'}],
+    body:'DeepQ 核心 AI 引擎。融合 NLP 問診資料、HIS 病歷、PACS 影像分析、LIS 肺功能四路輸入，執行 3-Gap Classifier 與跨次 Spirometry 縱向趨勢分析，判斷病患照護缺口並投影未來肺功能軌跡，生成臨床證據摘要供 CDSS 使用。',
+    kv:[['輸入','NLP + HIS + PACS + LIS 四路融合'],['模型','Ensemble · XGBoost + Transformer'],['肺功能趨勢','多次 BD 跨期融合 · FEV₁ 投影'],['延遲','< 800ms 整合推論']],
+    tags:[{t:'多模態 AI',c:'ad-tag-b'},{t:'3-Gap Classifier',c:'ad-tag-b'},{t:'Spirometry Trend',c:'ad-tag-t'},{t:'即時推論',c:'ad-tag-g'}],
     badge:'TFDA SaMD Class IIb'
   },
   cdss:{
@@ -1228,91 +1259,106 @@ const WS_AI_SUMMARY=[
   /* 王大明 */
   {
     sections:[
-      { title:'Diagnosis', icon:'fa-stethoscope', items:[
-        'Exertional dyspnea with productive cough — progressive over 6 months (mMRC Grade 2)',
-        'COPD-PS score <strong>9/10 (positive)</strong>: dyspnea on exertion, daily sputum, activity limitation, age ≥60, 40 pack-year smoking history',
-        'Current ICD-10 J06.9 (acute URTI) likely does not capture the underlying obstructive pattern'
+      { title:'診斷評估', icon:'fa-stethoscope', items:[
+        '活動性呼吸困難伴痰性咳嗽，症狀漸進惡化 6 個月（mMRC 第 2 級）',
+        'COPD-PS 篩查 <strong>9/10（陽性）</strong>：活動後喘、每日有痰、活動受限、年齡 ≥60、吸菸史 40 包-年',
+        '現行診斷碼 J06.9（急性上呼吸道感染）<strong>未能反映</strong>潛在阻塞性肺病型態'
       ]},
-      { title:'Treatment history', icon:'fa-clock-rotate-left', items:[
-        '2024/03 — Pulmonary clinic: acute bronchitis (J20.9); Salbutamol PRN prescribed',
-        '2024/09 — Family medicine: URTI (J06.9); antibiotic course, no follow-up imaging',
-        '2025/06 — Emergency: dyspnea exacerbation; CXR reported as unremarkable; discharged with Salbutamol',
-        'No post-bronchodilator spirometry has been performed across all visits'
+      { title:'病史摘要', icon:'fa-clock-rotate-left', items:[
+        '2024/03 胸腔科：急性支氣管炎（J20.9）；開立 Salbutamol PRN',
+        '2024/09 家醫科：上呼吸道感染（J06.9）；抗生素療程，未追蹤影像',
+        '2025/06 急診：呼吸困難加劇；CXR 報告無異常；帶 Salbutamol 出院',
+        '<strong>歷次就診均未安排支氣管擴張後肺功能檢查（Post-BD Spirometry）</strong>'
       ]},
-      { title:'Imaging findings', icon:'fa-x-ray', items:[
-        'CXR 2026/02 (re-read): bilateral upper lobe <strong>hyperinflation</strong>, HI index 82 (threshold ≥75 for COPD risk)',
-        'Original radiology report annotated as "no significant abnormality"',
-        'Flattening of bilateral hemidiaphragms consistent with air trapping; no consolidation'
+      { title:'影像判讀', icon:'fa-x-ray', items:[
+        'CXR 2026/02（DeepQ 重判）：雙上肺野<strong>過度充氣</strong>，HI 指數 82（COPD 風險閾值 ≥75）',
+        '原始放射科報告標記為「無特殊發現」—— DeepQ AI 偵測出隱性病灶',
+        '雙側橫膈膜扁平化，符合氣體滯留表現；無浸潤或積液'
       ]},
-      { title:'Plan', icon:'fa-list-check', items:[
-        'Order post-bronchodilator spirometry this visit — confirm FEV1/FVC <0.70 for COPD diagnosis',
-        'Consider updating ICD-10 to J44.1 (COPD with acute exacerbation) pending spirometry result',
-        'Initiate COPD care pathway and patient education if confirmed; smoking cessation referral',
-        'Follow-up in 4 weeks with spirometry results and symptom re-assessment'
+      { title:'肺功能評估', icon:'fa-flask-vial', items:[
+        '<strong>今日已排定 Post-BD Spirometry</strong>（候診室等候執行中）',
+        '確診標準：Post-BD FEV₁/FVC &lt; 0.70；GOLD 分級依 FEV₁ % 預測值',
+        '過去就診紀錄中<strong>從未安排肺功能</strong>——本次為首次評估',
+        '結果預計 1 小時內完成，將直接回傳醫師工作站'
+      ]},
+      { title:'處置計畫', icon:'fa-list-check', items:[
+        '本次就診安排支氣管擴張後肺功能（確認 FEV₁/FVC &lt; 0.70 以確診 COPD）',
+        '待肺功能結果確認後更新診斷碼為 J44.1 並制定 GOLD 分級對應治療方案',
+        '4 週後門診追蹤肺功能結果及症狀再評估'
       ]}
     ],
-    icdCurrent:'J06.9 — Acute URTI (prior visits)',
-    icdAI:'J44.1 — COPD, acute exacerbation (pending spirometry)',
+    icdCurrent:'J06.9 — 急性上呼吸道感染（歷次診斷）',
+    icdAI:'J44.1 — 慢性阻塞性肺病急性惡化（待肺功能確認）',
     icdFlag:'wrong'
   },
   /* 陳阿嬌 */
   {
     sections:[
-      { title:'Diagnosis', icon:'fa-stethoscope', items:[
-        'Chronic cough ×1 month; dyspnea on flat ground (mMRC ≥2); <strong>non-smoker with 20-year occupational dust exposure</strong> (textile industry)',
-        'COPD-PS score <strong>8/10 (positive)</strong>: chronic cough, daily sputum, exertional dyspnea, wheeze history',
-        'Recurrent J45.9 (asthma) diagnosis across 4 visits over 3 years without spirometric confirmation'
+      { title:'診斷評估', icon:'fa-stethoscope', items:[
+        '慢性咳嗽 1 個月；走平路即喘（mMRC ≥2）；<strong>非吸菸者但職業粉塵暴露 20 年</strong>（紡織業）',
+        'COPD-PS 篩查 <strong>8/10（陽性）</strong>：慢性咳嗽、每日有痰、活動後喘、有哮鳴音病史',
+        '3 年 4 次就診反覆診斷 J45.9（氣喘），<strong>從未安排肺功能確認</strong>'
       ]},
-      { title:'Treatment history', icon:'fa-clock-rotate-left', items:[
-        '2022/11 — Family medicine: chronic cough; J45.9 assigned; Salbutamol PRN',
-        '2023/04 — Family medicine: cough + wheeze; J45.9 maintained; no referral',
-        '2024/02 — Family medicine: pneumonia follow-up CXR; reported normal; J45.9 continued',
-        '2025/03 — Family medicine (this series): dyspnea worsening; spirometry never arranged in 3 years'
+      { title:'病史摘要', icon:'fa-clock-rotate-left', items:[
+        '2022/11 家醫科：慢性咳嗽；給予 J45.9；Salbutamol PRN',
+        '2023/04 家醫科：咳嗽伴哮鳴音；維持 J45.9；未轉介',
+        '2024/02 家醫科：肺炎後追蹤 CXR；報告正常；繼續 J45.9',
+        '2025/03 家醫科（本系列）：呼吸困難惡化；<strong>3 年內從未安排肺功能</strong>'
       ]},
-      { title:'Imaging findings', icon:'fa-x-ray', items:[
-        'CXR 2025/11 (re-read): <strong>bilateral hyperinflation with diaphragm flattening (barrel chest pattern)</strong>',
-        'Original report: "no obvious abnormality"',
-        'No pleural effusion; cardiac silhouette normal; consistent with obstructive lung pattern'
+      { title:'影像判讀', icon:'fa-x-ray', items:[
+        'CXR 2025/11（DeepQ 重判）：<strong>雙側過度充氣合併橫膈膜扁平（桶狀胸型態）</strong>',
+        '原始報告：「無明顯異常」—— DeepQ AI 偵測到被漏報的阻塞性型態',
+        '無肋膜積液，心臟輪廓正常，整體符合阻塞性肺病影像表現'
       ]},
-      { title:'Plan', icon:'fa-list-check', items:[
-        'Post-bronchodilator spirometry — first-line to differentiate COPD from asthma',
-        'Hold additional J45.9 coding until spirometry clarifies diagnosis',
-        'Refer to pulmonology if FEV1/FVC <0.70; consider occupational lung disease pathway',
-        'Counsel on occupational exposure reduction and inhaler technique'
+      { title:'肺功能評估', icon:'fa-flask-vial', items:[
+        '<strong>今日已排定 Post-BD Spirometry</strong>（3 年來首次肺功能評估）',
+        '確診標準：Post-BD FEV₁/FVC &lt; 0.70；與氣喘鑑別：支氣管擴張劑反應 &lt; 12% 提示 COPD',
+        '歷次 4 次就診以 J45.9 開立，均<strong>未安排肺功能確認</strong>',
+        '結果將決定是否轉介胸腔科及用藥調整方向'
+      ]},
+      { title:'處置計畫', icon:'fa-list-check', items:[
+        '安排支氣管擴張後肺功能——鑑別 COPD 與氣喘之第一線檢查',
+        'FEV₁/FVC &lt; 0.70 確診後轉介胸腔科；評估職業性肺病路徑（紡織業粉塵暴露 20 年）',
+        '確認吸入劑使用技巧與用藥遵從性'
       ]}
     ],
-    icdCurrent:'J45.909 — Asthma, unspecified (3 yrs, 4 visits)',
-    icdAI:'J44.1 — COPD, occupational (pending spirometry)',
+    icdCurrent:'J45.909 — 氣喘，未指明（3年 4次就診）',
+    icdAI:'J44.1 — 慢性阻塞性肺病，職業性（待肺功能確認）',
     icdFlag:'wrong'
   },
   /* 林志明 */
   {
     sections:[
-      { title:'Diagnosis', icon:'fa-stethoscope', items:[
-        'Chief complaint today: <strong>lumbar spondylosis / low back pain</strong> (orthopedic visit)',
-        'Background: COPD GOLD I confirmed 2023/03 (FEV1 78% predicted); <strong>no pulmonary follow-up for 3 years</strong>',
-        'COPD-PS score <strong>7/10 (positive)</strong>: increased exertional dyspnea, self-discontinued inhaler therapy'
+      { title:'診斷評估', icon:'fa-stethoscope', items:[
+        '本次主訴：<strong>腰椎退化 / 下背痛</strong>（骨科就診）',
+        '背景：2023/03 確診 COPD GOLD I（FEV₁ 78% 預測值）；<strong>確診後 3 年無胸腔科追蹤</strong>',
+        'COPD-PS <strong>7/10（陽性）</strong>：活動後喘加重、自行停用吸入劑'
       ]},
-      { title:'Treatment history', icon:'fa-clock-rotate-left', items:[
-        '2023/03 — Pulmonary: spirometry confirmed COPD GOLD I; LABA/ICS initiated',
-        '2023/09 — Pulmonary: 1 follow-up visit; adherence noted as fair',
-        '2024 onwards — No pulmonary follow-up; patient self-discontinued medication ("felt no difference")',
-        '2026/05 (today) — Orthopedic visit for chronic low back pain; pre-op CXR obtained'
+      { title:'病史摘要', icon:'fa-clock-rotate-left', items:[
+        '2023/03 胸腔科：肺功能確診 COPD GOLD I；開立 LABA/ICS',
+        '2023/09 胸腔科：1 次追蹤就診；藥物遵從性尚可',
+        '2024 年起：無胸腔科就診紀錄；病患自行停藥（「感覺沒差」）',
+        '2026/05（今日）：骨科下背痛門診；術前 CXR 觸發 AI 警示'
       ]},
-      { title:'Imaging findings', icon:'fa-x-ray', items:[
-        'CXR today vs. baseline 2023: <strong>increased lung volumes, progressive diaphragm descent</strong>',
-        'Findings suggest disease progression from GOLD I toward GOLD II',
-        'No acute consolidation, effusion, or pneumothorax; no new orthopedic relevant findings on chest'
+      { title:'影像判讀', icon:'fa-x-ray', items:[
+        '今日 CXR vs. 2023 年基線：<strong>肺容積增加、橫膈膜持續下移，疾病進展中</strong>',
+        '影像型態提示可能由 GOLD I 進展至 GOLD II',
+        '無急性浸潤、積液或氣胸；術前胸部無其他急性發現'
       ]},
-      { title:'Plan', icon:'fa-list-check', items:[
-        'Notify pulmonology for COPD re-evaluation — <strong>does not affect today\'s orthopedic management</strong>',
-        'Repeat spirometry and CAT questionnaire at pulmonary appointment',
-        'Restart appropriate inhaler therapy; assess for GOLD II reclassification',
-        'Patient education on medication adherence; schedule pulmonary follow-up within 2 weeks'
+      { title:'肺功能評估', icon:'fa-flask-vial', items:[
+        '最近一次 Spirometry：<strong>2023/03/15（距今 3 年）</strong>',
+        'Post-BD FEV₁/FVC = 67%（&lt; 70%）→ 確認氣流阻塞；Post-BD FEV₁ = 82% pred → <strong>GOLD I</strong>',
+        '今日術前 CXR：HI 指數 0.61 → 0.82，影像提示疾病可能由 GOLD I 進展至 GOLD II',
+        'GOLD 指引建議追蹤中斷者重新執行 Spirometry 確認分級'
+      ]},
+      { title:'處置計畫', icon:'fa-list-check', items:[
+        '通知胸腔科重新評估 COPD——<strong>不影響今日骨科診療進行</strong>',
+        '胸腔科門診重做 Post-BD Spirometry 及 CAT 問卷評分，確認 GOLD 分級',
+        '重新啟動吸入劑治療；視新肺功能結果評估是否需升級治療方案'
       ]}
     ],
-    icdCurrent:'M54.50 — Low back pain (today\'s chief complaint)',
-    icdAI:'J44.1 — COPD, possible progression (3-yr gap, re-eval needed)',
+    icdCurrent:'M54.50 — 下背痛（本次主訴）',
+    icdAI:'J44.1 — 慢性阻塞性肺病，疑似惡化（3年追蹤中斷，需重評）',
     icdFlag:'info'
   }
 ];
@@ -1333,14 +1379,27 @@ const WS_PE=[
   'Vitals: BP 132/80, HR 76, RR 17, SpO₂ 96% RA, T 36.7°C\nBack: Lumbar tenderness L4-L5. Limited flexion ROM.\nChest: Clear. No adventitious sounds.'
 ];
 const WS_SOAP_ASSESS=[
-  'Primary: Acute URTI (J06.9) per current coding — likely underdiagnosed.\nAI alert: COPD-PS 9/10 positive; CXR hyperinflation HI 82. High suspicion for pre-COPD or early GOLD I.\nDDx: Asthma (less likely — no atopy, no reversibility documented), cardiac dyspnea (SpO₂ 95%, no edema).\nPlan pending post-BD spirometry result.',
-  'Working diagnosis: Probable COPD (occupational subtype) — prior J45.9 coding likely incorrect.\nAI alert: 3-year pattern of asthma coding without spirometric confirmation; occupational dust exposure 20 yrs.\nDDx: Asthma with overlap (ACO), hypersensitivity pneumonitis.\nHold asthma ICD code pending spirometry.',
-  'Primary today: Lumbar spondylosis / chronic low back pain (M54.50).\nBackground: Confirmed COPD GOLD I (J44.1) 2023 — no pulmonary follow-up × 3 years; self-discontinued LABA/ICS.\nCXR today shows increased lung volumes vs. 2023 baseline, suggesting possible progression to GOLD II.\nOrthopedic plan unchanged; COPD re-evaluation referral added.'
+  '主診斷：急性上呼吸道感染（J06.9）。\n本次 COPD-PS 篩查 9/10 陽性，合併 CXR 影像過度充氣（HI 82），臨床高度懷疑早期慢性阻塞性肺病（GOLD I）。\n鑑別診斷：氣喘（可能性較低，無過敏體質、無支氣管可逆性紀錄）；心因性呼吸困難（SpO₂ 95%，無水腫，暫不支持）。\n本次安排 Post-BD Spirometry，俟肺功能結果確認後更新診斷碼及治療計畫。',
+  '工作診斷：疑似慢性阻塞性肺病（職業性，待確認）。\n病患非吸菸者，有 20 年紡織業粉塵暴露史；過去 3 年 4 次就診以 J45.9 氣喘診斷，均未安排肺功能確認。\n本次 COPD-PS 篩查 8/10，CXR 呈雙側過度充氣合併橫膈膜扁平，氣喘診斷有待肺功能重新釐清。\n鑑別診斷：氣喘 COPD 重疊症候群（ACO）；職業性過敏性肺炎。本次安排 Post-BD Spirometry。',
+  '本次主診斷：腰椎退化性病變 / 慢性下背痛（M54.50）。\n病患 2023 年有 COPD GOLD I 確診紀錄（J44.1），確診後 3 年無胸腔科回診，據述已自行停用吸入劑。\n今日術前 CXR 與 2023 年基線比對，肺容積增加、橫膈膜位置下移，疾病可能有所進展。\n骨科診療計畫不變，另建請病患至胸腔科重新評估 COPD 控制狀況。'
 ];
+/* ── 護理站量測生命徵象（結構化，供工作站顯示） ── */
+const WS_VITALS=[
+  {bp:'138/82',hr:82,rr:18,spo2:95,temp:'36.8',bmi:'24.2',wt:'72kg',time:'08:42'},
+  {bp:'145/88',hr:78,rr:20,spo2:94,temp:'36.6',bmi:'22.8',wt:'58kg',time:'09:15'},
+  {bp:'132/80',hr:76,rr:17,spo2:96,temp:'36.7',bmi:'26.1',wt:'78kg',time:'09:58'}
+];
+/* ── 過敏記錄 ── */
+const WS_ALLERGY=[
+  {has:false, text:'NKDA（無已知藥物過敏）'},
+  {has:true,  text:'Penicillin 類過敏（皮疹 / 蕁麻疹）· 2018/04 記錄'},
+  {has:false, text:'NKDA（無已知藥物過敏）'}
+];
+/* ── SOAP O：體檢部分（Vitals 已移至結構化顯示，此處僅保留理學檢查） ── */
 const WS_SOAP_O_SIM=[
-  'BP 138/82 mmHg · HR 82 bpm · RR 18 /min · SpO₂ 95% RA · T 36.8°C\nGeneral: Alert, mild respiratory distress on exertion. No use of accessory muscles at rest.\nChest: Slightly prolonged expiratory phase. No wheeze or crackle audible today. Resonant to percussion.\nNo clubbing, cyanosis, or pitting edema.',
-  'BP 145/88 mmHg · HR 78 bpm · RR 20 /min · SpO₂ 94% RA · T 36.6°C\nGeneral: Elderly female, mildly dyspneic at rest. Breathing comfortably with slight forward-lean posture.\nChest: Bilateral prolonged expiration. Mild expiratory wheeze on forced maneuver. Barrel chest configuration noted.\nNo accessory muscle use. No peripheral edema.',
-  'BP 132/80 mmHg · HR 76 bpm · RR 17 /min · SpO₂ 96% RA · T 36.7°C\nBack: Lumbar tenderness at L4-L5 level. Flexion ROM limited to ~60°. Straight leg raise negative bilaterally.\nChest: Clear to auscultation. No wheeze. Pre-op CXR obtained — AI flagged increased lung volumes vs. 2023 baseline.\nNo acute distress.'
+  '一般外觀：神智清楚，輕度活動後呼吸困難，靜止無明顯呼吸窘迫，無輔助肌使用。\n胸部：呼氣相輕度延長，今日無明顯哮鳴音或囉音，叩診共鳴音正常。\n四肢：無杵狀指，無發紺，無周圍性水腫。',
+  '一般外觀：老年女性，輕微靜止性呼吸困難，稍呈前傾坐姿，無明顯不適。\n胸部：雙側呼氣相明顯延長，用力呼氣時可聞輕微哮鳴音，桶狀胸外觀。\n四肢：無輔助肌使用，無周圍性水腫。',
+  '腰背部：L4-L5 壓痛，屈曲活動度約 60°，雙側直膝抬腿試驗（－）。\n胸部：聽診清晰，無哮鳴音，術前 CXR AI 標記肺容積較 2023 年基線增加。\n一般狀況：無急性呼吸窘迫。'
 ];
 
 function openWorkstation(ptIdx){
@@ -1348,6 +1407,8 @@ function openWorkstation(ptIdx){
   const d=DEPT_CONFIG[currentDeptIdx];
   const meds=WS_MEDS[ptIdx];
   const visits=WS_VISITS[ptIdx];
+  const vitals=WS_VITALS[ptIdx];
+  const allergy=WS_ALLERGY[ptIdx];
   const copdpsColor=p.copdps.score>=5?'#dc2626':'#d97706';
   const copdpsBg=p.copdps.score>=5?'rgba(220,38,38,0.08)':'rgba(217,119,6,0.08)';
   const copdpsBorder=p.copdps.score>=5?'rgba(220,38,38,0.25)':'rgba(217,119,6,0.25)';
@@ -1386,7 +1447,7 @@ function openWorkstation(ptIdx){
         <i class="fa-solid fa-chevron-left" style="font-size:10px;"></i> 返回候診清單
       </button>
       <div style="width:1px;height:20px;background:rgba(255,255,255,.1);"></div>
-      <span style="font-family:var(--mono);font-size:11px;color:#e2e8f0;font-weight:600;">CLOUD<em style="color:${d.color};">.</em>HIS<sup style="font-size:8px;">®</sup></span>
+      <span style="font-family:var(--mono);font-size:11px;color:#e2e8f0;font-weight:600;">DeepQ<em style="color:${d.color};">.</em>HIS<sup style="font-size:8px;">®</sup></span>
       <span style="font-family:var(--mono);font-size:10px;color:#64748b;">›</span>
       <span style="font-family:var(--mono);font-size:10px;color:#94a3b8;">${d.bc}</span>
       <span style="font-family:var(--mono);font-size:10px;color:#64748b;">›</span>
@@ -1405,32 +1466,35 @@ function openWorkstation(ptIdx){
       <button id="ws-img-btn" onclick="wsTogglePacs(${ptIdx})" style="padding:4px 12px;border-radius:4px;border:1px solid rgba(96,165,250,0.4);background:rgba(96,165,250,0.12);color:#60a5fa;font-size:11px;font-family:var(--sans);cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:500;">
         <i class="fa-solid fa-x-ray" style="font-size:11px;"></i> 影像
       </button>
+      <button id="ws-lab-btn-${ptIdx}" onclick="wsToggleLab(${ptIdx})" style="padding:4px 12px;border-radius:4px;border:1px solid rgba(16,185,129,0.4);background:rgba(16,185,129,0.1);color:#10b981;font-size:11px;font-family:var(--sans);cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:500;">
+        <i class="fa-solid fa-flask-vial" style="font-size:11px;"></i> 檢驗報告
+      </button>
       <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:#475569;">看診序 #${String(ptIdx+3).padStart(3,'0')}&ensp;|&ensp;病歷號 ${['A234891','B198024','C376150'][ptIdx]}&ensp;|&ensp;${p.nm}&ensp;${p.age}&ensp;${p.sex}&ensp;|&ensp;2026-05-27</div>
     </div>
   </div>
 
   <!-- ══ CDSS Alert Banner ══ -->
-  <div style="border-left:4px solid ${copdpsColor};background:${copdpsBg};border-bottom:1px solid ${copdpsBorder};">
+  <div id="ws-banner-${ptIdx}" style="border-left:4px solid ${copdpsColor};background:${copdpsBg};border-bottom:1px solid ${copdpsBorder};">
     <!-- Summary row (always visible) -->
     <div onclick="wsBannerToggle(${ptIdx})" style="display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;user-select:none;">
       <i class="fa-solid ${p.ai}" style="color:${copdpsColor};font-size:15px;flex-shrink:0;"></i>
       <div style="flex:1;min-width:0;">
         <div style="font-size:12px;font-weight:700;color:${copdpsColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.at}</div>
-        <div style="font-size:10px;font-family:var(--mono);color:#94a3b8;margin-top:1px;">${p.gap} · DeepQ CDSS · Click to expand trigger details</div>
+        <div style="font-size:10px;font-family:var(--mono);color:#94a3b8;margin-top:1px;">${p.gap} · DeepQ CDSS · 點擊展開觸發依據</div>
       </div>
       <span style="background:${copdpsBg};border:1px solid ${copdpsBorder};border-radius:4px;padding:2px 9px;font-family:var(--mono);font-size:11px;color:${copdpsColor};font-weight:700;flex-shrink:0;">COPD-PS ${p.copdps.score}/10</span>
-      <button onclick="event.stopPropagation();wsConfirm(${ptIdx},this)" style="padding:4px 10px;border-radius:5px;border:1px solid ${copdpsBorder};background:${copdpsColor};color:#fff;font-size:10px;font-family:var(--mono);cursor:pointer;flex-shrink:0;white-space:nowrap;"><i class="fa-solid fa-circle-check"></i> Acknowledge</button>
+      <button onclick="event.stopPropagation();wsConfirm(${ptIdx},this)" style="padding:4px 10px;border-radius:5px;border:1px solid ${copdpsBorder};background:${copdpsColor};color:#fff;font-size:10px;font-family:var(--mono);cursor:pointer;flex-shrink:0;white-space:nowrap;"><i class="fa-solid fa-circle-check"></i> 確認已知悉</button>
       <i id="ws-banner-chevron-${ptIdx}" class="fa-solid fa-chevron-down" style="color:${copdpsColor};font-size:10px;flex-shrink:0;transition:transform .2s;"></i>
     </div>
     <!-- Expandable detail -->
     <div id="ws-banner-detail-${ptIdx}" style="display:none;padding:0 14px 12px 18px;display:none;">
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-        <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;letter-spacing:.08em;width:100%;margin-bottom:2px;">AI TRIGGER SIGNALS</div>
+        <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;letter-spacing:.08em;width:100%;margin-bottom:2px;">AI 觸發依據</div>
         <!-- COPD-PS chips -->
         <div style="display:flex;align-items:flex-start;gap:7px;padding:6px 10px;background:rgba(255,255,255,.7);border-radius:6px;border:1px solid ${copdpsBorder};width:100%;">
           <i class="fa-solid fa-clipboard-list" style="color:${copdpsColor};font-size:11px;margin-top:1px;flex-shrink:0;"></i>
           <div>
-            <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;margin-bottom:4px;">COPD Screening Questionnaire (COPD-PS)</div>
+            <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;margin-bottom:4px;">COPD 篩查問卷（COPD-PS）</div>
             <div style="display:flex;flex-wrap:wrap;gap:3px;">
               ${p.copdps.items.map(it=>`<span style="font-size:9px;font-family:var(--mono);background:#fff;border:1px solid #e2e8f0;border-radius:3px;padding:2px 6px;color:#475569;">${it}</span>`).join('')}
             </div>
@@ -1459,8 +1523,8 @@ function openWorkstation(ptIdx){
         <!-- 標題列 -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
           <i class="fa-solid fa-brain" style="color:#0284c7;font-size:14px;"></i>
-          <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#0284c7;letter-spacing:.06em;">Clinical Summary</span>
-          <span style="font-family:var(--mono);font-size:9px;color:#94a3b8;">AI-generated · questionnaire + imaging + visit history</span>
+          <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#0284c7;letter-spacing:.06em;">AI 臨床摘要</span>
+          <span style="font-family:var(--mono);font-size:9px;color:#94a3b8;">自動生成 · 問卷 + 影像 + 就診記錄三路融合</span>
           <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:#cbd5e1;background:#f8fafc;border:1px solid #e2e8f0;padding:1px 7px;border-radius:3px;">DeepQ LLM</span>
         </div>
 
@@ -1488,18 +1552,43 @@ function openWorkstation(ptIdx){
 
         <!-- ICD 建議列 -->
         <div style="padding:10px 12px;border-radius:7px;border:1px solid #e2e8f0;background:#fafafa;display:flex;flex-direction:column;gap:8px;">
+          <!-- 現行診斷（可能有多筆） -->
           <div>
-            <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;margin-bottom:3px;letter-spacing:.06em;">ACTIVE DIAGNOSIS</div>
-            <div id="ws-icd-current-${ptIdx}" style="font-size:12px;color:#334155;font-weight:500;">${aiSum.icdCurrent}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
-            <div style="flex:1;">
-              <div style="font-size:9px;font-family:var(--mono);color:#0284c7;margin-bottom:2px;letter-spacing:.06em;">⚡ AI SUGGESTED</div>
-              <div style="font-size:12px;color:#0369a1;font-weight:600;">${aiSum.icdAI}</div>
+            <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;margin-bottom:4px;letter-spacing:.06em;">現行診斷碼</div>
+            <div id="ws-icd-active-wrap-${ptIdx}" style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;white-space:nowrap;">主診斷</span>
+                <span id="ws-icd-current-${ptIdx}" style="font-size:12px;color:#334155;font-weight:500;">${aiSum.icdCurrent}</span>
+              </div>
+              <div id="ws-icd-secondary-row-${ptIdx}" style="display:none;align-items:center;gap:6px;">
+                <span style="font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;white-space:nowrap;">次診斷 ✓</span>
+                <span id="ws-icd-secondary-val-${ptIdx}" style="font-size:12px;color:#0f766e;font-weight:500;"></span>
+              </div>
             </div>
-            <div id="ws-icd-updated-${ptIdx}" style="display:none;font-size:10px;font-family:var(--mono);color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;padding:3px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;"><i class="fa-solid fa-check"></i> Updated</div>
-            <button id="ws-icd-confirm-btn-${ptIdx}" onclick="confirmAIIcd(${ptIdx})" style="padding:5px 10px;border-radius:5px;border:none;background:#0284c7;color:#fff;font-size:10px;font-family:var(--mono);cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="fa-solid fa-check"></i> Confirm</button>
-            <button id="ws-icd-dismiss-btn-${ptIdx}" onclick="dismissAIIcd(${ptIdx})" style="padding:5px 8px;border-radius:5px;border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:10px;font-family:var(--mono);cursor:pointer;flex-shrink:0;" title="Dismiss suggestion"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <!-- AI 建議區 -->
+          <div id="ws-icd-suggest-box-${ptIdx}" style="padding:8px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
+            <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:8px;">
+              <div style="flex:1;">
+                <div style="font-size:9px;font-family:var(--mono);color:#0284c7;margin-bottom:2px;letter-spacing:.06em;">⚡ AI 建議診斷碼</div>
+                <div style="font-size:12px;color:#0369a1;font-weight:600;">${aiSum.icdAI}</div>
+                ${aiSum.icdFlag === 'info'
+                  ? `<div style="font-size:10px;color:#475569;margin-top:3px;">本次掛號主訴為骨科疾患，COPD 為<strong>共病</strong>，建議以次診斷加入本次病歷。</div>`
+                  : `<div style="font-size:10px;color:#dc2626;margin-top:3px;">現行診斷碼疑似<strong>誤判</strong>，AI 建議以正確碼取代。</div>`
+                }
+              </div>
+            </div>
+            <!-- 操作按鈕 (依情境調整主按鈕) -->
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              ${aiSum.icdFlag === 'info' ? `
+              <button id="ws-icd-add-btn-${ptIdx}" onclick="addAIIcdSecondary(${ptIdx})" style="flex:2;padding:5px 10px;border-radius:5px;border:none;background:#059669;color:#fff;font-size:10px;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:700;white-space:nowrap;"><i class="fa-solid fa-plus"></i> 加入次診斷（共病）</button>
+              <button id="ws-icd-confirm-btn-${ptIdx}" onclick="confirmAIIcd(${ptIdx})" style="flex:1;padding:5px 8px;border-radius:5px;border:1px solid #93c5fd;background:#fff;color:#0369a1;font-size:10px;font-family:var(--mono);cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:4px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> 取代</button>
+              ` : `
+              <button id="ws-icd-confirm-btn-${ptIdx}" onclick="confirmAIIcd(${ptIdx})" style="flex:2;padding:5px 10px;border-radius:5px;border:none;background:#0284c7;color:#fff;font-size:10px;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:700;white-space:nowrap;"><i class="fa-solid fa-arrow-right-arrow-left"></i> 取代現行診斷</button>
+              <button id="ws-icd-add-btn-${ptIdx}" onclick="addAIIcdSecondary(${ptIdx})" style="flex:1;padding:5px 8px;border-radius:5px;border:1px solid #93c5fd;background:#fff;color:#0369a1;font-size:10px;font-family:var(--mono);cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:4px;"><i class="fa-solid fa-plus"></i> 加次診斷</button>
+              `}
+              <button id="ws-icd-dismiss-btn-${ptIdx}" onclick="dismissAIIcd(${ptIdx})" style="padding:5px 8px;border-radius:5px;border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:10px;font-family:var(--mono);cursor:pointer;flex-shrink:0;" title="忽略建議"><i class="fa-solid fa-xmark"></i></button>
+            </div>
           </div>
         </div>
       </div>
@@ -1513,19 +1602,39 @@ function openWorkstation(ptIdx){
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
             <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#0284c7;">S</span>
             <span style="font-size:11px;color:#475569;">Subjective</span>
-            <span style="font-size:9px;font-family:var(--mono);color:#22c55e;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 6px;border-radius:3px;margin-left:auto;"><i class="fa-brands fa-line" style="font-size:9px;"></i> Pre-visit questionnaire · auto-translated</span>
+            <span style="font-size:9px;font-family:var(--mono);color:#22c55e;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 6px;border-radius:3px;margin-left:auto;"><i class="fa-brands fa-line" style="font-size:9px;"></i> LINE 候診問卷 · 自動轉譯</span>
           </div>
-          <div style="font-size:12px;color:#334155;line-height:1.75;padding:9px 11px;background:#f8fafc;border:1px solid #e2e8f0;border-left:3px solid #22c55e;border-radius:0 6px 6px 0;font-family:var(--mono);">${WS_CC_EN[ptIdx]}</div>
+          <div style="font-size:12px;color:#334155;line-height:1.75;padding:9px 11px;background:#f8fafc;border:1px solid #e2e8f0;border-left:3px solid #22c55e;border-radius:0 6px 6px 0;font-family:var(--mono);">${WS_CC[ptIdx]}</div>
         </div>
 
-        <!-- O: 客觀（醫師輸入） -->
+        <!-- O: 客觀（護理站量測 + 理學檢查） -->
         <div>
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;">
             <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#15803d;">O</span>
             <span style="font-size:11px;color:#475569;">客觀 · Objective</span>
-            <span style="font-size:9px;font-family:var(--mono);color:#94a3b8;margin-left:auto;">理學檢查 · Vitals</span>
           </div>
-          <textarea id="ws-soap-o-${ptIdx}" style="width:100%;height:90px;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;font-size:11.5px;color:#0f172a;line-height:1.75;resize:vertical;font-family:var(--mono);outline:none;background:#fff;" onfocus="this.style.borderColor='#0284c7'" onblur="this.style.borderColor='#e2e8f0'">${WS_SOAP_O_SIM[ptIdx]}</textarea>
+          <!-- 護理站量測 Vitals -->
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:8px 10px;margin-bottom:8px;">
+            <div style="font-size:9px;font-family:var(--mono);color:#15803d;letter-spacing:.08em;margin-bottom:7px;display:flex;align-items:center;gap:5px;">
+              <i class="fa-solid fa-heart-pulse" style="font-size:9px;"></i>護理站量測 · ${vitals.time} · 已送入病歷
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              ${[
+                {k:'血壓',v:vitals.bp,u:'mmHg', warn: parseInt(vitals.bp)>=140},
+                {k:'心跳',v:vitals.hr,u:'bpm',  warn: vitals.hr>100||vitals.hr<50},
+                {k:'呼吸',v:vitals.rr,u:'/min',  warn: vitals.rr>20},
+                {k:'SpO₂',v:vitals.spo2+'%',u:'RA',warn: vitals.spo2<95},
+                {k:'體溫', v:vitals.temp,u:'°C',  warn: parseFloat(vitals.temp)>=37.5},
+                {k:'BMI',  v:vitals.bmi,u:'kg/m²',warn:false}
+              ].map(({k,v,u,warn})=>`<div style="display:flex;flex-direction:column;align-items:center;padding:5px 9px;border-radius:5px;background:${warn?'#fef2f2':'#fff'};border:1px solid ${warn?'#fecaca':'#d1fae5'};min-width:52px;">
+                <span style="font-size:8px;font-family:var(--mono);color:${warn?'#dc2626':'#16a34a'};letter-spacing:.04em;">${k}</span>
+                <span style="font-size:13px;font-weight:700;color:${warn?'#dc2626':'#0f172a'};line-height:1.2;">${v}</span>
+                <span style="font-size:8px;color:#94a3b8;">${u}</span>
+              </div>`).join('')}
+            </div>
+          </div>
+          <!-- 理學檢查 -->
+          <textarea id="ws-soap-o-${ptIdx}" style="width:100%;height:74px;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;font-size:11.5px;color:#0f172a;line-height:1.75;resize:vertical;font-family:var(--mono);outline:none;background:#fff;" onfocus="this.style.borderColor='#0284c7'" onblur="this.style.borderColor='#e2e8f0'">${WS_SOAP_O_SIM[ptIdx]}</textarea>
         </div>
 
         <!-- A: 評估（醫師輸入） -->
@@ -1553,31 +1662,61 @@ function openWorkstation(ptIdx){
           </div>
           <!-- 生成排程單/轉診單 按鈕區 (smart: only shown when relevant items checked) -->
           <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button id="ws-btn-order-${ptIdx}" onclick="openOrderSlipModal(${ptIdx})" style="${p.orders.some((o,oi)=>o.ok&&!/轉介/i.test(o.l))?'':'display:none;'}flex:1;padding:8px 12px;border-radius:7px;border:1px solid #0284c7;background:#0284c7;color:#fff;font-size:11px;font-family:var(--mono);cursor:pointer;align-items:center;justify-content:center;gap:6px;font-weight:600;display:flex;">
-              <i class="fa-solid fa-file-medical"></i> Generate Order Sheet
-            </button>
-            <button id="ws-btn-referral-${ptIdx}" onclick="openReferralModal(${ptIdx})" style="${p.orders.some((o,oi)=>o.ok&&/轉介/i.test(o.l))?'':'display:none;'}flex:1;padding:8px 12px;border-radius:7px;border:1px solid #0369a1;background:#eff6ff;color:#0369a1;font-size:11px;font-family:var(--mono);cursor:pointer;align-items:center;justify-content:center;gap:6px;font-weight:600;display:flex;">
-              <i class="fa-solid fa-paper-plane"></i> Generate Referral
+            ${(()=>{ const hasOrd=p.orders.some((o,oi)=>o.ok&&!/轉介|轉診/i.test(o.l)); return `<button id="ws-btn-order-${ptIdx}" ${hasOrd?'':'disabled title="本次未開立檢查項目，無法產生排程單"'} onclick="${hasOrd?`openOrderSlipModal(${ptIdx})`:'void 0'}" style="display:flex;flex:1;padding:8px 12px;border-radius:7px;border:1px solid ${hasOrd?'#0284c7':'#cbd5e1'};background:${hasOrd?'#0284c7':'#f1f5f9'};color:${hasOrd?'#fff':'#94a3b8'};font-size:11px;font-family:var(--mono);cursor:${hasOrd?'pointer':'not-allowed'};align-items:center;justify-content:center;gap:6px;font-weight:600;">
+              <i class="fa-solid fa-file-medical"></i> 列印排程單（檢查申請單）
+            </button>`; })()}
+            ${(()=>{ const hasRef=p.orders.some((o,oi)=>o.ok&&/轉介|轉診/i.test(o.l)); return `<button id="ws-btn-referral-${ptIdx}" ${hasRef?'':'disabled title="本次未開立轉診單"'} onclick="${hasRef?`openReferralModal(${ptIdx})`:'void 0'}" style="display:flex;flex:1;padding:8px 12px;border-radius:7px;border:1px solid ${hasRef?'#0369a1':'#cbd5e1'};background:${hasRef?'#eff6ff':'#f1f5f9'};color:${hasRef?'#0369a1':'#94a3b8'};font-size:11px;font-family:var(--mono);cursor:${hasRef?'pointer':'not-allowed'};align-items:center;justify-content:center;gap:6px;font-weight:600;">`; })()}
+              <i class="fa-solid fa-paper-plane"></i> 列印轉診單（胸腔內科）
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: 建議行動 + 過去就診 (alert moved to top banner) -->
+    <!-- RIGHT: 病患概覽側欄 -->
     <div style="overflow-y:auto;background:#fafafa;display:flex;flex-direction:column;">
 
-      <!-- ── 建議行動 ── -->
-      <div style="padding:12px 12px 10px;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
-        <div style="font-family:var(--mono);font-size:10px;color:#64748b;letter-spacing:.08em;margin-bottom:8px;text-transform:uppercase;">Recommended Actions</div>
+      <!-- ── 過敏警示 ── -->
+      <div style="padding:8px 12px;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:${allergy.has?'#fef2f2':'#f0fdf4'};">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="fa-solid ${allergy.has?'fa-triangle-exclamation':'fa-shield-halved'}" style="color:${allergy.has?'#dc2626':'#16a34a'};font-size:12px;"></i>
+          <div>
+            <div style="font-size:9px;font-family:var(--mono);color:${allergy.has?'#dc2626':'#16a34a'};font-weight:700;letter-spacing:.06em;">過敏 / 禁忌</div>
+            <div style="font-size:10px;color:${allergy.has?'#991b1b':'#166534'};margin-top:1px;">${allergy.text}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 目前用藥清單 ── -->
+      <div style="padding:7px 12px 4px;font-family:var(--mono);font-size:9px;color:#64748b;letter-spacing:.08em;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:5px;">
+        <i class="fa-solid fa-pills" style="font-size:9px;color:#0284c7;"></i>目前用藥清單（藥歷）
+      </div>
+      <div style="padding:6px 12px 8px;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
+        ${meds.map(m=>`
+        <div style="display:flex;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9;align-items:flex-start;">
+          <i class="fa-solid fa-capsules" style="color:#0284c7;font-size:9px;margin-top:3px;flex-shrink:0;"></i>
+          <div style="flex:1;">
+            <div style="font-size:11px;color:#0f172a;font-weight:500;">${m.name}</div>
+            <div style="font-size:9px;font-family:var(--mono);color:#64748b;margin-top:1px;">${m.route} · ${m.freq} · ${m.days}天 <span style="color:#94a3b8;">｜ ${m.note}</span></div>
+          </div>
+        </div>`).join('')}
+      </div>
+
+      <!-- ── AI 建議行動 ── -->
+      <div style="padding:7px 12px 4px;font-family:var(--mono);font-size:9px;color:#64748b;letter-spacing:.08em;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:5px;">
+        <i class="fa-solid fa-brain" style="font-size:9px;color:#d97706;"></i>AI 建議行動
+      </div>
+      <div style="padding:8px 12px 10px;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
         ${aiActions}
-        <button onclick="wsSnooze(${ptIdx},this)" style="width:100%;margin-top:4px;padding:6px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:10px;cursor:pointer;font-family:var(--mono);display:flex;align-items:center;justify-content:center;gap:5px;">
-          <i class="fa-solid fa-clock"></i> Snooze alert for this visit
+        <button onclick="wsSnooze(${ptIdx},this)" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:10px;cursor:pointer;font-family:var(--mono);display:flex;align-items:center;justify-content:center;gap:5px;">
+          <i class="fa-solid fa-clock"></i> 本次就診暫緩提醒
         </button>
       </div>
 
-      <!-- ── 過去就診紀錄 ── -->
-      <div style="padding:8px 12px 4px;font-family:var(--mono);font-size:10px;color:#64748b;letter-spacing:.08em;text-transform:uppercase;background:#f8fafc;border-bottom:1px solid #e2e8f0;">Visit History</div>
+      <!-- ── 就診記錄 ── -->
+      <div style="padding:7px 12px 4px;font-family:var(--mono);font-size:9px;color:#64748b;letter-spacing:.08em;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:5px;">
+        <i class="fa-solid fa-clock-rotate-left" style="font-size:9px;color:#64748b;"></i>就診記錄
+      </div>
       <div style="padding:8px 12px;flex:1;">
         ${visitRows}
       </div>
@@ -1626,12 +1765,28 @@ function wsSetOrderState(ptIdx, orderIdx, newOk) {
   // smart show/hide generate buttons
   const p = PTS[ptIdx];
   const planEls = Array.from(document.querySelectorAll(`[id^="ws-plan-${ptIdx}-"]`));
-  const hasOrder    = planEls.some((el,i) => el.dataset.ok==='true' && !/轉介/i.test(p.orders[i]?.l||''));
-  const hasReferral = planEls.some((el,i) => el.dataset.ok==='true' && /轉介/i.test(p.orders[i]?.l||''));
+  const hasOrder    = planEls.some((el,i) => el.dataset.ok==='true' && !/轉介|轉診/i.test(p.orders[i]?.l||''));
+  const hasReferral = planEls.some((el,i) => el.dataset.ok==='true' && /轉介|轉診/i.test(p.orders[i]?.l||''));
   const btnOrder    = document.getElementById(`ws-btn-order-${ptIdx}`);
   const btnReferral = document.getElementById(`ws-btn-referral-${ptIdx}`);
-  if (btnOrder)    btnOrder.style.display    = hasOrder    ? 'flex' : 'none';
-  if (btnReferral) btnReferral.style.display = hasReferral ? 'flex' : 'none';
+  if (btnOrder) {
+    btnOrder.style.display    = hasOrder ? 'flex' : 'none';
+    btnOrder.disabled         = !hasOrder;
+    btnOrder.onclick          = hasOrder ? () => openOrderSlipModal(ptIdx) : null;
+    btnOrder.style.background = hasOrder ? '#0284c7' : '#f1f5f9';
+    btnOrder.style.color      = hasOrder ? '#fff'    : '#94a3b8';
+    btnOrder.style.border     = `1px solid ${hasOrder ? '#0284c7' : '#cbd5e1'}`;
+    btnOrder.style.cursor     = hasOrder ? 'pointer' : 'not-allowed';
+  }
+  if (btnReferral) {
+    btnReferral.style.display    = hasReferral ? 'flex' : 'none';
+    btnReferral.disabled         = !hasReferral;
+    btnReferral.onclick          = hasReferral ? () => openReferralModal(ptIdx) : null;
+    btnReferral.style.background = hasReferral ? '#eff6ff' : '#f1f5f9';
+    btnReferral.style.color      = hasReferral ? '#0369a1' : '#94a3b8';
+    btnReferral.style.border     = `1px solid ${hasReferral ? '#0369a1' : '#cbd5e1'}`;
+    btnReferral.style.cursor     = hasReferral ? 'pointer' : 'not-allowed';
+  }
 }
 
 function wsOrderClick(ptIdx, orderIdx, btn) {
@@ -1655,166 +1810,356 @@ function wsBannerToggle(ptIdx) {
   if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
 }
 
+/* 讀取醫師確認後的診斷碼（供排程單/轉診單使用） */
+function getActiveIcds(ptIdx) {
+  const aiSum = WS_AI_SUMMARY[ptIdx];
+  const curEl = document.getElementById(`ws-icd-current-${ptIdx}`);
+  const secRow = document.getElementById(`ws-icd-secondary-row-${ptIdx}`);
+  const secVal = document.getElementById(`ws-icd-secondary-val-${ptIdx}`);
+  const primary = curEl ? curEl.textContent.trim() : aiSum.icdCurrent;
+  const hasSecondary = secRow && secRow.style.display !== 'none' && secVal && secVal.textContent.trim();
+  return { primary, secondary: hasSecondary ? secVal.textContent.trim() : null };
+}
+
+function _icdHideButtons(ptIdx) {
+  ['confirm','add','dismiss'].forEach(id => {
+    const el = document.getElementById(`ws-icd-${id}-btn-${ptIdx}`);
+    if (el) el.style.display = 'none';
+  });
+}
+
 function confirmAIIcd(ptIdx) {
+  // 取代現行診斷
   const aiSum = WS_AI_SUMMARY[ptIdx];
   const curEl = document.getElementById(`ws-icd-current-${ptIdx}`);
   if (curEl) curEl.textContent = aiSum.icdAI;
-  document.getElementById(`ws-icd-confirm-btn-${ptIdx}`).style.display = 'none';
-  document.getElementById(`ws-icd-dismiss-btn-${ptIdx}`).style.display = 'none';
-  document.getElementById(`ws-icd-updated-${ptIdx}`).style.display = 'block';
-  const suggBox = document.getElementById(`ws-icd-updated-${ptIdx}`).closest('div[style*="eff6ff"]');
-  if (suggBox) { suggBox.style.background = '#f0fdf4'; suggBox.style.borderColor = '#bbf7d0'; }
+  _icdHideButtons(ptIdx);
+  const box = document.getElementById(`ws-icd-suggest-box-${ptIdx}`);
+  if (box) {
+    box.style.background = '#f0fdf4';
+    box.style.borderColor = '#bbf7d0';
+    box.innerHTML = `<div style="font-size:10px;font-family:var(--mono);color:#16a34a;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-check-circle"></i> 診斷碼已更新為 AI 建議碼</div>`;
+  }
+}
+
+function addAIIcdSecondary(ptIdx) {
+  // 保留主診斷，並加入 AI 建議為次診斷
+  const aiSum = WS_AI_SUMMARY[ptIdx];
+  const secRow = document.getElementById(`ws-icd-secondary-row-${ptIdx}`);
+  const secVal = document.getElementById(`ws-icd-secondary-val-${ptIdx}`);
+  if (secRow && secVal) {
+    secVal.textContent = aiSum.icdAI;
+    secRow.style.display = 'flex';
+  }
+  _icdHideButtons(ptIdx);
+  const box = document.getElementById(`ws-icd-suggest-box-${ptIdx}`);
+  if (box) {
+    box.style.background = '#f0fdf4';
+    box.style.borderColor = '#bbf7d0';
+    box.innerHTML = `<div style="font-size:10px;font-family:var(--mono);color:#16a34a;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-check-circle"></i> 已加入次診斷（共病），主診斷保留不變</div>`;
+  }
 }
 
 function dismissAIIcd(ptIdx) {
-  const parent = document.getElementById(`ws-icd-dismiss-btn-${ptIdx}`).closest('div[style*="eff6ff"]');
-  if (parent) { parent.style.opacity = '0.4'; parent.style.pointerEvents = 'none'; }
-  document.getElementById(`ws-icd-confirm-btn-${ptIdx}`).style.display = 'none';
-  document.getElementById(`ws-icd-dismiss-btn-${ptIdx}`).style.display = 'none';
+  _icdHideButtons(ptIdx);
+  const box = document.getElementById(`ws-icd-suggest-box-${ptIdx}`);
+  if (box) {
+    box.style.opacity = '0.45';
+    box.style.pointerEvents = 'none';
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:10px;font-family:var(--mono);color:#94a3b8;margin-top:4px;';
+    note.textContent = '已忽略 AI 建議';
+    box.appendChild(note);
+  }
 }
 
 function _orderSlipHTML(ptIdx, type) {
   const p = PTS[ptIdx];
   const aiSum = WS_AI_SUMMARY[ptIdx];
-  const d = DEPT_CONFIG[currentDeptIdx];
   const checkedOrders = p.orders.filter((o,oi) => {
     const el = document.getElementById(`ws-plan-${ptIdx}-${oi}`);
     return el ? el.dataset.ok === 'true' : o.ok;
   });
   const now = new Date();
-  const dateStr = now.toISOString().slice(0,10);
+  const dateStr = now.toISOString().slice(0,10).replace(/-/g,'/');
   const timeStr = now.toTimeString().slice(0,5);
-  const mrn = ['A234891','B198024','C376150'][ptIdx];
+  const mrn = ['A0234891','B0198024','C0376150'][ptIdx];
   const dob = ['1958/03/12','1954/07/28','1971/09/04'][ptIdx];
-  const ptNames = ['Wang, Da-Ming','Chen, A-Jiao','Lin, Zhi-Ming'];
-  const deptNames = ['Pulmonology','Family Medicine','Orthopedics'];
-  const drNames = ['Dr. Lin / Pulmonology','Dr. Chang / Family Medicine','Dr. Chen / Orthopedics'];
+  const ptNamesTW = ['王大明','陳阿嬌','林志明'];
+  const deptNamesTW = ['胸腔內科','家醫科','骨科'];
+  const drNamesTW = ['林大維 醫師／胸腔內科','張文翰 醫師／家醫科','陳建宏 醫師／骨科'];
+  const sexTW = p.sex === '男' ? '男' : '女';
 
+  /* ─── 排程單（肺功能檢查申請單）─── */
   if (type === 'order') {
-    const rows = checkedOrders.map(o => {
-      const isRef = /轉介|referral|refer/i.test(o.l);
-      const isSpty = /spirometry|肺功能/i.test(o.l);
-      const isCT = /CT|LDCT|computed/i.test(o.l);
-      const cat = isRef ? 'Referral' : isSpty ? 'Pulmonary Function' : isCT ? 'Radiology' : 'Clinical Order';
-      const priority = isSpty || isRef ? 'ROUTINE' : 'PRN';
-      return `<tr style="border-bottom:1px solid #e2e8f0;">
-        <td style="padding:8px 10px;font-size:12px;color:#334155;vertical-align:top;">${cat}</td>
-        <td style="padding:8px 10px;font-size:12px;color:#0f172a;font-weight:500;vertical-align:top;">${o.l}</td>
-        <td style="padding:8px 10px;font-size:11px;color:#64748b;font-family:monospace;vertical-align:top;">${o.s||'—'}</td>
-        <td style="padding:8px 10px;font-size:11px;font-family:monospace;vertical-align:top;"><span style="background:${priority==='ROUTINE'?'#eff6ff':'#fef9c3'};color:${priority==='ROUTINE'?'#0369a1':'#92400e'};padding:1px 7px;border-radius:3px;">${priority}</span></td>
-      </tr>`;
-    }).join('');
+    const rows = checkedOrders
+      .filter(o => !/轉介|轉診/i.test(o.l))
+      .map(o => {
+        const isSpty = /spirometry|肺功能/i.test(o.l);
+        const isCT   = /CT|LDCT|computed/i.test(o.l);
+        const isEdu  = /衛教/i.test(o.l);
+        const catTW  = isSpty ? '肺功能檢查' : isCT ? '影像放射' : isEdu ? '衛教轉介' : '其他醫令';
+        const priority = isSpty ? '常規（今日候診）' : '選擇性';
+        const urgBg = isSpty ? '#eff6ff' : '#fef9c3';
+        const urgColor = isSpty ? '#0369a1' : '#92400e';
+        return `<tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 10px;font-size:12px;color:#334155;vertical-align:top;border-right:1px solid #e2e8f0;">${catTW}</td>
+          <td style="padding:8px 10px;font-size:12.5px;color:#0f172a;font-weight:600;vertical-align:top;border-right:1px solid #e2e8f0;">${o.l}</td>
+          <td style="padding:8px 10px;font-size:11px;color:#475569;vertical-align:top;border-right:1px solid #e2e8f0;">${o.s||'—'}</td>
+          <td style="padding:8px 10px;font-size:11px;vertical-align:top;text-align:center;"><span style="background:${urgBg};color:${urgColor};padding:2px 8px;border-radius:3px;font-weight:600;">${priority}</span></td>
+        </tr>`;
+      }).join('');
+
     return `
-      <div style="font-family:'Arial',sans-serif;max-width:720px;margin:0 auto;background:#fff;padding:32px 36px;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:2px solid #0f172a;padding-bottom:14px;margin-bottom:20px;">
+      <div style="font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;max-width:720px;margin:0 auto;background:#fff;padding:28px 32px;">
+
+        <!-- 院所名稱 + 表單標題 -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px double #0f172a;padding-bottom:12px;margin-bottom:16px;">
           <div>
-            <div style="font-size:18px;font-weight:700;color:#0f172a;letter-spacing:-.3px;">CLOUD·HIS Medical Center</div>
-            <div style="font-size:11px;color:#64748b;margin-top:2px;">No. 1, Innovation Blvd, Taipei · Tel: (02) 1234-5678</div>
+            <div style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:.04em;">示範醫院 Demo Medical Center</div>
+            <div style="font-size:11px;color:#64748b;margin-top:3px;">臺北市創新大道一號 · 總機：(02) 1234-5678</div>
           </div>
           <div style="text-align:right;">
-            <div style="font-size:16px;font-weight:700;color:#0284c7;letter-spacing:.05em;">PHYSICIAN ORDER SHEET</div>
-            <div style="font-size:10px;font-family:monospace;color:#94a3b8;margin-top:4px;">Form No. MR-201 · Rev. 2024</div>
+            <div style="font-size:18px;font-weight:800;color:#0284c7;letter-spacing:.06em;">檢查申請單</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:3px;">表單編號：MR-201 · 修訂：2024</div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;margin-bottom:22px;">
-          ${[['Patient Name',ptNames[ptIdx]],['MRN',mrn],['Date of Birth',dob],['Sex',p.sex==='男'?'Male':'Female'],['Department',deptNames[ptIdx]],['Attending',drNames[ptIdx]],['Order Date',dateStr],['Order Time',timeStr]].map(([k,v])=>`
-          <div style="padding:7px 12px;border-bottom:1px solid #f1f5f9;background:${['Patient Name','Department'].includes(k)?'#f8fafc':'#fff'};">
-            <div style="font-size:9px;font-family:monospace;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;">${k}</div>
-            <div style="font-size:12px;color:#0f172a;font-weight:500;margin-top:1px;">${v}</div>
-          </div>`).join('')}
-        </div>
-        <div style="margin-bottom:6px;">
-          <div style="font-size:10px;font-family:monospace;color:#64748b;letter-spacing:.08em;margin-bottom:8px;text-transform:uppercase;">Clinical Context (AI-assisted summary)</div>
-          <div style="font-size:11px;color:#475569;line-height:1.6;padding:10px 12px;background:#f8fafc;border-left:3px solid #0284c7;border-radius:0 6px 6px 0;">
-            ${aiSum.icdAI} · ${p.tags.map(t=>t.t).join(' · ')}
-          </div>
-        </div>
-        <table style="width:100%;border-collapse:collapse;margin-top:16px;">
-          <thead>
-            <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
-              <th style="padding:8px 10px;font-size:10px;font-family:monospace;color:#64748b;text-align:left;letter-spacing:.06em;text-transform:uppercase;width:18%;">Category</th>
-              <th style="padding:8px 10px;font-size:10px;font-family:monospace;color:#64748b;text-align:left;letter-spacing:.06em;text-transform:uppercase;width:38%;">Order / Instruction</th>
-              <th style="padding:8px 10px;font-size:10px;font-family:monospace;color:#64748b;text-align:left;letter-spacing:.06em;text-transform:uppercase;">Notes / Indication</th>
-              <th style="padding:8px 10px;font-size:10px;font-family:monospace;color:#64748b;text-align:left;letter-spacing:.06em;text-transform:uppercase;width:10%;">Priority</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
+
+        <!-- 病患基本資料（六欄格） -->
+        <table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;margin-bottom:14px;font-size:12px;">
+          <tr style="background:#f1f5f9;">
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;width:14%;">病歷號碼</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:700;color:#0f172a;width:19%;">${mrn}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;width:14%;">姓　　名</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:700;color:#0f172a;width:19%;">${ptNamesTW[ptIdx]}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;width:14%;">性別／年齡</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:700;color:#0f172a;">${sexTW}／${p.age}</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">出生日期</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${dob}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">申請科別</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${deptNamesTW[ptIdx]}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">申請醫師</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${drNamesTW[ptIdx]}</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">申請日期</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${dateStr}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">申請時間</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${timeStr}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">預約執行</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:600;color:#0284c7;">今日候診安排</td>
+          </tr>
         </table>
-        <div style="margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-          <div>
-            <div style="height:1px;background:#0f172a;margin-bottom:5px;"></div>
-            <div style="font-size:10px;font-family:monospace;color:#64748b;">Physician Signature / Stamp</div>
-          </div>
-          <div>
-            <div style="height:1px;background:#0f172a;margin-bottom:5px;"></div>
-            <div style="font-size:10px;font-family:monospace;color:#64748b;">Date &amp; Time</div>
+
+        <!-- 臨床診斷 -->
+        <div style="border:1px solid #cbd5e1;border-radius:4px;margin-bottom:14px;overflow:hidden;">
+          <div style="background:#1e3a5f;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;letter-spacing:.05em;">▌ 臨床診斷（ICD-10-CM）</div>
+          <div style="padding:8px 12px;font-size:12px;color:#0f172a;line-height:1.8;background:#f8fbff;">
+            ${(()=>{ const ic=getActiveIcds(ptIdx); return ic.secondary ? `<div><span style="font-size:9px;font-family:monospace;color:#475569;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:3px;padding:1px 5px;margin-right:4px;">主診斷</span>${ic.primary}</div><div style="margin-top:4px;"><span style="font-size:9px;font-family:monospace;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:3px;padding:1px 5px;margin-right:4px;">次診斷</span>${ic.secondary}</div>` : `<div>${ic.primary}</div>`; })()}
+            <div style="margin-top:4px;font-size:11px;color:#475569;">${p.tags.map(t=>t.t).join('　')}</div>
           </div>
         </div>
-        <div style="margin-top:16px;padding:8px 12px;background:#fff8f1;border:1px solid #fed7aa;border-radius:6px;font-size:10px;color:#92400e;font-family:monospace;">
-          ⚠ Orders generated with AI-assisted clinical decision support (DeepQ CDSS). Physician must review and countersign before execution.
+
+        <!-- 申請檢查項目表 -->
+        <div style="border:1px solid #cbd5e1;border-radius:4px;margin-bottom:14px;overflow:hidden;">
+          <div style="background:#1e3a5f;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;letter-spacing:.05em;">▌ 申請檢查項目</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="background:#e8f0fb;">
+                <th style="padding:7px 10px;border:1px solid #dde6f0;text-align:left;color:#334155;font-weight:700;width:16%;">類　別</th>
+                <th style="padding:7px 10px;border:1px solid #dde6f0;text-align:left;color:#334155;font-weight:700;width:36%;">項目名稱</th>
+                <th style="padding:7px 10px;border:1px solid #dde6f0;text-align:left;color:#334155;font-weight:700;">說明／適應症</th>
+                <th style="padding:7px 10px;border:1px solid #dde6f0;text-align:center;color:#334155;font-weight:700;width:14%;">優先度</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+
+        <!-- 注意事項 -->
+        <div style="border:1px solid #fcd34d;border-radius:4px;background:#fffbeb;padding:10px 14px;margin-bottom:20px;font-size:11.5px;color:#78350f;line-height:1.9;">
+          <div style="font-weight:700;margin-bottom:4px;">【受檢注意事項】</div>
+          <div>1. 肺功能檢查前 <strong>4 小時</strong>請勿吸菸，<strong>6 小時</strong>內請避免劇烈運動。</div>
+          <div>2. 請於檢查前 <strong>停用</strong>短效支氣管擴張劑（SABA）至少 4 小時，長效製劑（LABA／LAMA）至少 12 小時。</div>
+          <div>3. 檢查時請穿著寬鬆衣物，避免束腰。</div>
+          <div>4. 如有急性感染、發燒、咳血，請告知護理師，視情況延後檢查。</div>
+        </div>
+
+        <!-- 簽章區 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:4px;">
+          <div>
+            <div style="height:1px;background:#0f172a;margin-bottom:5px;"></div>
+            <div style="font-size:10px;color:#64748b;">申請醫師簽章</div>
+          </div>
+          <div>
+            <div style="height:1px;background:#0f172a;margin-bottom:5px;"></div>
+            <div style="font-size:10px;color:#64748b;">護理師 / 執行人員</div>
+          </div>
+          <div>
+            <div style="height:1px;background:#0f172a;margin-bottom:5px;"></div>
+            <div style="font-size:10px;color:#64748b;">日期 &amp; 時間</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:7px 12px;background:#fef2f2;border:1px solid #fca5a5;border-radius:4px;font-size:10px;color:#991b1b;">
+          ⚠ 本申請單經 DeepQ CDSS 輔助決策產生，醫師審核確認並簽章後方可執行。
         </div>
       </div>`;
+
   } else {
-    // Referral letter
-    const toMap = [['Pulmonology Department','for post-bronchodilator spirometry and COPD workup'],['Pulmonology Department','for COPD diagnosis confirmation and specialist management'],['Pulmonology Department','for COPD re-evaluation and follow-up after 3-year gap']];
-    const [todept, purpose] = toMap[ptIdx];
+    /* ─── 轉診單（門診轉診單）─── */
+    const toMapTW = [
+      ['胸腔內科','Post-Bronchodilator 肺功能檢查確診 COPD','建議 3 個工作日內'],
+      ['胸腔內科','確診 COPD 並擬定專科治療計畫','優先（建議 3 個工作日內）'],
+      ['胸腔內科','COPD 追蹤中斷重新評估，含肺功能複查','建議 2 週內']
+    ];
+    const [todeptTW, purposeTW, urgencyTW] = toMapTW[ptIdx];
+    const _ic = getActiveIcds(ptIdx);
+    const icdNow = _ic.secondary
+      ? `<div><span style="font-size:9px;font-family:monospace;color:#475569;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:3px;padding:1px 5px;margin-right:4px;">主診斷</span>${_ic.primary}</div><div style="margin-top:4px;"><span style="font-size:9px;font-family:monospace;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:3px;padding:1px 5px;margin-right:4px;">次診斷</span>${_ic.secondary}</div>`
+      : _ic.primary;
+    const clinicalBullets = aiSum && aiSum.sections && aiSum.sections[0]
+      ? aiSum.sections[0].items.map(i=>i.replace(/<[^>]+>/g,'')).join('；')
+      : '';
+    const imagingBullets = aiSum && aiSum.sections && aiSum.sections[2]
+      ? aiSum.sections[2].items.map(i=>i.replace(/<[^>]+>/g,'')).join('；')
+      : '';
+    const currentMeds = [
+      'Salbutamol（Ventolin）100 mcg pMDI PRN',
+      'Salbutamol（Ventolin）100 mcg pMDI PRN × 3 年',
+      'Tiotropium 18 mcg 吸入（已自行停藥）'
+    ][ptIdx];
+
     return `
-      <div style="font-family:'Arial',sans-serif;max-width:720px;margin:0 auto;background:#fff;padding:32px 36px;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:2px solid #0f172a;padding-bottom:14px;margin-bottom:24px;">
+      <div style="font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;max-width:720px;margin:0 auto;background:#fff;padding:28px 32px;">
+
+        <!-- 院所名稱 + 表單標題 -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px double #0f172a;padding-bottom:12px;margin-bottom:16px;">
           <div>
-            <div style="font-size:18px;font-weight:700;color:#0f172a;">CLOUD·HIS Medical Center</div>
-            <div style="font-size:11px;color:#64748b;margin-top:2px;">No. 1, Innovation Blvd, Taipei · Tel: (02) 1234-5678</div>
+            <div style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:.04em;">示範醫院 Demo Medical Center</div>
+            <div style="font-size:11px;color:#64748b;margin-top:3px;">臺北市創新大道一號 · 總機：(02) 1234-5678</div>
           </div>
           <div style="text-align:right;">
-            <div style="font-size:16px;font-weight:700;color:#0284c7;letter-spacing:.05em;">REFERRAL LETTER</div>
-            <div style="font-size:10px;font-family:monospace;color:#94a3b8;margin-top:4px;">Form No. MR-301 · Rev. 2024</div>
+            <div style="font-size:18px;font-weight:800;color:#0369a1;letter-spacing:.06em;">門診轉診單</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:3px;">表單編號：MR-301 · 修訂：2024</div>
+            <div style="margin-top:5px;font-size:10px;font-family:monospace;color:#64748b;">
+              轉診日期：${dateStr}&emsp;流水號：REF-${dateStr.replace(/\//g,'')}-${mrn}
+            </div>
           </div>
         </div>
-        <div style="margin-bottom:20px;">
-          <span style="font-size:11px;font-family:monospace;color:#64748b;">DATE: </span><span style="font-size:12px;font-weight:600;">${dateStr}</span>
-          <span style="margin-left:24px;font-size:11px;font-family:monospace;color:#64748b;">REF NO: </span><span style="font-size:12px;font-family:monospace;">REF-${dateStr.replace(/-/g,'')}-${mrn}</span>
+
+        <!-- 病患基本資料 -->
+        <table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;margin-bottom:14px;font-size:12px;">
+          <tr style="background:#e8f0fb;">
+            <td colspan="6" style="padding:5px 12px;border:1px solid #cbd5e1;font-weight:700;color:#1e3a5f;font-size:11px;letter-spacing:.04em;">▌ 病患基本資料</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;width:14%;">病歷號碼</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:700;color:#0f172a;width:19%;">${mrn}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;width:14%;">姓　　名</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:700;color:#0f172a;width:19%;">${ptNamesTW[ptIdx]}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;width:14%;">性別／年齡</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:700;color:#0f172a;">${sexTW}／${p.age}</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">出生日期</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${dob}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">轉出科別</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${deptNamesTW[ptIdx]}</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">轉出醫師</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#334155;">${drNamesTW[ptIdx]}</td>
+          </tr>
+        </table>
+
+        <!-- 轉診資訊 -->
+        <table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;margin-bottom:14px;font-size:12px;">
+          <tr style="background:#e8f0fb;">
+            <td colspan="4" style="padding:5px 12px;border:1px solid #cbd5e1;font-weight:700;color:#1e3a5f;font-size:11px;letter-spacing:.04em;">▌ 轉診資訊</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;width:16%;">轉入科別</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;font-weight:700;color:#0369a1;font-size:13px;" colspan="3">${todeptTW}（院內轉診）</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">轉診目的</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#0f172a;font-weight:600;" colspan="3">${purposeTW}</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;color:#475569;font-size:10px;">緊急程度</td>
+            <td style="padding:6px 10px;border:1px solid #cbd5e1;" colspan="3">
+              <span style="background:#fef9c3;color:#92400e;font-weight:700;padding:2px 10px;border-radius:3px;font-size:11px;">${urgencyTW}</span>
+            </td>
+          </tr>
+        </table>
+
+        <!-- 目前診斷 -->
+        <div style="border:1px solid #cbd5e1;border-radius:4px;margin-bottom:12px;overflow:hidden;">
+          <div style="background:#1e3a5f;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;letter-spacing:.05em;">▌ 目前診斷（ICD-10-CM）</div>
+          <div style="padding:8px 12px;font-size:12.5px;color:#0f172a;background:#f8fbff;font-weight:600;">${icdNow}</div>
         </div>
-        <div style="margin-bottom:18px;">
-          <div style="font-size:11px;font-family:monospace;color:#64748b;margin-bottom:2px;">TO:</div>
-          <div style="font-size:13px;font-weight:700;color:#0f172a;">${todept}</div>
-          <div style="font-size:11px;color:#64748b;">CLOUD·HIS Medical Center (Internal Referral)</div>
+
+        <!-- 可編輯提示 -->
+        <div style="margin-bottom:10px;padding:6px 12px;background:#fefce8;border:1px solid #fde68a;border-radius:4px;font-size:10px;color:#92400e;display:flex;align-items:center;gap:6px;">
+          <i class="fa-solid fa-pen-to-square" style="font-size:11px;"></i>
+          以下欄位為 AI 輔助初稿，醫師可直接點擊欄位內文字進行修改，確認內容後再列印。
         </div>
-        <div style="margin-bottom:18px;padding:12px 14px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          ${[['Patient',ptNames[ptIdx]],['MRN',mrn],['DOB / Age / Sex',`${dob} / ${p.age} / ${p.sex==='男'?'M':'F'}`],['Referring Physician',drNames[ptIdx]]].map(([k,v])=>`
-          <div><span style="font-size:9px;font-family:monospace;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;">${k}: </span><span style="font-size:12px;font-weight:600;color:#0f172a;">${v}</span></div>`).join('')}
-        </div>
-        <div style="margin-bottom:16px;">
-          <div style="font-size:11px;font-family:monospace;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Reason for Referral</div>
-          <div style="font-size:12.5px;color:#0f172a;line-height:1.7;">${purpose.charAt(0).toUpperCase()+purpose.slice(1)}.</div>
-        </div>
-        <div style="margin-bottom:16px;">
-          <div style="font-size:11px;font-family:monospace;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Clinical Summary</div>
-          <div style="font-size:12px;color:#334155;line-height:1.7;padding:10px 12px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
-            ${aiSum.sections[0].items.map(i=>`<div style="margin-bottom:4px;">• ${i.replace(/<[^>]+>/g,'')}</div>`).join('')}
+
+        <!-- 病情摘要 -->
+        <div style="border:1px solid #cbd5e1;border-radius:4px;margin-bottom:12px;overflow:hidden;">
+          <div style="background:#1e3a5f;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;letter-spacing:.05em;display:flex;align-items:center;gap:6px;">
+            ▌ 病情摘要
+            <span style="margin-left:auto;font-size:9px;font-weight:400;opacity:.7;font-family:monospace;">✎ 可編輯</span>
+          </div>
+          <div contenteditable="true" spellcheck="false" style="padding:10px 12px;font-size:12px;color:#334155;line-height:1.85;background:#fffbeb;min-height:48px;outline:none;border-bottom:2px dashed #fde68a;" onblur="this.style.background='#fffbeb'" onfocus="this.style.background='#fef9c3'">
+            ${clinicalBullets || p.tags.map(t=>`• ${t.t}`).join('　')}
           </div>
         </div>
-        <div style="margin-bottom:16px;">
-          <div style="font-size:11px;font-family:monospace;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Relevant Imaging</div>
-          <div style="font-size:12px;color:#334155;line-height:1.7;padding:10px 12px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
-            ${aiSum.sections[2].items.map(i=>`<div style="margin-bottom:4px;">• ${i.replace(/<[^>]+>/g,'')}</div>`).join('')}
+
+        <!-- 影像及檢查結果 -->
+        <div style="border:1px solid #cbd5e1;border-radius:4px;margin-bottom:12px;overflow:hidden;">
+          <div style="background:#1e3a5f;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;letter-spacing:.05em;display:flex;align-items:center;gap:6px;">
+            ▌ 相關影像及檢查結果
+            <span style="margin-left:auto;font-size:9px;font-weight:400;opacity:.7;font-family:monospace;">✎ 可編輯</span>
+          </div>
+          <div contenteditable="true" spellcheck="false" style="padding:10px 12px;font-size:12px;color:#334155;line-height:1.85;background:#fffbeb;min-height:36px;outline:none;border-bottom:2px dashed #fde68a;" onblur="this.style.background='#fffbeb'" onfocus="this.style.background='#fef9c3'">
+            ${imagingBullets || '詳見 PACS 影像系統'}
           </div>
         </div>
-        <div style="margin-bottom:28px;">
-          <div style="font-size:11px;font-family:monospace;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Requested Actions</div>
-          ${checkedOrders.map(o=>`<div style="font-size:12px;color:#0f172a;padding:4px 0 4px 12px;border-left:2px solid #0284c7;margin-bottom:5px;">${o.l}</div>`).join('')}
+
+        <!-- 目前用藥 -->
+        <div style="border:1px solid #cbd5e1;border-radius:4px;margin-bottom:12px;overflow:hidden;">
+          <div style="background:#1e3a5f;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;letter-spacing:.05em;display:flex;align-items:center;gap:6px;">
+            ▌ 目前用藥
+            <span style="margin-left:auto;font-size:9px;font-weight:400;opacity:.7;font-family:monospace;">✎ 可編輯</span>
+          </div>
+          <div contenteditable="true" spellcheck="false" style="padding:8px 12px;font-size:12px;color:#334155;background:#fffbeb;min-height:28px;outline:none;border-bottom:2px dashed #fde68a;" onblur="this.style.background='#fffbeb'" onfocus="this.style.background='#fef9c3'">${currentMeds}</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:12px;">
+
+        <!-- 請求事項 -->
+        <div style="border:1px solid #cbd5e1;border-radius:4px;margin-bottom:18px;overflow:hidden;">
+          <div style="background:#1e3a5f;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;letter-spacing:.05em;display:flex;align-items:center;gap:6px;">
+            ▌ 請求事項
+            <span style="margin-left:auto;font-size:9px;font-weight:400;opacity:.7;font-family:monospace;">✎ 可編輯</span>
+          </div>
+          <div contenteditable="true" spellcheck="false" style="padding:10px 12px;background:#fffbeb;min-height:36px;outline:none;border-bottom:2px dashed #fde68a;" onblur="this.style.background='#fffbeb'" onfocus="this.style.background='#fef9c3'">
+            ${checkedOrders.map(o=>`<div style="font-size:12px;color:#0f172a;padding:4px 0 4px 12px;border-left:3px solid #0369a1;margin-bottom:6px;line-height:1.6;">${o.l}</div>`).join('')}
+          </div>
+        </div>
+
+        <!-- 簽章區 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:4px;">
           <div>
             <div style="height:1px;background:#0f172a;margin-bottom:5px;"></div>
-            <div style="font-size:10px;font-family:monospace;color:#64748b;">Referring Physician Signature</div>
+            <div style="font-size:10px;color:#64748b;">轉出醫師簽章　　　　　日期：${dateStr}</div>
           </div>
           <div>
             <div style="height:1px;background:#0f172a;margin-bottom:5px;"></div>
-            <div style="font-size:10px;font-family:monospace;color:#64748b;">Date &amp; Stamp</div>
+            <div style="font-size:10px;color:#64748b;">接收科別醫師簽章　　　日期：&emsp;&emsp;&emsp;&emsp;</div>
           </div>
         </div>
-        <div style="margin-top:16px;padding:8px 12px;background:#fff8f1;border:1px solid #fed7aa;border-radius:6px;font-size:10px;color:#92400e;font-family:monospace;">
-          ⚠ This referral was generated with AI-assisted clinical decision support. Physician review and countersignature required before submission.
+        <div style="margin-top:14px;padding:7px 12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:4px;font-size:10px;color:#0369a1;">
+          <i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>本轉診單由 DeepQ CDSS 輔助產生初稿，醫師確認並修改內容後，請簽章再遞交受診科。
         </div>
       </div>`;
   }
@@ -1839,8 +2184,8 @@ function _openDocModal(ptIdx, type) {
     <div style="background:#fff;border-radius:10px;width:100%;max-width:760px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;position:relative;">
       <div style="position:sticky;top:0;background:#1e293b;padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:1;">
         <i class="fa-solid ${type==='order'?'fa-file-medical':'fa-paper-plane'}" style="color:#60a5fa;"></i>
-        <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:#e2e8f0;">${type==='order'?'Physician Order Sheet':'Referral Letter'} — Preview</span>
-        <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:#475569;">Print or save as PDF via browser Ctrl+P</span>
+        <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:#e2e8f0;">${type==='order'?'檢查申請單（排程單）':'門診轉診單'} — 預覽</span>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:#475569;">按 Ctrl+P 列印或另存 PDF</span>
         <button onclick="document.getElementById('doc-modal-overlay').remove()" style="padding:4px 12px;border-radius:5px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#94a3b8;font-size:11px;font-family:var(--mono);cursor:pointer;">✕ Close</button>
       </div>
       <div style="padding:0;">${_orderSlipHTML(ptIdx, type)}</div>
@@ -1942,6 +2287,7 @@ const WS_PACS_STORY = [
 /* ═══ PACS 影像報告文字 ═══ */
 const WS_PACS_REPORT = [
   { doctor:'Dr. 林○○ · 胸腔內科', date:'2026/02/14', study:'CXR PA · 急診胸部 X 光',
+    originalReport:{ radiologist:'急診值班放射科', date:'2026/02/14', text:'雙側肺野清晰，心臟大小正常，橫膈膜位置尚可，無急性浸潤、積液或氣胸，骨骼構造完整。', impression:'無特殊發現。' },
     findings:[
       {label:'肺野', text:'雙側肺野呈現<strong>過度充氣</strong>，右上肺葉可見早期低密度區域，符合肺氣腫前期改變。無急性浸潤或積液。'},
       {label:'心臟', text:'心影在正常範圍內，心胸比 &lt; 0.5，未見急性心衰表現。心影稍呈垂直形態。'},
@@ -1952,6 +2298,7 @@ const WS_PACS_REPORT = [
     aiNote:'DeepQ HI（過度充氣指數）= <strong>82</strong>，超過 COPD 風險閾值 75；較 2024/01 基準值 (61) 上升 34%，進展速度超過同齡預期 2.3 倍。'
   },
   { doctor:'Dr. 張○○ · 家醫科', date:'2025/11/10', study:'CXR PA · 肺炎追蹤',
+    originalReport:{ radiologist:'Dr. 黃○○ · 放射科', date:'2025/11/10', text:'雙側肺野清晰，無浸潤灶，心臟及縱膈正常，橫膈膜及肋膈角正常，骨骼無特殊發現。', impression:'無明顯異常。' },
     findings:[
       {label:'肺野', text:'雙側肺野呈現<strong>過度充氣</strong>，整體肺容積較前次增加約 18%。無急性浸潤灶。'},
       {label:'心臟', text:'心影偏窄，心胸比 0.42，呈<strong>垂直心形態</strong>，符合肺氣腫繼發改變。'},
@@ -1962,6 +2309,7 @@ const WS_PACS_REPORT = [
     aiNote:'DeepQ HI = <strong>91</strong>，遠超 COPD 高度疑似閾值 72；原始放射科報告標記「正常」，AI 重判發現兩次均有隱性進展。'
   },
   { doctor:'Dr. 陳○○ · 骨科（術前例行）', date:'2026/05/27', study:'CXR PA · 術前例行胸部 X 光',
+    originalReport:{ radiologist:'Dr. 李○○ · 放射科', date:'2026/05/27', text:'雙側肺野清晰，無急性浸潤灶，心臟大小正常，縱膈無偏移，橫膈膜及肋膈角正常。術前例行胸部 X 光，無手術禁忌之急性肺部病變。', impression:'術前胸部 X 光正常範圍，無急性異常。' },
     findings:[
       {label:'肺野', text:'較 2023/03 確診基準影像相比，雙側肺野<strong>容積進一步擴大</strong>，右上肺葉低密度區域增加。'},
       {label:'心臟', text:'心影較基準偏窄，心胸比 0.42，垂直心形態持續，符合 COPD 進展。'},
@@ -2107,12 +2455,58 @@ function makeLungSVGLarge(item, showAnn) {
     w:(r.w*SX).toFixed(1), h:(r.h*SYscale).toFixed(1),
     color:r.color, stroke:r.stroke, lbl:r.lbl
   });
-  const rects = showAnn ? (item.regions||[]).map(r=>{
-    const t=tr(r);
-    return `<rect x="${t.x}" y="${t.y}" width="${t.w}" height="${t.h}" rx="3" fill="${t.color}" stroke="${t.stroke}" stroke-width="2" stroke-dasharray="5 3"/>
-    <rect x="${t.x}" y="${(+t.y-14).toFixed(1)}" width="${Math.min(+t.w,78)}" height="12" rx="2" fill="rgba(0,0,0,.82)"/>
-    <text x="${(+t.x+4).toFixed(1)}" y="${(+t.y-5).toFixed(1)}" font-size="9" fill="#fff" font-family="monospace" font-weight="600">${t.lbl}</text>`;
-  }).join('') : '';
+  const CONF_MAP={'早期':73,'進展↑':84,'過度充氣':87,'橫膈膜扁平':92,'橫膈膜↓':92,'低衰減區':89,'GOLD I 基準':78,'GOLD II?':85,'紋理↑':71,'過度充氣↑↑':91};
+
+  /* ── GradCAM：裁切至肺野範圍，jet colormap 熱力疊加 ── */
+  const _hmLungExpY = (() => {
+    const _l = item.scan || item.lung;
+    return _l && _l.ry1 ? Math.max(0, (_l.ry1-32)*3.5) : 0;
+  })();
+  const _hmLCY = (154 + _hmLungExpY*0.28).toFixed(1);
+  const _hmLRY = (116 + _hmLungExpY).toFixed(1);
+  const _hmRCY = (158 + _hmLungExpY*0.28).toFixed(1);
+  const _hmRRY = (112 + _hmLungExpY).toFixed(1);
+
+  const rects = showAnn ? (()=>{
+    const regions = item.regions||[];
+    if (!regions.length) return '';
+    const VW=260, VH=315;
+    const clipId=`lclip-${uid}`;
+    let gradDefs='', heatRects='', labels='';
+    regions.forEach((r,ri)=>{
+      const t=tr(r);
+      const cx=(+t.x + +t.w/2), cy=(+t.y + +t.h/2);
+      const spotR=(Math.max(+t.w,+t.h)*1.9).toFixed(1);
+      const gid=`hm-${uid}-${ri}`;
+      const confKey=Object.keys(CONF_MAP).find(k=>r.lbl&&r.lbl.includes(k));
+      const conf=confKey?CONF_MAP[confKey]:(75+ri*7);
+      const lblX=+t.x, lblY=+t.y-17;
+      const lblW=Math.min(Math.max(+t.w+22,64),102);
+      /* jet colormap: red(core) → orange → yellow → green → blue(edge→transparent) */
+      gradDefs+=`<radialGradient id="${gid}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${spotR}" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#ff0000" stop-opacity="0.88"/>
+        <stop offset="14%"  stop-color="#ff4400" stop-opacity="0.78"/>
+        <stop offset="28%"  stop-color="#ffaa00" stop-opacity="0.62"/>
+        <stop offset="46%"  stop-color="#aadd00" stop-opacity="0.42"/>
+        <stop offset="64%"  stop-color="#00aaff" stop-opacity="0.22"/>
+        <stop offset="82%"  stop-color="#0044cc" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#0000aa" stop-opacity="0"/>
+      </radialGradient>`;
+      heatRects+=`<rect x="0" y="0" width="${VW}" height="${VH}" fill="url(#${gid})"/>`;
+      labels+=`<rect x="${lblX.toFixed(1)}" y="${lblY.toFixed(1)}" width="${lblW}" height="13" rx="2" fill="rgba(0,0,0,.90)"/>
+      <text x="${(lblX+4).toFixed(1)}" y="${(lblY+9).toFixed(1)}" font-size="8" fill="#fff" font-family="monospace" font-weight="700">${t.lbl}</text>
+      <text x="${(lblX+lblW-3).toFixed(1)}" y="${(lblY+9).toFixed(1)}" font-size="7.5" fill="#ff8800" font-family="monospace" font-weight="700" text-anchor="end">${conf}%</text>`;
+    });
+    /* clip heat to lung fields only */
+    return `<defs>${gradDefs}
+      <clipPath id="${clipId}">
+        <ellipse cx="80" cy="${_hmLCY}" rx="68" ry="${_hmLRY}"/>
+        <ellipse cx="180" cy="${_hmRCY}" rx="62" ry="${_hmRRY}"/>
+      </clipPath>
+    </defs>
+    <g clip-path="url(#${clipId})" class="gradcam-heatmap delay-1">${heatRects}</g>
+    ${labels}`;
+  })() : '';
   let circleAnn = '';
   if (showAnn && item.regions && item.regions.length > 0) {
     const t = tr(item.regions[0]);
@@ -2124,23 +2518,181 @@ function makeLungSVGLarge(item, showAnn) {
   }
 
   if (mod === 'CT') {
-    return `<svg viewBox="0 0 260 315" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
-      <defs>
-        <filter id="ctg-${uid}"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="n"/><feColorMatrix type="saturate" values="0" in="n" result="gn"/><feBlend in="SourceGraphic" in2="gn" mode="screen" result="b"/><feComponentTransfer in="b"><feFuncA type="linear" slope="1"/></feComponentTransfer></filter>
-        <radialGradient id="ctlung-${uid}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#0a0a0a"/><stop offset="100%" stop-color="#040404"/></radialGradient>
+    const ctCOPD = item.regions && item.regions.length > 0;
+    const ctLLRX = ctCOPD ? 60 : 54, ctLLRY = ctCOPD ? 75 : 68;
+    const ctRLRX = ctCOPD ? 60 : 54, ctRLRY = ctCOPD ? 75 : 68;
+    /* Small pulmonary vessels (bright dots/short lines within dark lung) */
+    const ctVessels = (lx,ly,rx,ry,s) => {
+      const pts=[[.30,.20,3.8],[.68,.22,3.2],[.18,.48,3.0],[.76,.44,2.6],[.46,.14,4.2],[.52,.62,2.4],
+                 [.12,.34,2.2],[.84,.58,2.2],[.34,.76,2.0],[.62,.78,1.8],[.08,.62,1.7],[.88,.33,2.1],
+                 [.44,.40,3.6],[.22,.68,1.5],[.72,.68,1.6]];
+      return pts.map(([px,py,pr])=>{
+        const vx=lx-rx*.88+px*rx*1.76, vy=ly-ry*.88+py*ry*1.76;
+        const ex=(vx-lx)/rx, ey=(vy-ly)/ry;
+        if(ex*ex+ey*ey>0.82*0.82) return '';
+        const dist=Math.sqrt(ex*ex+ey*ey);
+        const op=(0.72-dist*0.35).toFixed(2);
+        return `<circle cx="${vx.toFixed(1)}" cy="${vy.toFixed(1)}" r="${pr}" fill="#b0b0b0" opacity="${op}"/>`;
+      }).join('');
+    };
+    /* Emphysema: peripheral very-dark patches in COPD */
+    const emphysema = ctCOPD ? `
+      <ellipse cx="46" cy="100" rx="19" ry="15" fill="#010101" opacity="0.96"/>
+      <ellipse cx="62" cy="168" rx="16" ry="12" fill="#010101" opacity="0.92"/>
+      <ellipse cx="215" cy="98"  rx="18" ry="14" fill="#010101" opacity="0.94"/>
+      <ellipse cx="198" cy="170" rx="14" ry="11" fill="#010101" opacity="0.90"/>
+      <ellipse cx="42"  cy="140" rx="11" ry="9"  fill="#010101" opacity="0.88"/>` : '';
+    /* CT GradCAM — uses CT lung positions, clipped */
+    const ctHeat = showAnn ? (()=>{
+      const regs=item.regions||[]; if(!regs.length) return '';
+      const VW=260,VH=315;
+      let gd='',hr='',lb='';
+      regs.forEach((r,ri)=>{
+        const t=tr(r);
+        const cx=(+t.x + +t.w/2), cy=(+t.y + +t.h/2);
+        const spotR=(Math.max(+t.w,+t.h)*1.9).toFixed(1);
+        const gid=`ctHm-${uid}-${ri}`;
+        const confKey=Object.keys(CONF_MAP).find(k=>r.lbl&&r.lbl.includes(k));
+        const conf=confKey?CONF_MAP[confKey]:(75+ri*7);
+        const lblX=+t.x, lblY=+t.y-17;
+        const lblW=Math.min(Math.max(+t.w+22,64),102);
+        gd+=`<radialGradient id="${gid}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${spotR}" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stop-color="#ff0000" stop-opacity="0.88"/>
+          <stop offset="14%"  stop-color="#ff4400" stop-opacity="0.78"/>
+          <stop offset="28%"  stop-color="#ffaa00" stop-opacity="0.62"/>
+          <stop offset="46%"  stop-color="#aadd00" stop-opacity="0.42"/>
+          <stop offset="64%"  stop-color="#00aaff" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="#0000aa" stop-opacity="0"/>
+        </radialGradient>`;
+        hr+=`<rect x="0" y="0" width="${VW}" height="${VH}" fill="url(#${gid})"/>`;
+        lb+=`<rect x="${lblX.toFixed(1)}" y="${lblY.toFixed(1)}" width="${lblW}" height="13" rx="2" fill="rgba(0,0,0,.90)"/>
+        <text x="${(lblX+4).toFixed(1)}" y="${(lblY+9).toFixed(1)}" font-size="8" fill="#fff" font-family="monospace" font-weight="700">${t.lbl}</text>
+        <text x="${(lblX+lblW-3).toFixed(1)}" y="${(lblY+9).toFixed(1)}" font-size="7.5" fill="#ff8800" font-family="monospace" font-weight="700" text-anchor="end">${conf}%</text>`;
+      });
+      return `<defs>${gd}
+        <clipPath id="ctlclip-${uid}">
+          <ellipse cx="72" cy="132" rx="${ctLLRX}" ry="${ctLLRY}"/>
+          <ellipse cx="188" cy="132" rx="${ctRLRX}" ry="${ctRLRY}"/>
+        </clipPath>
       </defs>
-      <rect width="260" height="315" fill="#020202"/>
-      <ellipse cx="130" cy="157" rx="120" ry="112" fill="#161616" stroke="#242424" stroke-width="2"/>
-      <ellipse cx="84" cy="148" rx="54" ry="78" fill="url(#ctlung-${uid})"/>
-      <ellipse cx="176" cy="148" rx="54" ry="78" fill="url(#ctlung-${uid})"/>
-      <rect x="111" y="86" width="38" height="122" rx="9" fill="#4e4e4e"/>
-      <ellipse cx="130" cy="218" rx="14" ry="14" fill="#828282" stroke="#9a9a9a" stroke-width="1"/>
-      ${rects}
-      <rect width="260" height="315" fill="rgba(0,0,0,0)" filter="url(#ctg-${uid})" opacity="0.05"/>
-      <rect x="5" y="5" width="24" height="14" rx="3" fill="rgba(60,220,140,.18)" stroke="rgba(60,220,140,.7)" stroke-width="1"/>
-      <text x="17" y="15.5" font-size="8" fill="#3cdc8c" font-family="monospace" text-anchor="middle" font-weight="bold">CT</text>
-      <text x="255" y="311" font-size="7" fill="#404040" font-family="monospace" text-anchor="end">W:1500 L:-600</text>
-    </svg>`;
+      <g clip-path="url(#ctlclip-${uid})" class="gradcam-heatmap delay-2">${hr}</g>${lb}`;
+    })() : '';
+    return `<svg viewBox="0 0 260 315" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+    <defs>
+      <filter id="ctf-${uid}" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.62 0.58" numOctaves="3" seed="42" result="noise"/>
+        <feColorMatrix type="saturate" values="0" in="noise" result="gn"/>
+        <feBlend in="SourceGraphic" in2="gn" mode="overlay"/>
+      </filter>
+      <radialGradient id="ctskin-${uid}" cx="50%" cy="46%" r="58%">
+        <stop offset="0%" stop-color="#3e3e3e"/><stop offset="60%" stop-color="#2c2c2c"/><stop offset="100%" stop-color="#181818"/>
+      </radialGradient>
+      <radialGradient id="ctmuscle-${uid}" cx="50%" cy="46%" r="58%">
+        <stop offset="0%" stop-color="#3a3a3a"/><stop offset="100%" stop-color="#282828"/>
+      </radialGradient>
+      <radialGradient id="ctlL-${uid}" cx="50%" cy="46%" r="55%">
+        <stop offset="0%" stop-color="#080808"/><stop offset="100%" stop-color="#030303"/>
+      </radialGradient>
+      <radialGradient id="ctlR-${uid}" cx="50%" cy="46%" r="55%">
+        <stop offset="0%" stop-color="#080808"/><stop offset="100%" stop-color="#030303"/>
+      </radialGradient>
+      <radialGradient id="ctheart-${uid}" cx="48%" cy="50%" r="56%">
+        <stop offset="0%" stop-color="#4c4c4c"/><stop offset="100%" stop-color="#363636"/>
+      </radialGradient>
+      <clipPath id="ctlL-clip-${uid}"><ellipse cx="72" cy="132" rx="${ctLLRX}" ry="${ctLLRY}"/></clipPath>
+      <clipPath id="ctlR-clip-${uid}"><ellipse cx="188" cy="132" rx="${ctRLRX}" ry="${ctRLRY}"/></clipPath>
+    </defs>
+
+    <!-- CT background black -->
+    <rect width="260" height="315" fill="#020202"/>
+
+    <g class="ct-anatomy">
+    <!-- Body cross-section contour: subcutaneous fat + muscle layers -->
+    <ellipse cx="130" cy="148" rx="124" ry="108" fill="url(#ctskin-${uid})"/>
+    <ellipse cx="130" cy="148" rx="117" ry="101" fill="url(#ctmuscle-${uid})"/>
+    <ellipse cx="130" cy="148" rx="108"  ry="93"  fill="#363636"/>
+
+    <!-- Sternum (anterior midline bone — bright) -->
+    <rect x="121" y="40" width="18" height="35" rx="4"  fill="#c4c4c4" opacity=".88"/>
+    <rect x="123" y="75" width="14" height="52" rx="3"  fill="#b8b8b8" opacity=".78"/>
+
+    <!-- Ribs (bright curved bone arcs in chest wall) -->
+    <path d="M116 66 Q58 52 28 88 Q10 116 16 154"  stroke="#cacaca" stroke-width="4"   fill="none" opacity=".92" stroke-linecap="round"/>
+    <path d="M117 86 Q54 74 22 114 Q8 146 12 182"  stroke="#c4c4c4" stroke-width="3.4" fill="none" opacity=".84" stroke-linecap="round"/>
+    <path d="M118 106 Q58 98 28 136 Q14 164 18 200" stroke="#bdbdbd" stroke-width="3"   fill="none" opacity=".76" stroke-linecap="round"/>
+    <path d="M119 124 Q64 120 36 154 Q24 180 26 212" stroke="#b6b6b6" stroke-width="2.6" fill="none" opacity=".66" stroke-linecap="round"/>
+    <path d="M144 66 Q202 52 232 88 Q250 116 244 154" stroke="#cacaca" stroke-width="4"   fill="none" opacity=".92" stroke-linecap="round"/>
+    <path d="M143 86 Q206 74 238 114 Q252 146 248 182" stroke="#c4c4c4" stroke-width="3.4" fill="none" opacity=".84" stroke-linecap="round"/>
+    <path d="M142 106 Q202 98 232 136 Q246 164 242 200" stroke="#bdbdbd" stroke-width="3"   fill="none" opacity=".76" stroke-linecap="round"/>
+    <path d="M141 124 Q196 120 224 154 Q236 180 234 212" stroke="#b6b6b6" stroke-width="2.6" fill="none" opacity=".66" stroke-linecap="round"/>
+
+    <!-- Lung fields (air-filled = near-black, HRCT lung window) -->
+    <ellipse cx="72"  cy="132" rx="${ctLLRX}" ry="${ctLLRY}" fill="url(#ctlL-${uid})"/>
+    <ellipse cx="188" cy="132" rx="${ctRLRX}" ry="${ctRLRY}" fill="url(#ctlR-${uid})"/>
+
+    <!-- Emphysema (very-dark low-attenuation patches in COPD) -->
+    ${emphysema}
+
+    <!-- Pulmonary vessels (small bright dots within dark lung) -->
+    <g clip-path="url(#ctlL-clip-${uid})">${ctVessels(72,132,ctLLRX,ctLLRY,1)}</g>
+    <g clip-path="url(#ctlR-clip-${uid})">${ctVessels(188,132,ctRLRX,ctRLRY,2)}</g>
+
+    <!-- Mediastinum: heart silhouette -->
+    <ellipse cx="120" cy="152" rx="38" ry="44" fill="url(#ctheart-${uid})"/>
+
+    <!-- Ascending aorta (anterior: bright ring) -->
+    <circle cx="150" cy="112" r="13" fill="#626262" stroke="#b0b0b0" stroke-width="2"/>
+    <circle cx="150" cy="112" r="7"  fill="#848484"/>
+
+    <!-- Superior vena cava -->
+    <circle cx="162" cy="104" r="9"  fill="#505050" stroke="#909090" stroke-width="1.5"/>
+    <circle cx="162" cy="104" r="5"  fill="#4a4a4a"/>
+
+    <!-- Pulmonary artery trunk -->
+    <ellipse cx="130" cy="104" rx="15" ry="13" fill="#545454" stroke="#8a8a8a" stroke-width="1.4"/>
+
+    <!-- Main bronchi (dark air lumen with bright wall) -->
+    <circle cx="106" cy="136" r="10" fill="#343434" stroke="#888888" stroke-width="1.6"/>
+    <circle cx="106" cy="136" r="7"  fill="#040404"/>
+    <circle cx="153" cy="136" r="9"  fill="#343434" stroke="#848484" stroke-width="1.6"/>
+    <circle cx="153" cy="136" r="6"  fill="#040404"/>
+
+    <!-- Descending aorta (left of spine, bright ring) -->
+    <circle cx="116" cy="232" r="11" fill="#686868" stroke="#b8b8b8" stroke-width="2"/>
+    <circle cx="116" cy="232" r="6"  fill="#8a8a8a"/>
+
+    <!-- Vertebral body (posterior, bright cortex + gray cancellous + dark spinal canal) -->
+    <circle cx="130" cy="244" r="19" fill="#7e7e7e"/>
+    <circle cx="130" cy="244" r="19" fill="none" stroke="#d4d4d4" stroke-width="3"/>
+    <circle cx="130" cy="244" r="8"  fill="#181818"/>
+    <!-- Pedicles -->
+    <ellipse cx="116" cy="244" rx="6" ry="8" fill="#9a9a9a" stroke="#cecece" stroke-width="1.5"/>
+    <ellipse cx="144" cy="244" rx="6" ry="8" fill="#9a9a9a" stroke="#cecece" stroke-width="1.5"/>
+    <!-- Spinous process (posterior protrusion) -->
+    <path d="M127 263 Q130 275 133 263" stroke="#cccccc" stroke-width="3.5" fill="#929292" stroke-linejoin="round"/>
+
+    <!-- Paraspinal muscles -->
+    <ellipse cx="99"  cy="242" rx="19" ry="22" fill="#383838"/>
+    <ellipse cx="161" cy="242" rx="19" ry="22" fill="#383838"/>
+
+    </g><!-- /ct-anatomy -->
+
+    <!-- GradCAM heat overlay (CT-specific, clipped to lung fields) -->
+    ${ctHeat}
+
+    <!-- Quantum noise / CT grain -->
+    <rect width="260" height="270" fill="rgba(10,10,10,0.01)" filter="url(#ctf-${uid})" opacity="0.10"/>
+
+    <!-- DICOM overlays -->
+    <rect x="0" y="272" width="260" height="43" fill="#020202"/>
+    <rect x="5" y="5" width="32" height="15" rx="3" fill="rgba(60,220,140,.15)" stroke="rgba(60,220,140,.65)" stroke-width="1"/>
+    <text x="21" y="15.5" font-size="8" fill="#3cdc8c" font-family="monospace" text-anchor="middle" font-weight="700">HRCT</text>
+    <text x="6"   y="286" font-size="8"   fill="#3cdc8c"  font-family="monospace" font-weight="600">${item.date||''}</text>
+    <text x="6"   y="298" font-size="7.5" fill="#4a7a9b"  font-family="monospace">肺窗 · T6</text>
+    <text x="254" y="286" font-size="7"   fill="#484848"  font-family="monospace" text-anchor="end">W:1500 L:−600</text>
+    <text x="254" y="298" font-size="7"   fill="#3a3a3a"  font-family="monospace" text-anchor="end">LUNG</text>
+    <text x="254" y="311" font-size="6.5" fill="#2e2e2e"  font-family="monospace" text-anchor="end">HI:${item.chartVal||'--'}</text>
+  </svg>`;
   }
 
   /* ── CXR PA view — realistic rendering ── */
@@ -2216,20 +2768,39 @@ function makeLungSVGLarge(item, showAnn) {
       <feColorMatrix type="saturate" values="0" in="noise" result="gray"/>
       <feBlend in="SourceGraphic" in2="gray" mode="overlay"/>
     </filter>
+    <!-- Interstitial lung markings texture (fine vascular/bronchovascular markings) -->
+    <filter id="lungTex-${uid}" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.22 0.18" numOctaves="5" seed="11" stitchTiles="stitch" result="veins"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.38  0 0 0 0 0.38  0 0 0 0 0.38  0 0 0 1.8 -1.05" in="veins" result="veinMask"/>
+      <feBlend in="SourceGraphic" in2="veinMask" mode="screen"/>
+    </filter>
+    <!-- Vascular crowding near hilum: brighter haze -->
+    <radialGradient id="hilarHaze-${uid}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3a3a3a" stop-opacity="0.55"/>
+      <stop offset="40%" stop-color="#282828" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
     <radialGradient id="lgL-${uid}" cx="44%" cy="42%" r="62%">
-      <stop offset="0%" stop-color="#1c1c1c"/><stop offset="55%" stop-color="#101010"/><stop offset="100%" stop-color="#060606"/>
+      <stop offset="0%" stop-color="#202020"/><stop offset="55%" stop-color="#111111"/><stop offset="100%" stop-color="#060606"/>
     </radialGradient>
     <radialGradient id="lgR-${uid}" cx="56%" cy="42%" r="62%">
-      <stop offset="0%" stop-color="#1a1a1a"/><stop offset="55%" stop-color="#0e0e0e"/><stop offset="100%" stop-color="#060606"/>
+      <stop offset="0%" stop-color="#1e1e1e"/><stop offset="55%" stop-color="#0f0f0f"/><stop offset="100%" stop-color="#060606"/>
     </radialGradient>
     <radialGradient id="tissue-${uid}" cx="50%" cy="48%" r="56%">
       <stop offset="0%" stop-color="#2e2e2e"/><stop offset="70%" stop-color="#1c1c1c"/><stop offset="100%" stop-color="#0c0c0c"/>
     </radialGradient>
+    <clipPath id="leftLung-${uid}">
+      <ellipse cx="80" cy="${(154+lungExpY*0.28).toFixed(0)}" rx="66" ry="${(116+lungExpY).toFixed(0)}"/>
+    </clipPath>
+    <clipPath id="rightLung-${uid}">
+      <ellipse cx="180" cy="${(158+lungExpY*0.28).toFixed(0)}" rx="60" ry="${(112+lungExpY).toFixed(0)}"/>
+    </clipPath>
   </defs>
 
   <!-- Film base -->
   <rect width="260" height="315" fill="#040404"/>
 
+  <g class="xray-anatomy">
   <!-- Chest wall soft tissue (outer body) -->
   <ellipse cx="130" cy="175" rx="128" ry="136" fill="url(#tissue-${uid})"/>
 
@@ -2241,8 +2812,19 @@ function makeLungSVGLarge(item, showAnn) {
   <path d="M23 62 Q12 88 15 148 Q19 168 26 172 Q27 142 23 88 Z" fill="#2d2d2d" opacity=".28"/>
 
   <!-- Lung fields (air = radiolucent = dark) -->
-  <ellipse cx="80" cy="${(154+lungExpY*0.28).toFixed(0)}" rx="64" ry="${116+lungExpY}" fill="url(#lgL-${uid})"/>
+  <ellipse cx="80"  cy="${(154+lungExpY*0.28).toFixed(0)}" rx="64" ry="${116+lungExpY}" fill="url(#lgL-${uid})"/>
   <ellipse cx="180" cy="${(158+lungExpY*0.28).toFixed(0)}" rx="58" ry="${112+lungExpY}" fill="url(#lgR-${uid})"/>
+
+  <!-- Interstitial lung markings texture (fine bronchovascular markings throughout parenchyma) -->
+  <g clip-path="url(#leftLung-${uid})">
+    <ellipse cx="80"  cy="${(154+lungExpY*0.28).toFixed(0)}" rx="64" ry="${116+lungExpY}" fill="url(#lgL-${uid})" filter="url(#lungTex-${uid})" opacity="0.55"/>
+    <!-- Hilar vascular crowding haze -->
+    <ellipse cx="${rHX}" cy="${rHY}" rx="32" ry="38" fill="url(#hilarHaze-${uid})"/>
+  </g>
+  <g clip-path="url(#rightLung-${uid})">
+    <ellipse cx="180" cy="${(158+lungExpY*0.28).toFixed(0)}" rx="58" ry="${112+lungExpY}" fill="url(#lgR-${uid})" filter="url(#lungTex-${uid})" opacity="0.55"/>
+    <ellipse cx="${lHX}" cy="${lHY}" rx="28" ry="34" fill="url(#hilarHaze-${uid})"/>
+  </g>
 
   <!-- Pulmonary vasculature (1st/2nd/3rd order vessels) -->
   ${vasculature}
@@ -2304,6 +2886,8 @@ function makeLungSVGLarge(item, showAnn) {
   <!-- Gastric air bubble (left upper quadrant) -->
   <ellipse cx="192" cy="${(diaphY+22).toFixed(0)}" rx="21" ry="10" fill="#111111" opacity=".78"/>
 
+  </g><!-- /xray-anatomy -->
+
   <!-- AI annotation regions -->
   ${rects}
   <!-- PACS annotation circle -->
@@ -2318,6 +2902,18 @@ function makeLungSVGLarge(item, showAnn) {
   <text x="254" y="18" font-size="8" fill="#686868" font-family="monospace" text-anchor="end">${mod} PA</text>
   <text x="254" y="30" font-size="8" fill="#5a5a5a" font-family="monospace" text-anchor="end">HI:${item.chartVal||'--'}</text>
   <text x="254" y="311" font-size="7" fill="#3e3e3e" font-family="monospace" text-anchor="end">W:1700 L:300</text>
+
+  <!-- GradCAM legend (only when overlay on) -->
+  ${showAnn ? `<rect x="6" y="282" width="72" height="29" rx="3" fill="rgba(0,0,0,.72)"/>
+  <text x="9" y="291" font-size="7" fill="#94a3b8" font-family="monospace" font-weight="600" letter-spacing="0.08em">GradCAM</text>
+  <defs><linearGradient id="hm-scale-${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="rgba(239,68,68,0.95)"/>
+    <stop offset="45%"  stop-color="rgba(251,191,36,0.90)"/>
+    <stop offset="100%" stop-color="rgba(59,130,246,0.20)"/>
+  </linearGradient></defs>
+  <rect x="9" y="295" width="66" height="6" rx="2" fill="url(#hm-scale-${uid})"/>
+  <text x="9"  y="308" font-size="6.5" fill="#ef4444" font-family="monospace">HIGH</text>
+  <text x="75" y="308" font-size="6.5" fill="#60a5fa" font-family="monospace" text-anchor="end">LOW</text>` : ''}
 </svg>`;
 }
 
@@ -2390,6 +2986,20 @@ function makeAITrendChart(story, modFilter) {
     <!-- dots -->
     ${dotsHtml}
   </svg>`;
+}
+
+function switchRptTab(ptIdx, tab) {
+  ['orig','ai'].forEach(t => {
+    const panel = document.getElementById(`rpt-panel-${t}-${ptIdx}`);
+    const tabEl = document.getElementById(`rpt-tab-${t}-${ptIdx}`);
+    if (!panel || !tabEl) return;
+    const isActive = t === tab;
+    panel.style.display = isActive ? 'flex' : 'none';
+    tabEl.style.color = isActive ? (t==='orig' ? '#dc2626' : '#0284c7') : '#94a3b8';
+    tabEl.style.fontWeight = isActive ? '700' : '400';
+    tabEl.style.borderBottomColor = isActive ? (t==='orig' ? '#dc2626' : '#0284c7') : 'transparent';
+    tabEl.style.background = isActive ? '#fff' : 'transparent';
+  });
 }
 
 function buildPACSPanel(ptIdx) {
@@ -2616,7 +3226,7 @@ function buildPACSPanel(ptIdx) {
         </div>
 
         <!-- 主要影像 -->
-        <div id="pacs-main-img-${ptIdx}" style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px;">
+        <div id="pacs-main-img-${ptIdx}" class="pacs-main-frame" style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px;">
           ${makeLungSVGLarge(mainScan,true)}
         </div>
 
@@ -2626,33 +3236,63 @@ function buildPACSPanel(ptIdx) {
         </div>
       </div>
 
-      <!-- 右：放射科報告 -->
+      <!-- 右：放射科報告（原始 vs DeepQ 重判 雙 tab） -->
       <div style="background:#fff;border-left:1px solid #e2e8f0;overflow-y:auto;display:flex;flex-direction:column;">
-        <!-- 報告抬頭 -->
-        <div style="padding:10px 13px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:7px;background:#f8fafc;">
-          <i class="fa-solid fa-user-doctor" style="color:#0284c7;font-size:13px;"></i>
-          <div>
-            <div style="font-size:11px;font-weight:600;color:#0f172a;">Reported by</div>
-            <div style="font-size:10px;font-family:monospace;color:#64748b;margin-top:1px;">${report.doctor}</div>
+
+        <!-- Tab bar -->
+        <div style="display:flex;border-bottom:2px solid #e2e8f0;flex-shrink:0;background:#f8fafc;">
+          <div id="rpt-tab-orig-${ptIdx}" onclick="switchRptTab(${ptIdx},'orig')"
+            style="flex:1;padding:7px 4px;text-align:center;font-family:monospace;font-size:10px;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;user-select:none;">
+            <i class="fa-solid fa-file-lines" style="font-size:9px;margin-right:3px;"></i>原始報告
+          </div>
+          <div id="rpt-tab-ai-${ptIdx}" onclick="switchRptTab(${ptIdx},'ai')"
+            style="flex:1;padding:7px 4px;text-align:center;font-family:monospace;font-size:10px;color:#0284c7;font-weight:700;cursor:pointer;border-bottom:2px solid #0284c7;margin-bottom:-2px;background:#fff;user-select:none;">
+            <i class="fa-solid fa-brain" style="font-size:9px;margin-right:3px;"></i>DeepQ 重判
           </div>
         </div>
 
-        <!-- 報告內容 -->
-        <div style="padding:10px 13px;flex:1;">
-          <div style="font-family:monospace;font-size:10px;font-weight:700;color:#0284c7;letter-spacing:.08em;margin-bottom:8px;">RADIOLOGY REPORT</div>
-
-          <div style="font-family:monospace;font-size:10px;color:#64748b;margin-bottom:6px;">Findings:</div>
-          <div id="${overlayId}-findings">${findingRows}</div>
-
-          <div style="font-family:monospace;font-size:10px;color:#64748b;margin:10px 0 6px;">Impression:</div>
-          <div id="${overlayId}-impression" style="margin-bottom:10px;">${impressionRows}</div>
-
-          <!-- AI 摘要 -->
-          <div style="background:rgba(${acRGB},0.07);border:1px solid rgba(${acRGB},0.25);border-radius:6px;padding:8px 10px;margin-top:8px;">
-            <div style="font-family:monospace;font-size:9px;font-weight:600;color:${ac};margin-bottom:4px;display:flex;align-items:center;gap:5px;">
-              <i class="fa-solid fa-brain" style="font-size:9px;"></i> DeepQ AI Analysis
+        <!-- 原始報告 panel (預設隱藏) -->
+        <div id="rpt-panel-orig-${ptIdx}" style="display:none;flex-direction:column;flex:1;">
+          <div style="padding:9px 13px;border-bottom:1px solid #fecaca;display:flex;align-items:center;gap:7px;background:#fef2f2;flex-shrink:0;">
+            <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;font-size:13px;"></i>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#dc2626;">原始放射科報告</div>
+              <div style="font-size:10px;font-family:monospace;color:#64748b;margin-top:1px;">${report.originalReport.radiologist} · ${report.originalReport.date}</div>
             </div>
-            <div style="font-size:10px;color:#475569;line-height:1.65;">${report.aiNote}</div>
+          </div>
+          <div style="padding:10px 13px;flex:1;overflow-y:auto;">
+            <div style="font-family:monospace;font-size:10px;font-weight:700;color:#64748b;letter-spacing:.08em;margin-bottom:6px;">影像所見</div>
+            <div style="font-size:11px;color:#475569;line-height:1.75;padding:9px 11px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;margin-bottom:10px;">${report.originalReport.text}</div>
+            <div style="font-family:monospace;font-size:10px;font-weight:700;color:#64748b;letter-spacing:.08em;margin-bottom:6px;">結論</div>
+            <div style="font-size:12px;font-weight:600;color:#334155;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">${report.originalReport.impression}</div>
+            <div style="margin-top:12px;padding:9px 11px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:10px;color:#991b1b;font-family:monospace;line-height:1.7;">
+              <i class="fa-solid fa-circle-xmark" style="margin-right:5px;"></i><strong>DeepQ AI 重判：此報告遺漏了 COPD 相關影像異常</strong><br>
+              點擊「DeepQ 重判」分頁查看 AI 發現的隱性病變
+            </div>
+          </div>
+        </div>
+
+        <!-- DeepQ AI 重判 panel (預設顯示) -->
+        <div id="rpt-panel-ai-${ptIdx}" style="display:flex;flex-direction:column;flex:1;">
+          <div style="padding:9px 13px;border-bottom:1px solid #bfdbfe;display:flex;align-items:center;gap:7px;background:#eff6ff;flex-shrink:0;">
+            <i class="fa-solid fa-brain" style="color:#0284c7;font-size:13px;"></i>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#0284c7;">DeepQ Vision AI 重判報告</div>
+              <div style="font-size:10px;font-family:monospace;color:#64748b;margin-top:1px;">${report.doctor}</div>
+            </div>
+            <span style="margin-left:auto;font-family:monospace;font-size:8px;background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;padding:1px 6px;border-radius:3px;white-space:nowrap;">TFDA 核准</span>
+          </div>
+          <div style="padding:10px 13px;flex:1;overflow-y:auto;">
+            <div style="font-family:monospace;font-size:10px;font-weight:700;color:#0284c7;letter-spacing:.08em;margin-bottom:8px;">DeepQ 重判 · 影像發現</div>
+            <div id="${overlayId}-findings">${findingRows}</div>
+            <div style="font-family:monospace;font-size:10px;color:#64748b;margin:10px 0 6px;">結論：</div>
+            <div id="${overlayId}-impression" style="margin-bottom:10px;">${impressionRows}</div>
+            <div style="background:rgba(${acRGB},0.07);border:1px solid rgba(${acRGB},0.25);border-radius:6px;padding:8px 10px;margin-top:8px;">
+              <div style="font-family:monospace;font-size:9px;font-weight:600;color:${ac};margin-bottom:4px;display:flex;align-items:center;gap:5px;">
+                <i class="fa-solid fa-brain" style="font-size:9px;"></i> DeepQ AI Quantitative Analysis
+              </div>
+              <div style="font-size:10px;color:#475569;line-height:1.65;">${report.aiNote}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -2676,7 +3316,7 @@ function buildPACSPanel(ptIdx) {
       <!-- 動作按鈕 -->
       <div style="font-family:monospace;font-size:11px;font-weight:600;color:#0f172a;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 18px;display:flex;align-items:center;gap:8px;flex-shrink:0;">
         <i class="fa-solid fa-brain" style="color:#0284c7;font-size:12px;"></i>
-        Agree with AI findings?
+        同意 AI 判讀結果？
       </div>
       <button onclick="this.style.background='#fee2e2';this.style.borderColor='#fca5a5';this.style.color='#dc2626';"
         style="width:34px;height:34px;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0;color:#94a3b8;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;">
@@ -2687,6 +3327,26 @@ function buildPACSPanel(ptIdx) {
         <i class="fa-solid fa-check"></i>
       </button>
     </div>
+
+    <!-- ── ASA 術前風險警示（僅骨科病人 ptIdx===2）── -->
+    ${ptIdx===2 ? `
+    <div id="asa-alert-card-2" style="background:#fff7ed;border-top:2px solid #f97316;padding:10px 14px;display:flex;align-items:flex-start;gap:12px;">
+      <i class="fa-solid fa-triangle-exclamation" style="color:#ea580c;font-size:18px;margin-top:2px;flex-shrink:0;"></i>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:700;color:#9a3412;font-family:var(--mono);">術前麻醉風險上升 · 建議麻醉科會診</div>
+        <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;">
+          <span style="font-family:monospace;font-size:10px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:2px 8px;border-radius:4px;">COPD 嚴重度指數 44 → 71 ↑</span>
+          <span style="font-family:monospace;font-size:10px;background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:2px 8px;border-radius:4px;">建議 ASA Class III</span>
+          <span style="font-family:monospace;font-size:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:2px 8px;border-radius:4px;">FEV₁ 術前覆測 必要</span>
+        </div>
+        <div style="font-size:10px;color:#9a3412;margin-top:5px;line-height:1.65;">DeepQ AI 偵測到本次影像 COPD 惡化，與初次評估相比風險顯著提升。建議手術前安排麻醉科會診及肺功能覆測，確保術後照護計畫完整。</div>
+      </div>
+      <button onclick="document.getElementById('asa-alert-card-2').style.display='none';"
+        style="flex-shrink:0;padding:5px 14px;border-radius:6px;border:1px solid #f97316;background:#fff;color:#ea580c;font-size:10px;font-family:var(--mono);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .2s;"
+        onmouseenter="this.style.background='#fff7ed'" onmouseleave="this.style.background='#fff'">
+        <i class="fa-solid fa-circle-check" style="font-size:9px;margin-right:4px;"></i>已知悉
+      </button>
+    </div>` : ''}
 
     <!-- ── 趨勢圖（折疊在底部） ── -->
     <div style="border-top:1px solid #e2e8f0;">
@@ -2773,6 +3433,594 @@ function closePACSView(ptIdx) {
   document.getElementById('p2-ws-view').style.display = 'block';
   document.getElementById('p2-ws-view').scrollIntoView({behavior:'smooth', block:'start'});
 }
+/* ══ 肺功能／檢驗報告 ══ */
+function wsToggleLab(ptIdx) {
+  document.getElementById('p2-ws-view').style.display = 'none';
+  document.getElementById('p2-pacs-view').style.display = 'none';
+  const labView = document.getElementById('p2-lab-view');
+  labView.style.display = 'block';
+  labView.innerHTML = buildLabPage(ptIdx);
+  labView.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function closeLabView(ptIdx) {
+  document.getElementById('p2-lab-view').style.display = 'none';
+  document.getElementById('p2-lab-view').innerHTML = '';
+  document.getElementById('p2-ws-view').style.display = 'block';
+  document.getElementById('p2-ws-view').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function buildLabPage(ptIdx) {
+  const pt = PTS[ptIdx];
+  const mrn = ['A234891','B198024','C376150'][ptIdx];
+
+  /* ── 共用 header ── */
+  const [headerBadge, headerNote] = [
+    ['<span style="font-family:var(--mono);font-size:9px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);border-radius:3px;padding:1px 7px;">⚠ 從未執行 Spirometry</span>',
+     '呼吸功能指標追蹤 · 2024–2026'],
+    ['<span style="font-family:var(--mono);font-size:9px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);border-radius:3px;padding:1px 7px;">⚠ 從未確認可逆性</span>',
+     'Peak Flow 追蹤 · 3年4次就診紀錄'],
+    ['<span style="font-family:var(--mono);font-size:9px;background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.3);border-radius:3px;padding:1px 7px;">GOLD I 確診 · 2023/03/15</span><span style="font-family:var(--mono);font-size:9px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);border-radius:3px;padding:1px 7px;margin-left:6px;">⚠ 距今 3 年未複測</span>',
+     'Spirometry 歷史追蹤 · FEV₁ 趨勢預測'],
+  ][ptIdx];
+  const header = `
+    <div style="display:flex;align-items:center;gap:10px;background:#134e4a;padding:9px 16px;border-radius:10px 10px 0 0;">
+      <button onclick="closeLabView(${ptIdx})" style="padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#99f6e4;font-size:11px;font-family:var(--sans);cursor:pointer;display:flex;align-items:center;gap:5px;" onmouseenter="this.style.background='rgba(255,255,255,.15)'" onmouseleave="this.style.background='rgba(255,255,255,.08)'">
+        <i class="fa-solid fa-chevron-left" style="font-size:10px;"></i> 返回病歷
+      </button>
+      <div style="width:1px;height:20px;background:rgba(255,255,255,.15);"></div>
+      <i class="fa-solid fa-flask-vial" style="color:#5eead4;font-size:14px;"></i>
+      <span style="font-family:var(--mono);font-size:11px;color:#ccfbf1;font-weight:600;">肺功能檢查紀錄 · ${headerNote}</span>
+      <span style="font-family:var(--mono);font-size:10px;color:#64748b;">${pt.nm} · ${pt.age} · ${pt.sex}</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <span style="font-family:var(--mono);font-size:9px;color:#475569;">病歷號 ${mrn}</span>
+        ${headerBadge}
+      </div>
+    </div>`;
+
+  /* ══ P0 王大明 · 胸腔內科：3 次追蹤 Spirometry + Body Plethysmography + DLCO ══ */
+  if (ptIdx === 0) {
+    /* Multi-session F/V Loop: 3 Post-BD sessions (2025/03→2025/06→2026/02), progressive GOLD II
+       fx(v)=38+v*42, fy(f)=100-f*8.8
+       2025/03(green): FVC 3.94L→x=204, PEF 5.52→y=51
+       2025/06(orange): FVC 3.86L→x=200, PEF 5.38→y=53
+       2026/02(red):  FVC 3.81L→x=198, PEF 5.23→y=54  */
+    const p0fvSVG = `<svg viewBox="0 0 290 215" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border-radius:4px;">
+      <defs><marker id="arr0" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#111"/></marker></defs>
+      <text x="100" y="10" font-family="Arial" font-size="8.5" fill="#222" font-weight="600">F/V ex</text>
+      <line x1="38" y1="100" x2="252" y2="100" stroke="#111" stroke-width="1.2"/>
+      <line x1="38" y1="12"  x2="38"  y2="200" stroke="#111" stroke-width="1.2"/>
+      <line x1="34" y1="12"  x2="38" y2="12"  stroke="#111"/><text x="32" y="15"  font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">10</text>
+      <line x1="34" y1="56"  x2="38" y2="56"  stroke="#111"/><text x="32" y="59"  font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">5</text>
+      <line x1="34" y1="100" x2="38" y2="100" stroke="#111"/><text x="32" y="103" font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">0</text>
+      <line x1="34" y1="144" x2="38" y2="144" stroke="#111"/><text x="32" y="147" font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">-5</text>
+      <text x="8" y="65" font-family="Arial" font-size="8" fill="#444" text-anchor="middle" transform="rotate(-90,8,65)">Flow [L/s]</text>
+      <line x1="80"  y1="100" x2="80"  y2="104" stroke="#111"/><text x="80"  y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">1</text>
+      <line x1="122" y1="100" x2="122" y2="104" stroke="#111"/><text x="122" y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">2</text>
+      <line x1="164" y1="100" x2="164" y2="104" stroke="#111"/><text x="164" y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">3</text>
+      <line x1="206" y1="100" x2="206" y2="104" stroke="#111"/><text x="206" y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">4</text>
+      <text x="152" y="122" font-family="Arial" font-size="8" fill="#444">Vol [L]</text>
+      <text x="100" y="207" font-family="Arial" font-size="8.5" fill="#222" font-weight="600">F/V in</text>
+      <!-- Normal reference (pred FVC 4.12L, PEF 7.42) -->
+      <path d="M 38 100 C 39 62, 46 35, 50 35 C 82 35, 116 54, 154 70 C 190 84, 209 96, 211 100 C 202 120, 172 147, 140 150 C 108 153, 68 132, 38 100 Z" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>
+      <!-- 2025/03 Post-BD (green, widest, least scooped) -->
+      <path d="M 38 100 C 39 66, 41 51, 42 51 C 62 49, 82 61, 104 69 C 132 79, 168 91, 204 100 C 194 117, 164 133, 129 136 C 95 138, 61 121, 38 100 Z" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+      <!-- 2025/06 Post-BD (orange, middle) -->
+      <path d="M 38 100 C 39 67, 41 53, 42 53 C 60 51, 80 63, 101 71 C 129 80, 163 92, 200 100 C 190 117, 161 132, 126 135 C 92 137, 58 120, 38 100 Z" fill="none" stroke="#f97316" stroke-width="1.5"/>
+      <!-- 2026/02 Post-BD today (red, narrowest, most scooped) -->
+      <path d="M 38 100 C 39 67, 41 54, 42 54 C 59 52, 77 64, 97 72 C 124 82, 158 92, 198 100 C 188 117, 158 132, 123 135 C 89 136, 57 120, 38 100 Z" fill="none" stroke="#dc2626" stroke-width="2"/>
+      <!-- Tidal loops (VT~0.5L, centered at FRC position) — shift LEFT = worsening hyperinflation -->
+      <path d="M 133,100 C 133,96 153,96 153,100 C 153,104 133,104 133,100 Z" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="0.9"/>
+      <path d="M 129,100 C 129,96.5 149,96.5 149,100 C 149,103.5 129,103.5 129,100 Z" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="0.9"/>
+      <path d="M 125,100 C 125,97 145,97 145,100 C 145,103 125,103 125,100 Z" fill="rgba(220,38,38,0.12)" stroke="#dc2626" stroke-width="0.9"/>
+      <text x="118" y="88" font-family="Arial" font-size="5.5" fill="#64748b" text-anchor="middle">← 潮氣環左移</text>
+      <!-- Arrows A (2025/03 peak) B (today peak) -->
+      <line x1="65" y1="22" x2="43" y2="50" stroke="#111" stroke-width="1.2" marker-end="url(#arr0)"/>
+      <text x="67" y="20" font-family="Arial" font-size="10" fill="#111" font-weight="700">A</text>
+      <line x1="82" y1="28" x2="44" y2="53" stroke="#111" stroke-width="1.2" marker-end="url(#arr0)"/>
+      <text x="84" y="26" font-family="Arial" font-size="10" fill="#111" font-weight="700">B</text>
+      <!-- Legend with dates -->
+      <rect x="206" y="14" width="78" height="88" fill="#fff" stroke="#ccc" stroke-width="0.8" rx="2"/>
+      <line x1="208" y1="23" x2="220" y2="23" stroke="#22c55e" stroke-width="1.5"/><text x="223" y="26" font-family="Arial" font-size="7" fill="#222">2025/03</text>
+      <line x1="208" y1="35" x2="220" y2="35" stroke="#f97316" stroke-width="1.5"/><text x="223" y="38" font-family="Arial" font-size="7" fill="#222">2025/06</text>
+      <line x1="208" y1="47" x2="220" y2="47" stroke="#dc2626" stroke-width="2"/>  <text x="223" y="50" font-family="Arial" font-size="7" fill="#222">2026/02★</text>
+      <line x1="208" y1="59" x2="220" y2="59" stroke="#bbb" stroke-width="1" stroke-dasharray="3,2"/><text x="223" y="62" font-family="Arial" font-size="7" fill="#888">預測值</text>
+      <ellipse cx="214" cy="71" rx="6" ry="2.5" fill="rgba(100,116,139,0.12)" stroke="#64748b" stroke-width="0.8"/><text x="223" y="74" font-family="Arial" font-size="7" fill="#475569">潮氣環(VT)</text>
+      <text x="223" y="84" font-family="Arial" font-size="6" fill="#94a3b8">← 左移=充氣惡化</text>
+    </svg>`;
+
+    /* AI FEV₁ % pred trend SVG (Post-BD): 67%→65%→62%→AI 58% */
+    const p0TrendSVG = `<svg viewBox="0 0 255 78" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border:1px solid #e2e8f0;border-radius:4px;">
+      <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">DeepQ AI · Post-BD FEV₁% 追蹤趨勢</text>
+      <line x1="45" y1="15" x2="45" y2="66" stroke="#ccc" stroke-width="1"/>
+      <line x1="45" y1="66" x2="238" y2="66" stroke="#ccc" stroke-width="1"/>
+      <!-- GOLD II/III 50% boundary -->
+      <line x1="45" y1="66" x2="238" y2="66" stroke="#f97316" stroke-width=".8" stroke-dasharray="3,2" opacity=".7"/>
+      <text x="43" y="69" font-family="monospace" font-size="6" fill="#f97316" text-anchor="end">50%</text>
+      <text x="43" y="19" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">75%</text>
+      <!-- fy(p)=66-(p-50)*2; 75%→16, 67%→32, 65%→36, 62%→42, 58%→50 -->
+      <line x1="70" y1="32" x2="130" y2="36" stroke="#475569" stroke-width="1.5"/>
+      <line x1="130" y1="36" x2="185" y2="42" stroke="#475569" stroke-width="1.5"/>
+      <line x1="185" y1="42" x2="220" y2="50" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <circle cx="70"  cy="32" r="4" fill="#22c55e"/><text x="70"  y="28" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">67%</text>
+      <circle cx="130" cy="36" r="4" fill="#f97316"/><text x="130" y="32" font-family="monospace" font-size="7" fill="#f97316" text-anchor="middle">65%</text>
+      <circle cx="185" cy="42" r="4.5" fill="#dc2626"/><text x="185" y="38" font-family="monospace" font-size="7" fill="#dc2626" text-anchor="middle">62%</text>
+      <circle cx="220" cy="50" r="3.5" fill="#dc2626" stroke="#fff" stroke-width="1" opacity=".7"/><text x="222" y="46" font-family="monospace" font-size="7" fill="#dc2626">~58%</text>
+      <text x="70"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2025/03</text>
+      <text x="130" y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2025/06</text>
+      <text x="185" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2026/02</text>
+      <text x="220" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">AI 投影</text>
+    </svg>`;
+
+    /* Spirometry 3-session comparison table */
+    const spiroCompTbl = [
+      ['2025/03', '3.90(95%)', '2.07(65%)', '53%', '2.14(67%)', '+3.4%'],
+      ['2025/06', '3.82(93%)', '2.00(63%)', '52%', '2.07(65%)', '+3.5%'],
+      ['2026/02★', '3.75(91%)', '1.91(60%)', '51%', '1.97(62%)', '+3.1%'],
+    ].map(([d,fvc,preFev,ratio,postFev,imp],i)=>`<tr style="border-bottom:1px solid #f1f5f9;${i===2?'background:#fef3c7;':''}">
+      <td style="padding:4px 7px;font-family:monospace;font-size:10px;color:${i===2?'#92400e':'#475569'};font-weight:${i===2?700:400};">${d}</td>
+      <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:10px;color:#475569;">${fvc}</td>
+      <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:10px;color:#f97316;">${preFev}</td>
+      <td style="padding:4px 7px;text-align:center;font-family:monospace;font-size:10px;color:#dc2626;">${ratio}</td>
+      <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:10px;font-weight:700;color:#0369a1;">${postFev}</td>
+      <td style="padding:4px 7px;text-align:center;font-family:monospace;font-size:10px;color:#64748b;">${imp}</td>
+    </tr>`).join('');
+
+    /* Body plethysmography */
+    const pleTbl = [
+      {p:'TLC',    u:'L',        pred:'6.02',  act:'6.84', pct:'114', flag:'↑'},
+      {p:'FRC',    u:'L',        pred:'3.04',  act:'3.96', pct:'130', flag:'↑↑'},
+      {p:'RV',     u:'L',        pred:'1.80',  act:'2.98', pct:'166', flag:'↑↑'},
+      {p:'RV/TLC', u:'%',        pred:'30',    act:'44',   pct:'—',   flag:'↑↑'},
+      {p:'Raw',    u:'kPa·s/L',  pred:'<0.30', act:'0.48', pct:'—',   flag:'↑'},
+    ].map(r=>{
+      const fc=r.flag==='↑↑'?'#dc2626':r.flag==='↑'?'#f59e0b':'#64748b';
+      return `<tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:4px 7px;font-family:monospace;font-size:11px;font-weight:600;color:#0f172a;">${r.p}</td>
+        <td style="padding:4px 7px;font-family:monospace;font-size:9.5px;color:#94a3b8;">${r.u}</td>
+        <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:10px;color:#64748b;">${r.pred}</td>
+        <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:11px;font-weight:700;color:${fc};">${r.act}</td>
+        <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:10px;color:${fc};">${r.pct==='—'?'—':r.pct+'%'}</td>
+        <td style="padding:4px 7px;font-size:12px;color:${fc};font-weight:700;">${r.flag}</td>
+      </tr>`;
+    }).join('');
+
+    /* DLCO */
+    const dlcoTbl = [
+      {p:'DLCO', u:'mL/min/mmHg',   pred:'20.8', act:'14.1', pct:'68', flag:'↓↓'},
+      {p:'VA',   u:'L',             pred:'5.85',  act:'5.20', pct:'89', flag:''},
+      {p:'KCO',  u:'mL/min/mmHg/L', pred:'3.55',  act:'2.71', pct:'76', flag:'↓'},
+    ].map(r=>{
+      const fc=r.flag==='↓↓'?'#dc2626':r.flag==='↓'?'#f59e0b':'#64748b';
+      const pc=r.flag?'#dc2626':'#0f172a';
+      return `<tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:4px 7px;font-family:monospace;font-size:11px;font-weight:600;color:#0f172a;">${r.p}</td>
+        <td style="padding:4px 7px;font-family:monospace;font-size:9.5px;color:#94a3b8;">${r.u}</td>
+        <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:10px;color:#64748b;">${r.pred}</td>
+        <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:11px;font-weight:700;color:${pc};">${r.act}</td>
+        <td style="padding:4px 7px;text-align:right;font-family:monospace;font-size:10px;color:${pc};">${r.pct==='—'?'—':r.pct+'%'}</td>
+        <td style="padding:4px 7px;font-size:12px;color:${fc};font-weight:700;">${r.flag}</td>
+      </tr>`;
+    }).join('');
+
+    return header + `
+    <div style="display:grid;grid-template-columns:285px 1fr;height:480px;border-radius:0 0 10px 10px;overflow:hidden;border:1px solid #0d9488;border-top:none;">
+      <!-- 左：F/V Loop (3 sessions) + AI trend -->
+      <div style="background:#f8fafc;padding:12px;overflow-y:auto;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:#0f766e;font-weight:600;">▌ 流量–容積環 · 3 次追蹤疊圖（Post-BD 最佳值）</div>
+        ${p0fvSVG}
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:5px;padding:6px;font-family:var(--mono);font-size:7.5px;color:#14532d;line-height:1.9;">
+          <span style="color:#22c55e;font-weight:600;">——— 2025/03：</span>Post-BD FEV₁ <strong>67%</strong>，FVC 3.94L<br>
+          <span style="color:#f97316;font-weight:600;">——— 2025/06：</span>Post-BD FEV₁ <strong>65%</strong>，FVC 3.86L（曲線向左移）<br>
+          <span style="color:#dc2626;font-weight:600;">——— 2026/02：</span>Post-BD FEV₁ <strong>62%</strong>，FVC 3.81L（凹陷加深）<br>
+          三次 Post-BD 改善均 &lt;4%：不可逆性確認
+        </div>
+        ${p0TrendSVG}
+      </div>
+      <!-- 右：Spirometry 比較 + Body Box + DLCO + AI -->
+      <div style="background:#fff;overflow-y:auto;display:flex;flex-direction:column;">
+        <div style="padding:9px 14px;border-bottom:1px solid #e2e8f0;background:#f8fafc;flex-shrink:0;">
+          <div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:2px;">完整肺功能評估（2026/02/18）· 第 3 次追蹤</div>
+          <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;">SensorMedics Vmax + Body Box · Hb 14.2g/dL · GLI-2012 · 判讀：陳○偉主治/胸腔內科</div>
+        </div>
+        <!-- Spirometry 追蹤比較 -->
+        <div style="padding:8px 14px;border-bottom:1px solid #f1f5f9;">
+          <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;">Spirometry 3 次追蹤（Pre-BD / Post-BD）</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#f1f5f9;">
+              <th style="padding:4px 7px;text-align:left;font-family:monospace;font-size:8.5px;color:#64748b;">日期</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#64748b;">FVC</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#64748b;">Pre FEV₁</th>
+              <th style="padding:4px 7px;text-align:center;font-family:monospace;font-size:8.5px;color:#64748b;">FEV₁/FVC</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#0369a1;font-weight:700;">Post FEV₁</th>
+              <th style="padding:4px 7px;text-align:center;font-family:monospace;font-size:8.5px;color:#64748b;">改善率</th>
+            </tr></thead>
+            <tbody>${spiroCompTbl}</tbody>
+          </table>
+          <div style="margin-top:4px;font-family:var(--mono);font-size:8px;color:#dc2626;">全程 GOLD II · 年均下降率約 2.5% pred/yr（超過正常老化 ~1%）</div>
+        </div>
+        <!-- Body Plethysmography -->
+        <div style="padding:8px 14px;border-bottom:1px solid #f1f5f9;">
+          <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;">體箱計 Body Plethysmography（2026/02/18）</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#f1f5f9;">
+              <th style="padding:4px 7px;text-align:left;font-family:monospace;font-size:8.5px;color:#64748b;">參數</th>
+              <th style="padding:4px 7px;font-family:monospace;font-size:8.5px;color:#64748b;">單位</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#64748b;">預測</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#374151;font-weight:700;">實測</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#374151;">%Pred</th>
+              <th style="padding:4px 7px;"></th>
+            </tr></thead>
+            <tbody>${pleTbl}</tbody>
+          </table>
+          <div style="margin-top:4px;font-family:var(--mono);font-size:8px;color:#475569;">RV 166%、RV/TLC 44% → <strong>嚴重氣體陷閉</strong> · TLC 114% → 過度充氣</div>
+        </div>
+        <!-- DLCO -->
+        <div style="padding:8px 14px;border-bottom:1px solid #f1f5f9;">
+          <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;">肺擴散功能 DLCO（2026/02/18）· Hb 14.2g/dL 未校正</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#f1f5f9;">
+              <th style="padding:4px 7px;text-align:left;font-family:monospace;font-size:8.5px;color:#64748b;">參數</th>
+              <th style="padding:4px 7px;font-family:monospace;font-size:8.5px;color:#64748b;">單位</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#64748b;">預測</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#374151;font-weight:700;">實測</th>
+              <th style="padding:4px 7px;text-align:right;font-family:monospace;font-size:8.5px;color:#374151;">%Pred</th>
+              <th style="padding:4px 7px;"></th>
+            </tr></thead>
+            <tbody>${dlcoTbl}</tbody>
+          </table>
+          <div style="margin-top:4px;font-family:var(--mono);font-size:8px;color:#475569;">DLCO 68% → 輕中度擴散障礙，提示氣腫成分合併存在</div>
+        </div>
+        <!-- AI 判讀 -->
+        <div style="padding:10px 14px;flex:1;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:11px;">
+            <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-bottom:6px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-brain"></i>DeepQ AI 肺功能綜合判讀</div>
+            <div style="font-family:var(--mono);font-size:9.5px;color:#1e3a8a;line-height:1.8;">
+              <strong style="color:#dc2626;">GOLD II 持續進展：Post-BD FEV₁ 67%→65%→62%（年均 −2.5%）超過正常老化速率。</strong><br><br>
+              · F/V 環疊圖：各曲線依序右移（FVC 縮小）且凹陷加深 → 阻塞與氣體陷閉雙向惡化<br>
+              · Body Box：RV 166%、RV/TLC 44% → 嚴重靜態過度充氣，Raw 升高確認氣道阻力<br>
+              · DLCO 68% → 肺泡毀損（氣腫）合併 COPD，提示需更積極防護策略<br>
+              · 三次 Post-BD 改善均 &lt;4%：不可逆性反覆確認，排除可逆成分
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ══ P1 陳阿嬌 · 家醫科：2 次 Spirometry 追蹤，COPD 確診（非氣喘）══ */
+  if (ptIdx === 1) {
+    /* Multi-session F/V Loop: 2 sessions
+       Session 1 (2023/04, green, 外院 Pre-BD only): FVC 2.52L→x=144, PEF 4.35→y=62
+       Session 2 (2025/03, red, Pre-BD): FVC 2.38L→x=138, PEF 4.10→y=64
+       Session 2 Post-BD (2025/03, blue): FVC 2.42L→x=140, PEF 4.28→y=62 (barely better)
+       Female/smaller lung → narrower loop vs normal reference */
+    const p1fvSVG = `<svg viewBox="0 0 290 215" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border-radius:4px;">
+      <defs><marker id="arr1" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#111"/></marker></defs>
+      <text x="100" y="10" font-family="Arial" font-size="8.5" fill="#222" font-weight="600">F/V ex</text>
+      <line x1="38" y1="100" x2="252" y2="100" stroke="#111" stroke-width="1.2"/>
+      <line x1="38" y1="12"  x2="38"  y2="200" stroke="#111" stroke-width="1.2"/>
+      <line x1="34" y1="12"  x2="38" y2="12"  stroke="#111"/><text x="32" y="15"  font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">10</text>
+      <line x1="34" y1="56"  x2="38" y2="56"  stroke="#111"/><text x="32" y="59"  font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">5</text>
+      <line x1="34" y1="100" x2="38" y2="100" stroke="#111"/><text x="32" y="103" font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">0</text>
+      <line x1="34" y1="144" x2="38" y2="144" stroke="#111"/><text x="32" y="147" font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">-5</text>
+      <text x="8" y="65" font-family="Arial" font-size="8" fill="#444" text-anchor="middle" transform="rotate(-90,8,65)">Flow [L/s]</text>
+      <line x1="80"  y1="100" x2="80"  y2="104" stroke="#111"/><text x="80"  y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">1</text>
+      <line x1="122" y1="100" x2="122" y2="104" stroke="#111"/><text x="122" y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">2</text>
+      <line x1="149" y1="100" x2="149" y2="104" stroke="#111"/><text x="152" y="122" font-family="Arial" font-size="8" fill="#444">Vol [L]</text>
+      <text x="100" y="207" font-family="Arial" font-size="8.5" fill="#222" font-weight="600">F/V in</text>
+      <!-- Normal female reference (FVC 2.64L→x=149, PEF 6.5→y=43) -->
+      <path d="M 38 100 C 39 66, 43 43, 46 43 C 68 42, 95 60, 116 72 C 134 82, 146 94, 149 100 C 143 116, 124 128, 106 130 C 88 132, 64 120, 38 100 Z" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>
+      <!-- Session 1: 2023/04 外院 Pre-BD (green, wider, less scooped FEV₁~72%) -->
+      <path d="M 38 100 C 39 72, 41 62, 43 62 C 56 60, 72 68, 92 74 C 114 82, 133 93, 144 100 C 139 113, 122 122, 104 124 C 85 125, 63 115, 38 100 Z" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+      <!-- Session 2: 2025/03 Pre-BD (red, narrower, more scooped FEV₁ 66%) -->
+      <path d="M 38 100 C 39 73, 41 64, 43 64 C 54 62, 68 71, 87 78 C 108 85, 128 94, 138 100 C 133 113, 116 122, 98 124 C 80 125, 61 115, 38 100 Z" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+      <!-- Session 2: 2025/03 Post-BD (blue, barely better — MINIMAL reversibility) -->
+      <path d="M 38 100 C 39 72, 41 62, 43 62 C 55 60, 70 68, 90 75 C 111 82, 131 92, 140 100 C 135 113, 117 122, 100 124 C 82 125, 62 114, 38 100 Z" fill="none" stroke="#2196f3" stroke-width="2"/>
+      <!-- Tidal loops (VT~0.5L) — left shift across sessions = worsening hyperinflation -->
+      <path d="M 88,100 C 88,96.5 106,96.5 106,100 C 106,103.5 88,103.5 88,100 Z" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="0.9"/>
+      <path d="M 81,100 C 81,97 99,97 99,100 C 99,103 81,103 81,100 Z" fill="rgba(220,38,38,0.12)" stroke="#dc2626" stroke-width="0.9"/>
+      <path d="M 84,100 C 84,97 102,97 102,100 C 102,103 84,103 84,100 Z" fill="rgba(33,150,243,0.12)" stroke="#2196f3" stroke-width="0.9"/>
+      <text x="86" y="88" font-family="Arial" font-size="5.5" fill="#64748b" text-anchor="middle">← 潮氣環左移</text>
+      <!-- Annotation: reversibility label -->
+      <text x="105" y="52" font-family="Arial" font-size="7" fill="#dc2626" font-style="italic">Post-BD 改善 +5.5%</text>
+      <text x="105" y="61" font-family="Arial" font-size="7" fill="#dc2626" font-style="italic">(&lt;12% → 不可逆)</text>
+      <!-- Arrows A (2023 PEF) B (2025 Pre PEF) -->
+      <line x1="60" y1="24" x2="44" y2="61" stroke="#111" stroke-width="1.2" marker-end="url(#arr1)"/>
+      <text x="62" y="22" font-family="Arial" font-size="10" fill="#111" font-weight="700">A</text>
+      <line x1="78" y1="30" x2="44" y2="63" stroke="#111" stroke-width="1.2" marker-end="url(#arr1)"/>
+      <text x="80" y="28" font-family="Arial" font-size="10" fill="#111" font-weight="700">B</text>
+      <!-- Legend -->
+      <rect x="208" y="14" width="78" height="88" fill="#fff" stroke="#ccc" stroke-width="0.8" rx="2"/>
+      <line x1="210" y1="23" x2="222" y2="23" stroke="#22c55e" stroke-width="1.5"/><text x="225" y="26" font-family="Arial" font-size="7" fill="#222">2023/04 外院</text>
+      <line x1="210" y1="35" x2="222" y2="35" stroke="#dc2626" stroke-width="1.5"/><text x="225" y="38" font-family="Arial" font-size="7" fill="#222">2025/03 Pre-BD</text>
+      <line x1="210" y1="47" x2="222" y2="47" stroke="#2196f3" stroke-width="2"/>  <text x="225" y="50" font-family="Arial" font-size="7" fill="#222">2025/03 Post-BD</text>
+      <line x1="210" y1="59" x2="222" y2="59" stroke="#bbb" stroke-width="1" stroke-dasharray="3,2"/><text x="225" y="62" font-family="Arial" font-size="7" fill="#888">預測值</text>
+      <ellipse cx="216" cy="71" rx="6" ry="2.5" fill="rgba(100,116,139,0.12)" stroke="#64748b" stroke-width="0.8"/><text x="225" y="74" font-family="Arial" font-size="7" fill="#475569">潮氣環(VT)</text>
+      <text x="225" y="84" font-family="Arial" font-size="6" fill="#94a3b8">← 左移=充氣惡化</text>
+    </svg>`;
+
+    /* AI FEV₁ trend SVG (Pre-BD: 2023/04 72% → 2025/03 66% → projected 60%) */
+    const p1TrendSVG = `<svg viewBox="0 0 255 78" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border:1px solid #e2e8f0;border-radius:4px;">
+      <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">DeepQ AI · FEV₁% 追蹤趨勢（Pre-BD）</text>
+      <line x1="45" y1="15" x2="45" y2="66" stroke="#ccc" stroke-width="1"/>
+      <line x1="45" y1="66" x2="238" y2="66" stroke="#ccc" stroke-width="1"/>
+      <text x="43" y="69" font-family="monospace" font-size="6" fill="#f97316" text-anchor="end">50%</text>
+      <text x="43" y="19" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">75%</text>
+      <!-- fy(p)=66-(p-50)*2 → 72%→22, 66%→34, 60%→46 -->
+      <line x1="85"  y1="22" x2="170" y2="34" stroke="#475569" stroke-width="1.5"/>
+      <line x1="170" y1="34" x2="218" y2="46" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <circle cx="85"  cy="22" r="4" fill="#22c55e"/>
+      <circle cx="170" cy="34" r="4.5" fill="#dc2626"/>
+      <circle cx="218" cy="46" r="3.5" fill="#dc2626" stroke="#fff" stroke-width="1" opacity=".7"/>
+      <text x="85"  y="18" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">72%</text>
+      <text x="170" y="30" font-family="monospace" font-size="7" fill="#dc2626" text-anchor="middle">66%</text>
+      <text x="220" y="42" font-family="monospace" font-size="7" fill="#dc2626">~60%</text>
+      <text x="85"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/04 外院</text>
+      <text x="170" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2025/03 今日</text>
+      <text x="218" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">AI 投影</text>
+      <line x1="45" y1="66" x2="238" y2="66" stroke="#f97316" stroke-width=".8" stroke-dasharray="3,2" opacity=".6"/>
+    </svg>`;
+
+    /* Today's formal spirometry (3+1) */
+    const p1Rows = [
+      {p:'FVC',        u:'L',    pred:'2.64', pre:'2.38', preP:'90', post:'2.42', postP:'92', flag:''},
+      {p:'FEV₁',       u:'L',    pred:'1.94', pre:'1.28', preP:'66', post:'1.35', postP:'70', flag:'↓↓'},
+      {p:'FEV₁/FVC',   u:'%',    pred:'73',   pre:'54',   preP:'—',  post:'56',   postP:'—',  flag:'↓↓'},
+      {p:'FEF₂₅₋₇₅%',  u:'L/s',  pred:'2.18', pre:'0.52', preP:'24', post:'0.55', postP:'25', flag:'↓↓'},
+      {p:'FEV₁改善',    u:'%',    pred:'—',    pre:'—',    preP:'—',  post:'+5.5%', postP:'—', flag:''},
+    ];
+    const p1Tbl = p1Rows.map(r=>{
+      const fc=r.flag==='↓↓'?'#dc2626':r.flag==='↓'?'#f59e0b':'#64748b';
+      const pc=(r.flag==='↓↓'||r.flag==='↓')?'#dc2626':'#0f172a';
+      return `<tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:5px 7px;font-family:monospace;font-size:11px;font-weight:600;color:#0f172a;">${r.p}</td>
+        <td style="padding:5px 7px;font-family:monospace;font-size:10px;color:#94a3b8;">${r.u}</td>
+        <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:#64748b;">${r.pred}</td>
+        <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:#475569;">${r.pre}</td>
+        <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:#94a3b8;">${r.preP==='—'?'—':r.preP+'%'}</td>
+        <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:11px;font-weight:700;color:${pc};">${r.post}</td>
+        <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:${pc};">${r.postP==='—'?'—':r.postP+'%'}</td>
+        <td style="padding:5px 7px;font-size:12px;color:${fc};font-weight:700;">${r.flag}</td>
+      </tr>`;
+    }).join('');
+
+    return header + `
+    <div style="display:grid;grid-template-columns:285px 1fr;height:480px;border-radius:0 0 10px 10px;overflow:hidden;border:1px solid #0d9488;border-top:none;">
+      <!-- 左：F/V Loop (2 sessions) + AI trend -->
+      <div style="background:#f8fafc;padding:12px;overflow-y:auto;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:#0f766e;font-weight:600;">▌ 流量–容積環 · 2 次追蹤疊圖（2023→2025）</div>
+        ${p1fvSVG}
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:5px;padding:6px;font-family:var(--mono);font-size:7.5px;color:#14532d;line-height:1.9;">
+          <span style="color:#22c55e;font-weight:600;">——— 2023/04：</span>外院 Pre-BD FEV₁ <strong>72%</strong>，FVC 2.52L（未做 Post-BD）<br>
+          <span style="color:#dc2626;font-weight:600;">——— 2025/03 Pre：</span>FEV₁ <strong>66%</strong>，圖形較前次窄且凹陷加深<br>
+          <span style="color:#2196f3;font-weight:600;">——— 2025/03 Post：</span>FEV₁ <strong>70%</strong>，曲線幾乎重疊（+5.5% → 不可逆）
+        </div>
+        ${p1TrendSVG}
+      </div>
+      <!-- 右：今日 Spirometry + PEF 歷史 + AI -->
+      <div style="background:#fff;overflow-y:auto;display:flex;flex-direction:column;">
+        <div style="padding:9px 14px;border-bottom:1px solid #e2e8f0;background:#f8fafc;flex-shrink:0;">
+          <div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:2px;">正式肺功能報告（2025/03/14）· ATS/ERS Grade A</div>
+          <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;">Jaeger MasterScope · Pre+Post-BD Salbutamol 400mcg · GLI-2012 · 判讀：李○芳主治/家醫科</div>
+        </div>
+        <div style="padding:8px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#f1f5f9;">
+              <th style="padding:5px 7px;text-align:left;font-family:monospace;font-size:9px;color:#64748b;">參數</th>
+              <th style="padding:5px 7px;font-family:monospace;font-size:9px;color:#64748b;">單位</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#64748b;">預測</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#64748b;">Pre-BD</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#64748b;">%Pred</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#0369a1;font-weight:700;">Post-BD</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#0369a1;font-weight:700;">%Pred</th>
+              <th style="padding:5px 7px;"></th>
+            </tr></thead>
+            <tbody>${p1Tbl}</tbody>
+          </table>
+        </div>
+        <div style="padding:8px 14px;border-top:2px solid #fecaca;background:#fef2f2;flex-shrink:0;font-family:var(--mono);font-size:10px;color:#991b1b;line-height:1.7;">
+          <strong>結論：</strong>Post-BD FEV₁/FVC 56%（&lt;70%）、FEV₁ 70% pred → <strong>GOLD II</strong>。FEV₁ 改善 +5.5%（&lt;12%）→ <strong>不可逆，COPD 確診</strong>（非氣喘）。
+        </div>
+        <!-- AI 判讀 -->
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px;flex:1;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;">
+            <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-bottom:5px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-brain"></i>DeepQ AI 判讀</div>
+            <div style="font-family:var(--mono);font-size:9.5px;color:#1e3a8a;line-height:1.8;">
+              <strong style="color:#dc2626;">FEV₁ 2 年下降 6%（72%→66%），且 F/V 環疊圖顯示曲線進行性左移與凹陷加深。</strong><br><br>
+              · 2023/04 外院圖形（綠）vs 2025/03 今日（紅）：FVC 縮小、mid-flow 更低，表示 2 年內阻塞加重<br>
+              · Post-BD 藍色曲線幾乎與紅色重疊 → FEV₁ 改善 +5.5%（&lt;12%）→ <span style="color:#dc2626;">排除氣喘，COPD 確診</span><br>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ══ P2 林志明 · 骨科：COPD GOLD I 確診 2023，FEV₁ 趨勢投影 ══ */
+  /* Pre-BD FEV₁ 78% pred (KPI顯示值); Post-BD FEV₁ 82% pred → GOLD I */
+  const spiroRows = [
+    {p:'FVC',       u:'L',   pred:'4.46', pre:'4.18', preP:'94', post:'4.28', postP:'96', flag:''},
+    {p:'FEV₁',      u:'L',   pred:'3.52', pre:'2.76', preP:'78', post:'2.88', postP:'82', flag:'↓'},
+    {p:'FEV₁/FVC',  u:'%',   pred:'79',   pre:'66',   preP:'—',  post:'67',   postP:'—',  flag:'↓↓'},
+    {p:'FEF₂₅₋₇₅%', u:'L/s', pred:'3.08', pre:'1.68', preP:'55', post:'1.86', postP:'60', flag:'↓'},
+    {p:'FEV₁改善',   u:'%',   pred:'—',   pre:'—',    preP:'—',  post:'+4.3%', postP:'—', flag:''},
+  ];
+  const spiroTbl = spiroRows.map(r=>{
+    const fc = r.flag==='↓↓'?'#dc2626':r.flag==='↓'?'#f59e0b':'#64748b';
+    const pc = (r.flag==='↓↓'||r.flag==='↓')?'#dc2626':'#0f172a';
+    return `<tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="padding:5px 7px;font-family:monospace;font-size:11px;font-weight:600;color:#0f172a;white-space:nowrap;">${r.p}</td>
+      <td style="padding:5px 7px;font-family:monospace;font-size:10px;color:#94a3b8;">${r.u}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:#64748b;">${r.pred}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:#475569;">${r.pre}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:#94a3b8;">${r.preP==='—'?'—':r.preP+'%'}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:11px;font-weight:700;color:${pc};">${r.post}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:monospace;font-size:10px;color:${pc};">${r.postP==='—'?'—':r.postP+'%'}</td>
+      <td style="padding:5px 7px;font-size:12px;color:${fc};font-weight:700;">${r.flag}</td>
+    </tr>`;
+  }).join('');
+
+  /* FEV₁ % pred 趨勢投影 SVG
+     X: 2022–2027, y=(100-pct)*1.8+10, GOLD I/II 界線 pct=80 → y=46
+     確認點：2023/03(82%→y=42.4≈42), 2023/09(80%→y=46)
+     AI 預測點：2026/05(70%→y=64)
+     正常衰退：-1%/yr 從85%; COPD加速：-3.5%/yr 從82% */
+  const fy = p => Math.round((100-p)*1.8+10);
+  /* x positions: 2022→28, each year=37px */
+  const fx = yr => 28 + (yr-2022)*37;
+  /* F/V Loop SVG — GOLD I obstructive pattern (Pre-BD 3 attempts + Post-BD)
+     ViewBox 290×215, plot area x:38–248 (210px=0–5L), y:100=zero-flow, y:12=+10L/s, y:188=-10L/s
+     fy(f)=100-f*8.8, fx(v)=38+v*42 */
+  /* P2 F/V Loop: 2 confirmed Post-BD sessions (2023/03 green, 2023/09 orange) + AI projected dashed (2026, red)
+     fx(v)=38+v*42, fy(f)=100-f*8.8
+     2023/03 Post-BD: FVC 4.28→x=218, PEF 6.38→y=44 (GOLD I, mild scooping)
+     2023/09 Post-BD: FVC 4.22→x=215, PEF 6.18→y=46 (slight decline, follow-up)
+     2026 AI projected: FVC ~4.05→x=208, PEF ~5.6→y=51 (estimated GOLD II, more scooped, DASHED) */
+  const fvLoopSVG = `<svg viewBox="0 0 290 215" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border-radius:4px;">
+    <defs><marker id="arrowB" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#111"/></marker></defs>
+    <text x="100" y="10" font-family="Arial" font-size="8.5" fill="#222" font-weight="600">F/V ex</text>
+    <line x1="38" y1="100" x2="252" y2="100" stroke="#111" stroke-width="1.2"/>
+    <line x1="38" y1="12"  x2="38"  y2="200" stroke="#111" stroke-width="1.2"/>
+    <line x1="34" y1="12"  x2="38" y2="12"  stroke="#111"/><text x="32" y="15"  font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">10</text>
+    <line x1="34" y1="56"  x2="38" y2="56"  stroke="#111"/><text x="32" y="59"  font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">5</text>
+    <line x1="34" y1="100" x2="38" y2="100" stroke="#111"/><text x="32" y="103" font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">0</text>
+    <line x1="34" y1="144" x2="38" y2="144" stroke="#111"/><text x="32" y="147" font-family="Arial" font-size="7.5" fill="#222" text-anchor="end">-5</text>
+    <text x="8" y="65" font-family="Arial" font-size="8" fill="#444" text-anchor="middle" transform="rotate(-90,8,65)">Flow [L/s]</text>
+    <line x1="80"  y1="100" x2="80"  y2="104" stroke="#111"/><text x="80"  y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">1</text>
+    <line x1="122" y1="100" x2="122" y2="104" stroke="#111"/><text x="122" y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">2</text>
+    <line x1="164" y1="100" x2="164" y2="104" stroke="#111"/><text x="164" y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">3</text>
+    <line x1="206" y1="100" x2="206" y2="104" stroke="#111"/><text x="206" y="112" font-family="Arial" font-size="7.5" fill="#222" text-anchor="middle">4</text>
+    <text x="152" y="122" font-family="Arial" font-size="8" fill="#444">Vol [L]</text>
+    <text x="100" y="207" font-family="Arial" font-size="8.5" fill="#222" font-weight="600">F/V in</text>
+    <!-- Normal reference (gray dashed, FVC pred 4.46L, PEF 7.42) -->
+    <path d="M 38 100 C 40 62, 46 35, 50 35 C 82 35, 116 54, 154 70 C 190 84, 218 95, 225 100 C 218 120, 188 148, 152 152 C 116 155, 72 132, 38 100 Z" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>
+    <!-- 2023/03 Post-BD (green, widest, GOLD I mild scooping): FVC 4.28→x=218, PEF 6.38→y=44 -->
+    <path d="M 38 100 C 40 63, 43 44, 46 44 C 76 42, 102 58, 132 71 C 165 84, 200 95, 218 100 C 210 121, 178 139, 143 142 C 107 144, 68 125, 38 100 Z" fill="none" stroke="#22c55e" stroke-width="2"/>
+    <!-- 2023/09 Post-BD (orange, slightly narrower, mild worsening): FVC 4.22→x=215, PEF 6.18→y=46 -->
+    <path d="M 38 100 C 40 64, 43 46, 46 46 C 75 44, 100 60, 130 73 C 162 86, 196 96, 215 100 C 207 121, 176 139, 141 142 C 106 144, 67 125, 38 100 Z" fill="none" stroke="#f97316" stroke-width="1.5"/>
+    <!-- 2026 AI Projected (red dashed, more scooped GOLD II): FVC ~4.05→x=208, PEF ~5.6→y=51 -->
+    <path d="M 38 100 C 39 66, 42 51, 44 51 C 68 49, 90 63, 116 74 C 148 85, 186 95, 208 100 C 200 120, 170 137, 137 140 C 104 142, 66 124, 38 100 Z" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <!-- Tidal loops (VT~0.5L) — left shift = increasing hyperinflation GOLD I→II -->
+    <path d="M 141,100 C 141,96 163,96 163,100 C 163,104 141,104 141,100 Z" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="0.9"/>
+    <path d="M 136,100 C 136,96.2 158,96.2 158,100 C 158,103.8 136,103.8 136,100 Z" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="0.9"/>
+    <path d="M 125,100 C 125,96.5 147,96.5 147,100 C 147,103.5 125,103.5 125,100 Z" fill="rgba(220,38,38,0.12)" stroke="#dc2626" stroke-width="0.9" stroke-dasharray="3,2"/>
+    <text x="132" y="88" font-family="Arial" font-size="5.5" fill="#64748b" text-anchor="middle">← 潮氣環左移</text>
+    <!-- Arrows A (2023/03 peak) B (AI projected peak) -->
+    <line x1="65" y1="22" x2="47" y2="43" stroke="#111" stroke-width="1.2" marker-end="url(#arrowB)"/>
+    <text x="67" y="20" font-family="Arial" font-size="10" fill="#111" font-weight="700">A</text>
+    <line x1="80" y1="30" x2="47" y2="50" stroke="#dc2626" stroke-width="1.2" marker-end="url(#arrowB)"/>
+    <text x="82" y="28" font-family="Arial" font-size="10" fill="#dc2626" font-weight="700">B</text>
+    <text x="90" y="38" font-family="Arial" font-size="7" fill="#dc2626" font-style="italic">AI 投影</text>
+    <!-- Legend -->
+    <rect x="206" y="14" width="78" height="90" fill="#fff" stroke="#ccc" stroke-width="0.8" rx="2"/>
+    <line x1="208" y1="23" x2="220" y2="23" stroke="#22c55e" stroke-width="2"/><text x="223" y="26" font-family="Arial" font-size="7" fill="#222">2023/03 Post-BD</text>
+    <line x1="208" y1="35" x2="220" y2="35" stroke="#f97316" stroke-width="1.5"/><text x="223" y="38" font-family="Arial" font-size="7" fill="#222">2023/09 Post-BD</text>
+    <line x1="208" y1="47" x2="220" y2="47" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/><text x="223" y="50" font-family="Arial" font-size="7" fill="#dc2626">2026 AI 估計</text>
+    <line x1="208" y1="59" x2="220" y2="59" stroke="#bbb" stroke-width="1" stroke-dasharray="3,2"/><text x="223" y="62" font-family="Arial" font-size="7" fill="#888">預測值</text>
+    <ellipse cx="214" cy="71" rx="6" ry="2.5" fill="rgba(100,116,139,0.12)" stroke="#64748b" stroke-width="0.8"/><text x="223" y="74" font-family="Arial" font-size="7" fill="#475569">潮氣環(VT)</text>
+    <text x="223" y="84" font-family="Arial" font-size="6" fill="#94a3b8">← 左移=充氣惡化</text>
+  </svg>`;
+
+  /* P2 AI FEV₁ trend SVG (Post-BD: 2023/03=82%, 2023/09=80%, 3yr gap, AI 2026=~70%) */
+  const p2TrendSVG = `<svg viewBox="0 0 255 78" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border:1px solid #e2e8f0;border-radius:4px;">
+    <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">DeepQ AI · Post-BD FEV₁% 追蹤趨勢</text>
+    <line x1="45" y1="15" x2="45" y2="66" stroke="#ccc" stroke-width="1"/>
+    <line x1="45" y1="66" x2="238" y2="66" stroke="#ccc" stroke-width="1"/>
+    <!-- GOLD I/II 80% boundary: fy(80)=66-(80-60)*2=26 -->
+    <line x1="45" y1="26" x2="238" y2="26" stroke="#f59e0b" stroke-width=".8" stroke-dasharray="3,2" opacity=".8"/>
+    <text x="43" y="29" font-family="monospace" font-size="6" fill="#f59e0b" text-anchor="end">80%</text>
+    <text x="43" y="19" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">90%</text>
+    <text x="43" y="46" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">70%</text>
+    <!-- fy(p)=66-(p-60)*2: 82%→22, 80%→26, 70%→46 -->
+    <line x1="75"  y1="22" x2="110" y2="26" stroke="#475569" stroke-width="1.5"/>
+    <!-- gap shading 2024-2025 -->
+    <rect x="110" y="15" width="80" height="51" fill="#f1f5f9" opacity=".8"/>
+    <text x="150" y="42" font-family="monospace" font-size="7" fill="#94a3b8" text-anchor="middle">追蹤中斷</text>
+    <line x1="190" y1="26" x2="190" y2="46" stroke="#dc2626" stroke-width=".8" stroke-dasharray="2,2" opacity=".5"/>
+    <line x1="190" y1="46" x2="225" y2="46" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <circle cx="75"  cy="22" r="4" fill="#22c55e"/>
+    <circle cx="110" cy="26" r="4" fill="#f97316"/>
+    <circle cx="225" cy="46" r="3.5" fill="#dc2626" stroke="#fff" stroke-width="1" opacity=".8"/>
+    <text x="75"  y="18" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">82%</text>
+    <text x="110" y="22" font-family="monospace" font-size="7" fill="#f97316" text-anchor="middle">80%</text>
+    <text x="226" y="42" font-family="monospace" font-size="7" fill="#dc2626">~70%?</text>
+    <text x="75"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/03</text>
+    <text x="110" y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/09</text>
+    <text x="225" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">AI 2026估</text>
+  </svg>`;
+
+  return header + `
+    <div style="display:grid;grid-template-columns:285px 1fr;height:480px;border-radius:0 0 10px 10px;overflow:hidden;border:1px solid #0d9488;border-top:none;">
+      <!-- 左：F/V Loop + metadata -->
+      <div style="background:#f8fafc;padding:12px;overflow-y:auto;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-family:var(--mono);font-size:9px;color:#0f766e;letter-spacing:.08em;font-weight:600;">▌ 流量–容積環 · 2 次 Post-BD 追蹤疊圖（2023→AI估）</div>
+        ${fvLoopSVG}
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:5px;padding:6px;font-family:var(--mono);font-size:7.5px;color:#14532d;line-height:1.9;">
+          <span style="color:#22c55e;font-weight:600;">——— 2023/03：</span>Post-BD 最佳，FEV₁ 82%，FVC 4.28L（首次確診）<br>
+          <span style="color:#f97316;font-weight:600;">——— 2023/09：</span>Post-BD 追蹤，FEV₁ 80%，曲線略窄（輕度進展）<br>
+          <span style="color:#dc2626;font-weight:600;">- - - 2026 AI：</span>估算 FEV₁ ~70%，圖形凹陷加深，GOLD I→II 邊緣
+        </div>
+        ${p2TrendSVG}
+      </div>
+      <!-- 右：Spirometry 表 + GOLD + AI 分析 -->
+      <div style="background:#fff;overflow-y:auto;display:flex;flex-direction:column;">
+        <div style="padding:10px 14px;border-bottom:1px solid #e2e8f0;background:#f8fafc;flex-shrink:0;">
+          <div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:2px;">肺功能報告（2023/03/15）· ATS/ERS Grade A</div>
+          <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;">Jaeger MasterScope · Post-BD Salbutamol 400 mcg · GLI-2012 亞洲方程式 · 判讀：王○明主治/胸腔內科</div>
+        </div>
+        <div style="padding:8px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#f1f5f9;">
+              <th style="padding:5px 7px;text-align:left;font-family:monospace;font-size:9px;color:#64748b;font-weight:600;">參數</th>
+              <th style="padding:5px 7px;font-family:monospace;font-size:9px;color:#64748b;font-weight:600;">單位</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#64748b;font-weight:600;">預測</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#64748b;font-weight:600;">Pre-BD</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#64748b;font-weight:600;">%Pred</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#0369a1;font-weight:700;">Post-BD</th>
+              <th style="padding:5px 7px;text-align:right;font-family:monospace;font-size:9px;color:#0369a1;font-weight:700;">%Pred</th>
+              <th style="padding:5px 7px;"></th>
+            </tr></thead>
+            <tbody>${spiroTbl}</tbody>
+          </table>
+        </div>
+        <div style="padding:8px 14px;border-top:2px solid #fde68a;background:#fffbeb;flex-shrink:0;font-family:var(--mono);font-size:10px;color:#78350f;line-height:1.7;">
+          <strong>結論：</strong>Post-BD FEV₁/FVC 67%（&lt;70%）確認氣流阻塞；Post-BD FEV₁ 82% → <strong>GOLD I 輕度</strong>。支氣管擴張劑反應 +4.3%（&lt;12%），不可逆，排除氣喘。
+        </div>
+        <!-- GOLD + AI 分析 -->
+        <div style="padding:10px 14px;display:grid;grid-template-columns:120px 1fr;gap:10px;flex:1;">
+          <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:12px;text-align:center;align-self:start;">
+            <div style="font-family:var(--mono);font-size:8px;color:#14532d;letter-spacing:.08em;margin-bottom:4px;">2023/03 GOLD</div>
+            <div style="font-size:34px;font-weight:900;color:#16a34a;line-height:1;font-family:var(--mono);">I</div>
+            <div style="font-size:10px;font-weight:700;color:#14532d;margin-top:3px;">輕度阻塞</div>
+            <div style="margin-top:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:5px;padding:4px 6px;font-family:var(--mono);font-size:8px;color:#92400e;">
+              今日影像估算<br>⚠ 疑似 GOLD II
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;">
+              <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+                <i class="fa-solid fa-brain"></i>DeepQ AI 趨勢判讀
+              </div>
+              <div style="font-family:var(--mono);font-size:9.5px;color:#1e3a8a;line-height:1.75;">
+                CXR HI 指數 0.61（2023確診）→ 0.82（今日），3 年上升 34%，<strong>超過 GOLD I 自然衰退預期</strong>。<br><br>
+                結合自行停藥（LABA/ICS 中斷）+ 追蹤缺口，AI 估算目前 FEV₁ 約 68–72% pred，<span style="color:#f59e0b;font-weight:600;">疑似已進入 GOLD II</span>。<br><br>
+                <span style="color:#dc2626;font-weight:600;">術前需重新確認 GOLD 分級，影響麻醉科風險評估。</span>
+              </div>
+            </div>
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;">
+              <div style="font-family:var(--mono);font-size:9.5px;color:#991b1b;line-height:1.7;">
+                <strong>追蹤空白：</strong>2023/09 → 2026/05（32 個月無肺功能紀錄）<br>
+                GOLD 建議穩定期每年複測 Spirometry 監測 FEV₁ 年度下降速率
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
 function buildPACSPage(ptIdx) {
   const pt = PTS[ptIdx];
   return `
@@ -2794,9 +4042,23 @@ function buildPACSPage(ptIdx) {
 }
 
 function wsConfirm(ptIdx,btn){
-  btn.disabled=true;
-  btn.style.background='#059669';
-  btn.innerHTML='<i class="fa-solid fa-circle-check"></i> 已知悉 · 系統記錄時間戳記';
+  const now=new Date();
+  const ts=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const bannerEl=document.getElementById('ws-banner-'+ptIdx);
+  if(bannerEl){
+    bannerEl.style.transition='all .3s';
+    bannerEl.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 14px;background:#f0fdf4;">
+        <i class="fa-solid fa-circle-check" style="color:#059669;font-size:13px;flex-shrink:0;"></i>
+        <div style="flex:1;">
+          <span style="font-family:var(--mono);font-size:11px;color:#059669;font-weight:700;">醫師已確認知悉此 CDSS 警示</span>
+          <span style="font-family:var(--mono);font-size:10px;color:#64748b;margin-left:10px;">· 知悉時間 ${ts} · 由醫師自行決定後續處置</span>
+        </div>
+        <span style="font-family:var(--mono);font-size:9px;color:#16a34a;background:#dcfce7;border:1px solid #bbf7d0;padding:2px 9px;border-radius:4px;white-space:nowrap;flex-shrink:0;">
+          <i class="fa-solid fa-database" style="font-size:8px;margin-right:3px;"></i>HIS 稽核記錄已寫入
+        </span>
+      </div>`;
+  }
   confirmed[ptIdx]=true;
 }
 
