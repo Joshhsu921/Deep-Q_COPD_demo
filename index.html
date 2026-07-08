@@ -516,7 +516,7 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
                 <div style="background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);flex:1;margin-bottom:4px;">
                   <strong style="color:var(--dq)">② AI 自動分析影像與肺功能報告</strong><br>
                   <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
-                    <span style="background:var(--bg2);border:1px solid var(--dq-border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--dq);font-family:var(--mono);">PACS · 胸部影像重判</span>
+                    <span style="background:var(--bg2);border:1px solid var(--dq-border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--dq);font-family:var(--mono);">PACS · 胸部影像量測</span>
                     <span style="background:var(--bg2);border:1px solid var(--dq-border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--dq);font-family:var(--mono);">HIS · Spirometry 紀錄</span>
                   </div>
                 </div>
@@ -540,14 +540,14 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
             </div>
             <div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;">
               <button class="ai-tab active-tab" id="tab-mining" onclick="switchAiTab('mining')">機會性探勘</button>
-              <button class="ai-tab" id="tab-detect" onclick="switchAiTab('detect')">AI 偵測項目</button>
-              <button class="ai-tab" id="tab-trend" onclick="switchAiTab('trend')">縱向趨勢追蹤</button>
+              <button class="ai-tab" id="tab-detect" onclick="switchAiTab('detect')">幾何量測項目</button>
+              <button class="ai-tab" id="tab-trend" onclick="switchAiTab('trend')">歷次數值彙整</button>
             </div>
 
             <!-- Tab 1: 機會性影像探勘 -->
             <div id="ai-tab-mining">
               <div style="font-size:12px;color:var(--text2);line-height:1.75;margin-bottom:10px;">
-                DeepQ Vision 不需要新的影像——它直接<strong style="color:var(--text1);">重判患者既有的歷史影像</strong>，從被遺忘的舊 X 光與 CT 中找出早期 COPD 線索。
+                DeepQ Vision 不需要新的影像——它直接<strong style="color:var(--text1);">量測患者既有的歷史影像</strong>，從被遺忘的舊 X 光與 CT 中計算出 HI 指數數值。
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;">
                 <div style="display:flex;align-items:flex-start;gap:9px;background:var(--bg3);border-radius:8px;padding:9px 11px;">
@@ -560,94 +560,93 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
                 <div style="display:flex;align-items:flex-start;gap:9px;background:var(--bg3);border-radius:8px;padding:9px 11px;">
                   <i class="fa-solid fa-microscope" style="color:var(--amber);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
                   <div style="font-size:11px;color:var(--text2);line-height:1.65;">
-                    <strong style="color:var(--text1);">Deep Learning 推論</strong><br>
-                    以 ResNet / Vision Transformer 為基礎，輸出結構化影像發現與信心分數
+                    <strong style="color:var(--text1);">Deep Learning 幾何量測</strong><br>
+                    以 ResNet / Vision Transformer 為基礎，輸出肺野面積、橫膈膜位置等結構化幾何量測數值
                   </div>
                 </div>
                 <div style="display:flex;align-items:flex-start;gap:9px;background:var(--bg3);border-radius:8px;padding:9px 11px;">
-                  <i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
+                  <i class="fa-solid fa-circle-info" style="color:var(--dq);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
                   <div style="font-size:11px;color:var(--text2);line-height:1.65;">
-                    <strong style="color:var(--text1);">原始報告未標記 ≠ 正常</strong><br>
-                    本 Demo 中三位患者的舊影像，原報告均為「無特殊發現」，DeepQ 重判後發現隱性變化
+                    <strong style="color:var(--text1);">純數據化輸出，不做臨床判讀</strong><br>
+                    DeepQ Vision 僅計算並輸出 HI 指數數值，不與原始放射科報告比較優劣，亦不產生診斷印象，最終判讀由醫師綜合決定
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Tab 2: AI 偵測項目 -->
+            <!-- Tab 2: 幾何量測項目 -->
             <div id="ai-tab-detect" style="display:none;">
-              <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px;">胸部 X 光 / CT · COPD 相關偵測指標</div>
+              <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px;">胸部 X 光 · HI 指數幾何量測項目（不做臨床判讀）</div>
               <div class="detect-row">
-                <div class="detect-icon" style="background:rgba(251,191,36,.15);"><i class="fa-solid fa-lungs" style="color:var(--amber);font-size:12px;"></i></div>
+                <div class="detect-icon" style="background:rgba(96,165,250,.15);"><i class="fa-solid fa-lungs" style="color:var(--dq);font-size:12px;"></i></div>
                 <div style="flex:1;">
-                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肺過度充氣</div>
-                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Hyperinflation · 肺容積增加</div>
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肺野面積</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Lung Field Area · 對比胸廓總面積</div>
                 </div>
-                <span class="conf-chip" style="background:var(--am-dim);color:var(--amber);border-color:var(--am-border);">早期指標</span>
+                <span class="conf-chip" style="background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);">幾何測量</span>
               </div>
               <div class="detect-row">
-                <div class="detect-icon" style="background:rgba(217,119,6,.15);"><i class="fa-solid fa-cloud" style="color:var(--amber);font-size:12px;"></i></div>
+                <div class="detect-icon" style="background:rgba(100,116,139,.15);"><i class="fa-solid fa-minus" style="color:#64748b;font-size:12px;"></i></div>
                 <div style="flex:1;">
-                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肺氣腫變化</div>
-                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Emphysema · 肺實質破壞</div>
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">橫膈膜位置</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Diaphragm Position · 對比肋骨定位點</div>
                 </div>
-                <span class="conf-chip" style="background:var(--da-dim);color:var(--danger);border-color:var(--da-border);">高特異性</span>
+                <span class="conf-chip" style="background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);">幾何測量</span>
               </div>
               <div class="detect-row">
-                <div class="detect-icon" style="background:rgba(220,38,38,.12);"><i class="fa-solid fa-minus" style="color:var(--danger);font-size:12px;"></i></div>
+                <div class="detect-icon" style="background:rgba(100,116,139,.15);"><i class="fa-solid fa-angle-up" style="color:#64748b;font-size:12px;"></i></div>
                 <div style="flex:1;">
-                  <div style="font-size:12px;font-weight:500;color:var(--text1);">橫膈膜扁平</div>
-                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Diaphragm Flattening · 桶狀胸</div>
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肋膈角角度</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Costophrenic Angle · 角度計算</div>
                 </div>
-                <span class="conf-chip" style="background:var(--da-dim);color:var(--danger);border-color:var(--da-border);">高特異性</span>
+                <span class="conf-chip" style="background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);">幾何測量</span>
               </div>
               <div class="detect-row">
                 <div class="detect-icon" style="background:rgba(2,132,199,.12);"><i class="fa-solid fa-expand" style="color:var(--dq);font-size:12px;"></i></div>
                 <div style="flex:1;">
-                  <div style="font-size:12px;font-weight:500;color:var(--text1);">肋間隙增寬</div>
-                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Rib Spacing · 胸廓重塑</div>
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">心胸比</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Cardiothoracic Ratio · 心影寬度 ÷ 胸廓寬度</div>
                 </div>
-                <span class="conf-chip" style="background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);">輔助指標</span>
+                <span class="conf-chip" style="background:var(--dq-dim);color:var(--dq);border-color:var(--dq-border);">幾何測量</span>
               </div>
               <div class="detect-row">
-                <div class="detect-icon" style="background:rgba(15,118,110,.12);"><i class="fa-solid fa-heart-pulse" style="color:var(--teal);font-size:12px;"></i></div>
+                <div class="detect-icon" style="background:rgba(15,118,110,.12);"><i class="fa-solid fa-calculator" style="color:var(--teal);font-size:12px;"></i></div>
                 <div style="flex:1;">
-                  <div style="font-size:12px;font-weight:500;color:var(--text1);">心臟垂直化</div>
-                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">Vertical Heart · 繼發性改變</div>
+                  <div style="font-size:12px;font-weight:500;color:var(--text1);">HI 指數合成</div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);">綜合上述幾何量測值計算單一數值</div>
                 </div>
-                <span class="conf-chip" style="background:var(--tl-dim);color:var(--teal);border-color:var(--tl-border);">輔助指標</span>
+                <span class="conf-chip" style="background:var(--tl-dim);color:var(--teal);border-color:var(--tl-border);">輸出數值</span>
               </div>
               <div style="margin-top:9px;background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:6px;padding:7px 10px;font-size:10px;color:var(--dq);font-family:var(--mono);">
-                輸出格式：結構化 JSON → HL7 FHIR · 信心分數 0–100%
+                輸出格式：結構化 JSON → HL7 FHIR · HI 指數（數值）
               </div>
             </div>
 
-            <!-- Tab 3: 縱向趨勢追蹤 -->
+            <!-- Tab 3: 歷次數值彙整 -->
             <div id="ai-tab-trend" style="display:none;">
               <div style="font-size:12px;color:var(--text2);line-height:1.75;margin-bottom:10px;">
-                單張影像只能看現況。DeepQ Vision 串接同一患者的<strong style="color:var(--text1);">跨年度影像序列</strong>，量化疾病進展速度。
+                單張影像只能看現況。DeepQ Vision 串接同一患者的<strong style="color:var(--text1);">跨年度影像序列</strong>，將 HI 指數依時間彙整呈現，供醫師參考。
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;">
                 <div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">
                   <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:5px;display:flex;align-items:center;gap:6px;">
-                    <i class="fa-solid fa-chart-line" style="color:var(--dq);"></i>AI 肺過度充氣指數 (HI) 縱向追蹤
+                    <i class="fa-solid fa-chart-line" style="color:var(--dq);"></i>CXR HI 指數歷次數值
                   </div>
                   <div style="display:flex;align-items:flex-end;gap:5px;height:44px;padding:0 4px;">
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                      <div style="width:100%;background:var(--amber);border-radius:3px 3px 0 0;opacity:.6;" style="height:18px;"></div>
-                      <div style="width:100%;height:18px;background:var(--amber);border-radius:3px 3px 0 0;opacity:.6;"></div>
+                      <div style="width:100%;height:18px;background:var(--dq);border-radius:3px 3px 0 0;opacity:.5;"></div>
                       <div style="font-size:9px;color:var(--text3);font-family:var(--mono);">2年前</div>
                     </div>
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                      <div style="width:100%;height:26px;background:var(--amber);border-radius:3px 3px 0 0;opacity:.8;"></div>
+                      <div style="width:100%;height:26px;background:var(--dq);border-radius:3px 3px 0 0;opacity:.7;"></div>
                       <div style="font-size:9px;color:var(--text3);font-family:var(--mono);">1年前</div>
                     </div>
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                      <div style="width:100%;height:36px;background:var(--danger);border-radius:3px 3px 0 0;"></div>
-                      <div style="font-size:9px;color:var(--danger);font-family:var(--mono);font-weight:600;">本次↑↑</div>
+                      <div style="width:100%;height:36px;background:var(--dq);border-radius:3px 3px 0 0;"></div>
+                      <div style="font-size:9px;color:var(--dq);font-family:var(--mono);font-weight:600;">本次</div>
                     </div>
                   </div>
-                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:5px;">指數 0.61 → 0.74 → 0.82 · <span style="color:var(--danger);">進展超過年齡預期</span></div>
+                  <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:5px;">指數 0.61 → 0.74 → 0.82（歷次實測數值）</div>
                 </div>
                 <div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">
                   <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
@@ -655,11 +654,11 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
                   </div>
                   <div style="font-size:11px;color:var(--text2);line-height:1.65;">以解剖標記點自動對齊不同時間點影像，排除體位差異，確保測量可比性</div>
                 </div>
-                <div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">
+                <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 11px;">
                   <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
-                    <i class="fa-solid fa-bell" style="color:var(--amber);"></i>進展速度異常警示
+                    <i class="fa-solid fa-table-list" style="color:var(--dq);"></i>數值彙整原則
                   </div>
-                  <div style="font-size:11px;color:var(--text2);line-height:1.65;">AI 計算個人化進展曲線，與同年齡族群基準比較，<strong>超過預期速度即觸發臨床警示</strong></div>
+                  <div style="font-size:11px;color:var(--text2);line-height:1.65;">僅將歷次 HI 指數依時間排列呈現，<strong>不與常模或閾值比較，不做臨床判讀</strong>，數值意義由醫師綜合判斷</div>
                 </div>
               </div>
             </div>
@@ -680,7 +679,7 @@ html,body{background:var(--bg);color:var(--text1);font-family:var(--sans);height
               <div style="display:flex;flex-direction:column;gap:6px;">
                 <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);">
                   <i class="fa-solid fa-x-ray" style="color:var(--dq);width:14px;text-align:center;"></i>
-                  <span>歷史胸部影像（PACS）<span style="font-family:var(--mono);font-size:10px;color:var(--lgreen);margin-left:6px;">→ AI 重判中</span></span>
+                  <span>歷史胸部影像（PACS）<span style="font-family:var(--mono);font-size:10px;color:var(--lgreen);margin-left:6px;">→ AI 量測中</span></span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);">
                   <i class="fa-solid fa-lungs" style="color:var(--dq);width:14px;text-align:center;"></i>
@@ -1048,9 +1047,9 @@ const PTS=[
    ac:"ab-danger",at:"Undiagnosed COPD · AI 主動偵測風險",atc:"abt-danger",cb:"cb-danger",ai:"fa-shield-exclamation",aic:"var(--danger)",
    conf:"3年4次門診反覆以氣喘分類記錄",
    ev:[{src:"HIS 歷史門診彙整（AI 跨診次）",ic:"fa-solid fa-notes-medical",icol:"var(--amber)",body:"3年內4次「季節性咳嗽/老化氣喘」診斷<br>每次開立支氣管擴張劑，<strong>從未轉介肺功能</strong><br>LINE 問診揭露：<strong>職業粉塵暴露 20年</strong>",cite:""},
-       {src:"PACS AI · 歷史影像重新判讀",ic:"fa-solid fa-x-ray",icol:"var(--dq)",body:"來源：<strong>2025/11 肺炎追蹤胸部 X 光</strong><br>DeepQ 重判：<strong>過度充氣 + 橫膈膜扁平</strong><br>原報告：「無明顯異常」（未用 AI）",cite:"Lamprecht et al., Lancet 2015"}],
+       {src:"PACS AI · 歷史影像幾何量測",ic:"fa-solid fa-x-ray",icol:"var(--dq)",body:"來源：<strong>2025/11 肺炎追蹤胸部 X 光</strong><br>DeepQ 量測：<strong>HI 指數 91</strong>（依肺野面積、橫膈膜位置計算）",cite:"Lamprecht et al., Lancet 2015"}],
    emr:[{k:"主訴",v:"老毛病又犯了，咳嗽咳了快一個月，走平路也有點喘。",src:"掛號時填寫",pre:true},{k:"過去處置（3年跨診次）",v:"每次診斷「氣喘/老年性咳嗽」，開立 Salbutamol PRN。",src:"HIS 歷史紀錄",pre:true}],
-   int:"三年來相似症狀反覆以氣喘記錄，可能掩蓋了 COPD 的可能性。AI 整合跨診次 HIS 資料並重新判讀舊影像，在第 5 次就診時主動提出重新鑑別診斷的建議。職業粉塵暴露是非吸菸者 COPD 的重要危險因子。\n\n注意：GOLD 分級需以 Post-BD Spirometry 確認（FEV1/FVC < 0.70），目前 mMRC ≥2 為症狀嚴重度評估，GOLD 分期待肺功能確認後補登。",
+   int:"三年來相似症狀反覆以氣喘記錄，可能掩蓋了 COPD 的可能性。AI 整合跨診次 HIS 資料並重新分析舊影像，在第 5 次就診時主動提出重新鑑別診斷的建議。職業粉塵暴露是非吸菸者 COPD 的重要危險因子。\n\n注意：GOLD 分級需以 Post-BD Spirometry 確認（FEV1/FVC < 0.70），目前 mMRC ≥2 為症狀嚴重度評估，GOLD 分期待肺功能確認後補登。",
    tags:[{t:"職業粉塵暴露20年",c:"tag-r"},{t:"慢性咳嗽",c:"tag-a"},{t:"走路喘 mMRC≥2",c:"tag-a"},{t:"3年未做Spirometry",c:"tag-r"}],
    referralOrdIdx: 1,
    icd:{
@@ -1117,8 +1116,8 @@ const ARCH_DATA = {
   line:{
     icon:'fa-brands fa-line',iconBg:'#dcfce7',iconColor:'#059669',
     title:'LINE Gateway',sub:'PRE-VISIT NLP MODULE',
-    body:'院前問診入口模組。引導病患回答 COPD-PS 問卷（10題）、吸菸史（Pack-Years）、職業曝露史與呼吸症狀。NLP 引擎即時分析自由文字，萃取結構化風險因子，回傳 Risk Engine。',
-    kv:[['問卷','COPD-PS v2 (10 items)'],['NLP','症狀實體識別'],['延遲','< 1.2 秒 / 回應'],['個資','符合個資法第 6 條']],
+    body:'院前問診入口模組。引導病患回答 COPD-PS 問卷（5題，滿分10分）、吸菸史（Pack-Years）、職業曝露史與呼吸症狀。NLP 引擎即時分析自由文字，萃取結構化風險因子，回傳 Risk Engine。',
+    kv:[['問卷','COPD-PS（5 items，max 10分）'],['NLP','症狀實體識別'],['延遲','< 1.2 秒 / 回應'],['個資','符合個資法第 6 條']],
     tags:[{t:'院前整合',c:'ad-tag-g'},{t:'NLP',c:'ad-tag-b'},{t:'HL7 FHIR R4',c:'ad-tag-b'}]
   },
   nlp:{
@@ -1139,26 +1138,26 @@ const ARCH_DATA = {
   pacs:{
     icon:'fa-solid fa-x-ray',iconBg:'#f0f9ff',iconColor:'#0284c7',
     title:'PACS AI 模組',sub:'OPPORTUNISTIC IMAGE MINING',
-    body:'機會性影像挖掘。針對高風險病患，自動調閱過去 5 年內的胸部 X 光，計算 Hyperinflation Index（HI）。不需重新安排影像檢查，直接從歷史 PACS 資料中萃取診斷線索。',
-    kv:[['輸入','歷史 CXR (DICOM)'],['模型','CNN · Hyperinflation Detector'],['輸出','HI 值 · 信心分數 · 標註圖'],['整合','PACS DICOM C-FIND/MOVE']],
+    body:'機會性影像挖掘。針對高風險病患，自動調閱過去 5 年內的胸部 X 光，計算 Hyperinflation Index（HI）。不需重新安排影像檢查，直接從歷史 PACS 資料中計算幾何量測數值。',
+    kv:[['輸入','歷史 CXR (DICOM)'],['模型','CNN · Hyperinflation Detector'],['輸出','HI 值 · 幾何量測標註圖'],['整合','PACS DICOM C-FIND/MOVE']],
     tags:[{t:'PACS 整合',c:'ad-tag-b'},{t:'DICOM',c:'ad-tag-b'},{t:'機會性篩查',c:'ad-tag-a'}],
-    badge:'TFDA SaMD Class IIa'
+    badge:'TFDA SaMD Class II'
   },
   lis:{
     icon:'fa-solid fa-lungs',iconBg:'#fdf4ff',iconColor:'#7e22ce',
     title:'LIS · 肺功能模組',sub:'SPIROMETRY · DLCO · BODY PLETHYSMOGRAPHY',
-    body:'從醫院 LIS（檢驗資訊系統）擷取肺功能報告，包含多次 Post-BD Spirometry（FEV₁、FVC、F/V Loop）、Body Plethysmography（TLC、FRC、RV）及 DLCO 擴散功能。DeepQ AI 自動整合跨次資料，進行縱向趨勢分析並投影未來肺功能軌跡。',
-    kv:[['資料來源','LIS · HL7 FHIR R4'],['涵蓋項目','Spirometry · Body Pleth · DLCO'],['核心能力','跨次 BD 趨勢分析 · AI 軌跡投影'],['參考標準','GLI-2012 · ATS/ERS 2019']],
+    body:'從醫院 LIS（檢驗資訊系統）擷取肺功能報告，包含多次 Post-BD Spirometry（FEV₁、FVC、F/V Loop）、Body Plethysmography（TLC、FRC、RV）及 DLCO 擴散功能。DeepQ AI 自動整合跨次資料，進行歷次數據可視化與跨診次趨勢彙整。',
+    kv:[['資料來源','LIS · HL7 FHIR R4'],['涵蓋項目','Spirometry · Body Pleth · DLCO'],['核心能力','跨次 BD 趨勢分析 · 歷次數據可視化'],['參考標準','GLI-2012 · ATS/ERS 2019']],
     tags:[{t:'Spirometry',c:'ad-tag-t'},{t:'DLCO',c:'ad-tag-t'},{t:'縱向趨勢 AI',c:'ad-tag-b'},{t:'GLI-2012',c:'ad-tag-a'}],
-    badge:'TFDA SaMD Class IIa'
+    badge:'TFDA SaMD Class II'
   },
   risk:{
     icon:'fa-solid fa-microchip',iconBg:'#eff6ff',iconColor:'#0284c7',
     title:'Risk Engine',sub:'MULTI-MODAL FUSION CORE',
-    body:'DeepQ 核心 AI 引擎。融合 NLP 問診資料、HIS 病歷、PACS 影像分析、LIS 肺功能四路輸入，執行 3-Gap Classifier 與跨次 Spirometry 縱向趨勢分析，判斷病患照護缺口並投影未來肺功能軌跡，生成臨床證據摘要供 CDSS 使用。',
-    kv:[['輸入','NLP + HIS + PACS + LIS 四路融合'],['模型','Ensemble · XGBoost + Transformer'],['肺功能趨勢','多次 BD 跨期融合 · FEV₁ 投影'],['延遲','< 800ms 整合推論']],
+    body:'DeepQ 核心 AI 引擎。融合 NLP 問診資料、HIS 病歷、PACS 影像分析、LIS 肺功能四路輸入，執行 3-Gap Classifier 與跨次 Spirometry 縱向趨勢分析，判斷病患照護缺口並彙整跨診次肺功能趨勢，生成臨床證據摘要供 CDSS 使用。',
+    kv:[['輸入','NLP + HIS + PACS + LIS 四路融合'],['模型','Ensemble · XGBoost + Transformer'],['肺功能趨勢','多次 BD 跨期融合 · 跨診次趨勢彙整'],['延遲','< 800ms 整合推論']],
     tags:[{t:'多模態 AI',c:'ad-tag-b'},{t:'3-Gap Classifier',c:'ad-tag-b'},{t:'Spirometry Trend',c:'ad-tag-t'},{t:'即時推論',c:'ad-tag-g'}],
-    badge:'TFDA SaMD Class IIb'
+    badge:'TFDA SaMD Class II'
   },
   cdss:{
     icon:'fa-solid fa-stethoscope',iconBg:'#f1f5f9',iconColor:'#0f172a',
@@ -1274,8 +1273,8 @@ const WS_AI_SUMMARY=[
         '歷次主訴：2024/03 陣發性咳嗽（胸腔科）；2024/09 喉嚨痛流鼻水（家醫科）；2025/06 呼吸困難加劇（急診）'
       ]},
       { title:'O · 客觀（影像與肺功能彙整）', icon:'fa-chart-line', items:[
-        'CXR 2026/02（DeepQ 重判）：雙上肺野<strong>過度充氣</strong>，HI 指數 82（原始報告標記「無特殊發現」）',
-        '雙側橫膈膜扁平化，符合氣體滯留表現；無浸潤或積液',
+        'CXR 2026/02：<strong>HI 指數 82</strong>（依肺野面積、橫膈膜位置等幾何量測計算）',
+        '雙側橫膈膜位置測量呈扁平化；無浸潤或積液',
         'Post-BD Spirometry 3 次追蹤（2025/03、2025/06、2026/02）：FEV₁ <strong>67%→65%→62%</strong>，年均下降 2.5% pred/yr',
         'Body Plethysmography（RV 166%、RV/TLC 44%）與 DLCO（68%）：氣體陷閉及擴散功能數值，詳見「檢驗報告」分頁'
       ]},
@@ -1300,8 +1299,8 @@ const WS_AI_SUMMARY=[
         '3 年 4 次就診主訴：2022/11 慢性咳嗽；2023/04 咳嗽伴哮鳴音；2024/02 肺炎後追蹤；2025/03 呼吸困難惡化——歷次均診斷 J45.9（氣喘）'
       ]},
       { title:'O · 客觀（影像與肺功能彙整）', icon:'fa-chart-line', items:[
-        'CXR 2025/11（DeepQ 重判）：<strong>雙側過度充氣合併橫膈膜扁平（桶狀胸型態）</strong>（原始報告「無明顯異常」）',
-        '無肋膜積液，心臟輪廓正常，整體符合阻塞性肺病影像表現',
+        'CXR 2025/11：<strong>HI 指數 91</strong>（依肺野面積、橫膈膜位置等幾何量測計算），橫膈膜角度扁平化',
+        '無肋膜積液，心臟輪廓正常',
         '2025/03 正式 Post-BD Spirometry：FEV₁/FVC <strong>56%</strong>（&lt; 0.70）；支氣管擴張劑反應 +5.5%（&lt; 12%）',
         'F/V 環疊圖：2023/04 外院（僅 Pre-BD）vs 2025/03（曲線左移、凹陷加深）→ 2 年內阻塞加重，詳見「檢驗報告」分頁'
       ]},
@@ -2228,90 +2227,82 @@ function _openDocModal(ptIdx, type) {
 /* ═══════════════════════════════════════════
    PACS AI 影像面板資料
 ═══════════════════════════════════════════ */
+/* 純幾何量測數據彙整：僅輸出 HI／EI 數值與計算方式，不與原始報告比較、不做臨床印象或常模/閾值判讀 */
 const WS_PACS_STORY = [
-  { // 王大明 — Pre-COPD (CXR + CT 雙模態)
-    headline: 'DeepQ Vision · CXR＋CT 雙模態 AI 縱向追蹤',
-    uniqueValue: '2 年 4 次影像（CXR×3・LDCT×1），AI 同步量化 HI（過度充氣）與 EI（肺氣腫指數），多維度追蹤 COPD 進展',
-    accentColor: '#f59e0b', chartMetric: 'AI 肺過度充氣指數 HI（CXR）',
-    threshold: 75, threshLabel: 'COPD 風險閾值',
-    normalBand: [48, 65], normalLabel: '同齡正常範圍',
+  { // 王大明 — CXR + CT 雙模態
+    headline: 'DeepQ Vision · CXR＋CT 雙模態幾何量測',
+    uniqueValue: '2 年 4 次影像（CXR×3・LDCT×1），AI 依幾何量測輸出 HI（肺野/橫膈膜量測）與 EI（低衰減區比例）數值',
+    accentColor: '#f59e0b', chartMetric: 'CXR HI 指數（幾何量測）',
     /* CT（EI）獨立圖表設定 */
-    ctChartMetric: 'Emphysema Index EI%（LDCT）',
+    ctChartMetric: 'LDCT 低衰減區比例 EI%（幾何量測）',
     ctAccentColor: '#10b981',
-    ctThreshold: 10, ctThreshLabel: 'EI 10%・輕度閾值',
-    ctNormalBand: [0, 5], ctNormalLabel: '正常 EI < 5%',
     timeline: [
       { date:'2024/01', dept:'急診', icon:'fa-truck-medical', deptColor:'#dc2626', modality:'CXR',
-        reason:'骨折—附帶胸部 X 光', aiFind:'右上肺早期充氣異常・HI 61', chartVal:61,
+        reason:'骨折—附帶胸部 X 光', aiFind:'HI 指數：61', chartVal:61,
         scan:{cx1:55,cy1:42,rx1:36,ry1:32,cx2:115,cy2:42,rx2:36,ry2:32,diaph:72},
-        regions:[{x:90,y:16,w:26,h:28,color:'rgba(251,191,36,.18)',stroke:'rgba(251,191,36,.55)',lbl:'早期'}] },
+        regions:[{x:90,y:16,w:26,h:28,color:'rgba(96,165,250,.18)',stroke:'rgba(96,165,250,.55)',lbl:'量測區'}] },
       { date:'2025/03', dept:'胸腔內科', icon:'fa-lungs', deptColor:'#1565c0', modality:'CXR',
-        reason:'慢性咳嗽門診', aiFind:'雙上葉過度充氣進展・HI 74', chartVal:74,
+        reason:'慢性咳嗽門診', aiFind:'HI 指數：74', chartVal:74,
         scan:{cx1:55,cy1:43,rx1:37,ry1:33,cx2:115,cy2:43,rx2:37,ry2:33,diaph:74},
-        regions:[{x:26,y:17,w:27,h:30,color:'rgba(251,191,36,.22)',stroke:'rgba(251,191,36,.65)',lbl:'進展↑'},{x:107,y:17,w:27,h:30,color:'rgba(251,191,36,.22)',stroke:'rgba(251,191,36,.65)',lbl:'進展↑'}] },
+        regions:[{x:26,y:17,w:27,h:30,color:'rgba(96,165,250,.22)',stroke:'rgba(96,165,250,.65)',lbl:'肺野量測'},{x:107,y:17,w:27,h:30,color:'rgba(96,165,250,.22)',stroke:'rgba(96,165,250,.65)',lbl:'肺野量測'}] },
       { date:'2025/09', dept:'胸腔內科', icon:'fa-circle-radiation', deptColor:'#10b981', modality:'CT',
-        reason:'症狀惡化・低劑量 CT（LDCT）追蹤', aiFind:'EI 16%・雙上葉低衰減區（HU<-950）', chartVal:16,
+        reason:'低劑量 CT（LDCT）追蹤', aiFind:'EI：16%（HU&lt;-950 區域占比）', chartVal:16,
         scan:{cx1:55,cy1:43,rx1:37,ry1:33,cx2:115,cy2:43,rx2:37,ry2:33,diaph:75},
         regions:[
-          {x:26,y:14,w:27,h:30,color:'rgba(16,185,129,.18)',stroke:'rgba(16,185,129,.65)',lbl:'低衰減區'},
-          {x:107,y:14,w:27,h:30,color:'rgba(16,185,129,.18)',stroke:'rgba(16,185,129,.65)',lbl:'低衰減區'}
+          {x:26,y:14,w:27,h:30,color:'rgba(16,185,129,.18)',stroke:'rgba(16,185,129,.65)',lbl:'量測區'},
+          {x:107,y:14,w:27,h:30,color:'rgba(16,185,129,.18)',stroke:'rgba(16,185,129,.65)',lbl:'量測區'}
         ]},
       { date:'2026/02', dept:'急診', icon:'fa-truck-medical', deptColor:'#dc2626', modality:'CXR',
-        reason:'咳嗽加劇・急診胸部 X 光', aiFind:'雙側過度充氣＋橫膈膜下移・HI 82', chartVal:82,
+        reason:'咳嗽加劇・急診胸部 X 光', aiFind:'HI 指數：82', chartVal:82,
         scan:{cx1:55,cy1:44,rx1:38,ry1:34,cx2:115,cy2:44,rx2:38,ry2:34,diaph:76},
-        regions:[{x:24,y:14,w:30,h:34,color:'rgba(251,191,36,.28)',stroke:'rgba(251,191,36,.82)',lbl:'過度充氣↑↑'},{x:106,y:14,w:30,h:34,color:'rgba(251,191,36,.28)',stroke:'rgba(251,191,36,.82)',lbl:'過度充氣↑↑'},{x:20,y:66,w:130,h:10,color:'rgba(239,68,68,.15)',stroke:'rgba(239,68,68,.6)',lbl:'橫膈膜↓'}] }
+        regions:[{x:24,y:14,w:30,h:34,color:'rgba(96,165,250,.28)',stroke:'rgba(96,165,250,.82)',lbl:'肺野量測'},{x:106,y:14,w:30,h:34,color:'rgba(96,165,250,.28)',stroke:'rgba(96,165,250,.82)',lbl:'肺野量測'},{x:20,y:66,w:130,h:10,color:'rgba(100,116,139,.15)',stroke:'rgba(100,116,139,.6)',lbl:'橫膈膜量測'}] }
     ],
     stats:[
-      {n:'CXR × 3',u:'HI 61→74→82',d:'過度充氣指數 2 年持續上升'},
-      {n:'LDCT × 1',u:'EI 16%',d:'雙上葉低衰減區，超輕度閾值'},
-      {n:'+34%',u:'HI 相對進展',d:'超過同齡預期值 2.3 倍'},
-      {n:'雙模態',u:'AI 同步分析',d:'CXR + CT 各自輸出對應指標'}
+      {n:'CXR × 3',u:'HI 61→74→82',d:'歷次 HI 指數數值'},
+      {n:'LDCT × 1',u:'EI 16%',d:'低衰減區占比（幾何量測）'},
+      {n:'2 年',u:'HI 數值變化',d:'61 → 82（僅呈現數值，不做常模判讀）'},
+      {n:'雙模態',u:'幾何量測',d:'CXR 與 CT 各自輸出對應數值'}
     ]
   },
-  { // 陳阿嬌 — Undiagnosed COPD
-    headline: 'DeepQ Vision · AI 縱向影像分析',
-    uniqueValue: '3 年 2 次 CXR，AI 量化肺容積增加 18%、橫膈膜角度持續下移，兩次報告均標記「正常」',
-    accentColor: '#ef4444', chartMetric: 'AI 過度充氣指數',
-    threshold: 72, threshLabel: 'COPD 高度疑似閾值',
-    normalBand: [40, 60], normalLabel: '同齡正常範圍',
+  { // 陳阿嬌
+    headline: 'DeepQ Vision · CXR 幾何量測',
+    uniqueValue: '3 年 2 次 CXR，AI 依肺野面積、橫膈膜位置等幾何量測輸出 HI 數值',
+    accentColor: '#ef4444', chartMetric: 'CXR HI 指數（幾何量測）',
     timeline: [
       { date:'2023/11', dept:'內科', icon:'fa-stethoscope', deptColor:'#475569', modality:'CXR',
-        reason:'支氣管炎追蹤', aiFind:'雙肺紋理增加（非特異性）', chartVal:55,
+        reason:'支氣管炎追蹤', aiFind:'HI 指數：55', chartVal:55,
         scan:{cx1:55,cy1:42,rx1:36,ry1:32,cx2:115,cy2:42,rx2:36,ry2:32,diaph:72},
-        regions:[{x:22,y:58,w:126,h:12,color:'rgba(239,68,68,.10)',stroke:'rgba(239,68,68,.35)',lbl:'紋理↑'}] },
+        regions:[{x:22,y:58,w:126,h:12,color:'rgba(100,116,139,.10)',stroke:'rgba(100,116,139,.35)',lbl:'橫膈膜量測'}] },
       { date:'2025/11', dept:'家醫科（今日觸發）', icon:'fa-house-medical', deptColor:'#15803d', modality:'CXR',
-        reason:'肺炎追蹤', aiFind:'過度充氣＋橫膈膜扁平', chartVal:91,
+        reason:'肺炎追蹤', aiFind:'HI 指數：91', chartVal:91,
         scan:{cx1:55,cy1:43,rx1:39,ry1:35,cx2:115,cy2:43,rx2:39,ry2:35,diaph:78},
-        regions:[{x:20,y:62,w:130,h:14,color:'rgba(239,68,68,.20)',stroke:'rgba(239,68,68,.70)',lbl:'橫膈膜扁平'},{x:22,y:10,w:126,h:56,color:'rgba(251,191,36,.12)',stroke:'rgba(251,191,36,.45)',lbl:'過度充氣'}] }
+        regions:[{x:20,y:62,w:130,h:14,color:'rgba(100,116,139,.20)',stroke:'rgba(100,116,139,.70)',lbl:'橫膈膜量測'},{x:22,y:10,w:126,h:56,color:'rgba(96,165,250,.12)',stroke:'rgba(96,165,250,.45)',lbl:'肺野量測'}] }
     ],
     stats:[
-      {n:'2 次 CXR',u:'AI 肺過度充氣指數',d:'55 → 91，2 年急速上升'},
-      {n:'+18%',u:'肺容積增加',d:'AI 量化比對，單張影像無法發現'},
-      {n:'2 次',u:'原始報告標「正常」',d:'DeepQ 重判均發現異常進展'},
-      {n:'3 年',u:'縱向追蹤範圍',d:'AI 自動比對歷次影像'}
+      {n:'2 次 CXR',u:'CXR HI 指數',d:'55 → 91（歷次數值）'},
+      {n:'2 次',u:'幾何量測',d:'肺野面積與橫膈膜位置皆納入計算'},
+      {n:'3 年',u:'縱向數據範圍',d:'AI 自動彙整歷次影像數值'}
     ]
   },
-  { // 林志明 — Follow-up interruption
-    headline: 'DeepQ Vision · AI 基準影像自動比對',
-    uniqueValue: '以 2023 年 GOLD I 確診 CXR 為基準，AI 自動比對 3 年後術前 CXR，量化進展並疑似達 GOLD II',
-    accentColor: '#0ea5e9', chartMetric: 'COPD 嚴重度指數 (AI)',
-    threshold: 60, threshLabel: 'GOLD II 疑似閾值',
-    normalBand: [30, 50], normalLabel: '穩定控制範圍',
+  { // 林志明
+    headline: 'DeepQ Vision · CXR 基準影像數值比對',
+    uniqueValue: '以 2023 年 CXR 為基準影像，AI 自動彙整 3 年後術前 CXR 的 HI 數值變化',
+    accentColor: '#0ea5e9', chartMetric: 'CXR HI 指數（幾何量測）',
     timeline: [
       { date:'2023/03', dept:'胸腔內科（確診基準）', icon:'fa-lungs', deptColor:'#0f766e', modality:'CXR',
-        reason:'COPD 確診當日 CXR・基準建檔', aiFind:'輕度充氣・無急性病灶（同日 Spirometry: FEV1/FVC=0.65）', chartVal:44,
+        reason:'COPD 確診當日 CXR・基準建檔', aiFind:'HI 指數：44（同日 Spirometry：FEV1/FVC=0.65）', chartVal:44,
         scan:{cx1:55,cy1:43,rx1:37,ry1:33,cx2:115,cy2:43,rx2:37,ry2:33,diaph:74},
-        regions:[{x:22,y:12,w:124,h:56,color:'rgba(16,185,129,.12)',stroke:'rgba(16,185,129,.5)',lbl:'GOLD I 基準'}] },
+        regions:[{x:22,y:12,w:124,h:56,color:'rgba(16,185,129,.12)',stroke:'rgba(16,185,129,.5)',lbl:'基準影像'}] },
       { date:'2026/05', dept:'骨科（今日・術前胸 X）', icon:'fa-bone', deptColor:'#0f766e', modality:'CXR',
-        reason:'腰椎術前例行胸部 X 光', aiFind:'較基準進展，疑似 GOLD II', chartVal:71,
+        reason:'腰椎術前例行胸部 X 光', aiFind:'HI 指數：71（較基準影像數值變化，臨床意義待肺功能複測確認）', chartVal:71,
         scan:{cx1:55,cy1:44,rx1:39,ry1:35,cx2:115,cy2:44,rx2:39,ry2:35,diaph:76},
-        regions:[{x:22,y:10,w:126,h:60,color:'rgba(251,191,36,.18)',stroke:'rgba(251,191,36,.60)',lbl:'GOLD II?'},{x:20,y:65,w:130,h:11,color:'rgba(239,68,68,.15)',stroke:'rgba(239,68,68,.55)',lbl:'橫膈膜↓'}] }
+        regions:[{x:22,y:10,w:126,h:60,color:'rgba(96,165,250,.18)',stroke:'rgba(96,165,250,.60)',lbl:'肺野量測'},{x:20,y:65,w:130,h:11,color:'rgba(100,116,139,.15)',stroke:'rgba(100,116,139,.55)',lbl:'橫膈膜量測'}] }
     ],
     stats:[
-      {n:'44 → 71',u:'COPD 嚴重度指數',d:'3 年間超越 GOLD II 閾值'},
-      {n:'3 年',u:'未追蹤影像',d:'確診後首次 AI 再評估'},
-      {n:'術前 CXR',u:'觸發來源',d:'例行影像・AI 附帶偵測 COPD 進展'},
-      {n:'自動比對',u:'無需人工操作',d:'AI 自動找出歷史基準影像並量化差異'}
+      {n:'44 → 71',u:'CXR HI 指數',d:'3 年間之數值變化'},
+      {n:'3 年',u:'未追蹤影像',d:'確診後首次重新量測'},
+      {n:'術前 CXR',u:'觸發來源',d:'例行影像・AI 附帶輸出 HI 數值'},
+      {n:'自動比對',u:'無需人工操作',d:'AI 自動找出歷史基準影像並量化數值差異'}
     ]
   }
 ];
@@ -2321,35 +2312,35 @@ const WS_PACS_REPORT = [
   { doctor:'Dr. 林○○ · 胸腔內科', date:'2026/02/14', study:'CXR PA · 急診胸部 X 光',
     originalReport:{ radiologist:'急診值班放射科', date:'2026/02/14', text:'雙側肺野清晰，心臟大小正常，橫膈膜位置尚可，無急性浸潤、積液或氣胸，骨骼構造完整。', impression:'無特殊發現。' },
     findings:[
-      {label:'肺野', text:'雙側肺野呈現<strong>過度充氣</strong>，右上肺葉可見早期低密度區域，符合肺氣腫前期改變。無急性浸潤或積液。'},
+      {label:'肺野', text:'雙側肺野透亮度較高，右上肺葉可見低密度區域。無急性浸潤或積液。'},
       {label:'心臟', text:'心影在正常範圍內，心胸比 &lt; 0.5，未見急性心衰表現。心影稍呈垂直形態。'},
       {label:'縱膈', text:'氣管居中，縱膈無偏移或擴大，無淋巴腺腫大徵象。'},
-      {label:'橫膈膜', text:'雙側橫膈膜<strong>輕度下移</strong>，右側肋膈角稍鈍，左側肋膈角清晰。'},
+      {label:'橫膈膜', text:'雙側橫膈膜位置測量呈輕度下移，右側肋膈角角度稍鈍，左側肋膈角清晰。'},
     ],
-    impression:['雙側<strong>肺野過度充氣</strong>，右上肺葉低密度改變，符合早期 COPD / Pre-COPD 影像表現。','建議進行 Post-BD Spirometry 以評估氣流阻塞程度（GOLD 分級確認）。'],
-    aiNote:'DeepQ HI（過度充氣指數）= <strong>82</strong>，超過 COPD 風險閾值 75；較 2024/01 基準值 (61) 上升 34%，進展速度超過同齡預期 2.3 倍。'
+    impression:['HI 指數：<strong>82</strong>（依肺野面積、橫膈膜位置等幾何量測計算）'],
+    aiNote:'HI 指數計算方式：肺野面積 ÷ 胸廓面積比值，並納入橫膈膜位置角度。本次數值 82，2024/01 數值為 61。'
   },
   { doctor:'Dr. 張○○ · 家醫科', date:'2025/11/10', study:'CXR PA · 肺炎追蹤',
     originalReport:{ radiologist:'Dr. 黃○○ · 放射科', date:'2025/11/10', text:'雙側肺野清晰，無浸潤灶，心臟及縱膈正常，橫膈膜及肋膈角正常，骨骼無特殊發現。', impression:'無明顯異常。' },
     findings:[
-      {label:'肺野', text:'雙側肺野呈現<strong>過度充氣</strong>，整體肺容積較前次增加約 18%。無急性浸潤灶。'},
-      {label:'心臟', text:'心影偏窄，心胸比 0.42，呈<strong>垂直心形態</strong>，符合肺氣腫繼發改變。'},
+      {label:'肺野', text:'雙側肺野透亮度較高，整體肺野面積較前次影像增加約 18%。無急性浸潤灶。'},
+      {label:'心臟', text:'心影偏窄，心胸比 0.42，呈垂直心形態。'},
       {label:'縱膈', text:'氣管居中，縱膈偏窄，上縱膈無淋巴腺腫大徵象。'},
-      {label:'橫膈膜', text:'<strong>雙側橫膈膜明顯扁平</strong>，後肋膈角角度銳化，符合 Barrel Chest 形態。'},
+      {label:'橫膈膜', text:'雙側橫膈膜位置測量呈扁平化，後肋膈角角度增加。'},
     ],
-    impression:['<strong>雙側過度充氣＋橫膈膜扁平</strong>，符合 COPD 影像表現（Barrel Chest）。','原始報告標注「無明顯異常」—— DeepQ AI 重判發現上述改變。','強烈建議安排 Post-BD Spirometry 以確診 COPD。'],
-    aiNote:'DeepQ HI = <strong>91</strong>，遠超 COPD 高度疑似閾值 72；原始放射科報告標記「正常」，AI 重判發現兩次均有隱性進展。'
+    impression:['HI 指數：<strong>91</strong>（依肺野面積、橫膈膜位置等幾何量測計算）'],
+    aiNote:'HI 指數計算方式：肺野面積 ÷ 胸廓面積比值，並納入橫膈膜位置角度。本次數值 91，2023/11 數值為 55。'
   },
   { doctor:'Dr. 陳○○ · 骨科（術前例行）', date:'2026/05/27', study:'CXR PA · 術前例行胸部 X 光',
     originalReport:{ radiologist:'Dr. 李○○ · 放射科', date:'2026/05/27', text:'雙側肺野清晰，無急性浸潤灶，心臟大小正常，縱膈無偏移，橫膈膜及肋膈角正常。術前例行胸部 X 光，無手術禁忌之急性肺部病變。', impression:'術前胸部 X 光正常範圍，無急性異常。' },
     findings:[
-      {label:'肺野', text:'較 2023/03 確診基準影像相比，雙側肺野<strong>容積進一步擴大</strong>，右上肺葉低密度區域增加。'},
-      {label:'心臟', text:'心影較基準偏窄，心胸比 0.42，垂直心形態持續，符合 COPD 進展。'},
-      {label:'縱膈', text:'氣管居中，縱膈較 3 年前基準偏窄，符合肺過度充氣繼發改變。'},
-      {label:'橫膈膜', text:'橫膈膜位置較 2023/03 基準<strong>下移約 1.5 肋間</strong>，雙側肋膈角仍存在但角度增加。'},
+      {label:'肺野', text:'較 2023/03 基準影像相比，雙側肺野面積測量數值增加，右上肺葉低密度區域範圍增加。'},
+      {label:'心臟', text:'心影較基準偏窄，心胸比 0.42，垂直心形態持續。'},
+      {label:'縱膈', text:'氣管居中，縱膈較 3 年前基準偏窄。'},
+      {label:'橫膈膜', text:'橫膈膜位置測量較 2023/03 基準下移約 1.5 肋間，雙側肋膈角仍存在但角度增加。'},
     ],
-    impression:['<strong>COPD 影像較確診基準持續進展</strong>，肺容積增加、橫膈膜下移。','DeepQ AI 自動比對 2023/03 基準影像，疑似由 GOLD I 進展至 GOLD II。','建議轉介胸腔內科重新評估 COPD 嚴重度並重做 Spirometry。'],
-    aiNote:'DeepQ COPD 嚴重度指數 = <strong>71</strong>（較基準 44 上升至 71），超越 GOLD II 疑似閾值 60。3 年追蹤中斷期間疾病持續進展。'
+    impression:['HI 指數：<strong>71</strong>（依肺野面積、橫膈膜位置等幾何量測計算，2023/03 基準值為 44）'],
+    aiNote:'HI 指數計算方式：肺野面積 ÷ 胸廓面積比值，並納入橫膈膜位置角度。本次數值 71，2023/03 基準值為 44。3 年間無新影像可供比對。'
   }
 ];
 
@@ -2967,13 +2958,6 @@ function makeAITrendChart(story, modFilter) {
   const xPos = i => ML + (N<2 ? PW/2 : (i/(N-1))*PW);
   const yPos = v => MT + PH - ((v-yMin)/(yMax-yMin))*PH;
 
-  // normal band
-  const nb = story.normalBand;
-  const nbY1 = yPos(nb[1]), nbY2 = yPos(nb[0]);
-
-  // threshold line
-  const thrY = yPos(story.threshold);
-
   // grid
   const gridVals = gridValsAll;
   const grid = gridVals.map(v=>{
@@ -2986,11 +2970,10 @@ function makeAITrendChart(story, modFilter) {
   const lineD = pts.map((p,i)=>`${i===0?'M':'L'}${xPos(i).toFixed(1)},${yPos(p.chartVal).toFixed(1)}`).join(' ');
   const areaD = `${lineD} L${xPos(N-1).toFixed(1)},${(MT+PH).toFixed(1)} L${xPos(0).toFixed(1)},${(MT+PH).toFixed(1)} Z`;
 
-  // dots + labels
+  // dots + labels（僅呈現實測數值，不做常模/閾值比較）
   const dotsHtml = pts.map((p,i)=>{
     const x=xPos(i), y=yPos(p.chartVal), isLast=(i===N-1);
-    const aboveThresh = p.chartVal >= story.threshold;
-    const dotColor = aboveThresh ? story.accentColor : '#60a5fa';
+    const dotColor = story.accentColor;
     return `
       ${isLast?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="13" fill="${dotColor}" opacity=".12"/>`:``}
       <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isLast?7:5}" fill="${dotColor}" stroke="${isLast?'#fff':'rgba(255,255,255,.25)'}" stroke-width="${isLast?2:1}"/>
@@ -3001,16 +2984,10 @@ function makeAITrendChart(story, modFilter) {
 
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:130px;display:block;background:#fff;">
     <rect width="${W}" height="${H}" fill="#fff"/>
-    <!-- normal band -->
-    <rect x="${ML}" y="${nbY1.toFixed(1)}" width="${PW}" height="${(nbY2-nbY1).toFixed(1)}" fill="rgba(16,185,129,.07)"/>
-    <text x="${(W-MR-3).toFixed(1)}" y="${(nbY2-2).toFixed(1)}" font-size="7" fill="#10b981" font-family="monospace" text-anchor="end" opacity=".7">${story.normalLabel}</text>
     <!-- grid -->
     ${grid}
     <!-- y-axis label -->
     <text transform="rotate(-90)" x="${-(MT+PH/2)}" y="11" font-size="7.5" fill="#94a3b8" font-family="monospace" text-anchor="middle">${story.chartMetric}</text>
-    <!-- threshold -->
-    <line x1="${ML}" y1="${thrY.toFixed(1)}" x2="${W-MR}" y2="${thrY.toFixed(1)}" stroke="${story.accentColor}" stroke-width="1.2" stroke-dasharray="5 3" opacity=".7"/>
-    <text x="${(W-MR-3).toFixed(1)}" y="${(thrY-3).toFixed(1)}" font-size="7" fill="${story.accentColor}" font-family="monospace" text-anchor="end" opacity=".9">${story.threshLabel}</text>
     <!-- area -->
     <path d="${areaD}" fill="${story.accentColor}" opacity=".06"/>
     <!-- line -->
@@ -3018,20 +2995,6 @@ function makeAITrendChart(story, modFilter) {
     <!-- dots -->
     ${dotsHtml}
   </svg>`;
-}
-
-function switchRptTab(ptIdx, tab) {
-  ['orig','ai'].forEach(t => {
-    const panel = document.getElementById(`rpt-panel-${t}-${ptIdx}`);
-    const tabEl = document.getElementById(`rpt-tab-${t}-${ptIdx}`);
-    if (!panel || !tabEl) return;
-    const isActive = t === tab;
-    panel.style.display = isActive ? 'flex' : 'none';
-    tabEl.style.color = isActive ? (t==='orig' ? '#dc2626' : '#0284c7') : '#94a3b8';
-    tabEl.style.fontWeight = isActive ? '700' : '400';
-    tabEl.style.borderBottomColor = isActive ? (t==='orig' ? '#dc2626' : '#0284c7') : 'transparent';
-    tabEl.style.background = isActive ? '#fff' : 'transparent';
-  });
 }
 
 function buildPACSPanel(ptIdx) {
@@ -3089,7 +3052,7 @@ function buildPACSPanel(ptIdx) {
     </div>${makeAITrendChart(story,'CXR')}`;
   }
   if(hasCT&&story.ctChartMetric){
-    const ctS=Object.assign({},story,{chartMetric:story.ctChartMetric,accentColor:story.ctAccentColor,threshold:story.ctThreshold,threshLabel:story.ctThreshLabel,normalBand:story.ctNormalBand,normalLabel:story.ctNormalLabel});
+    const ctS=Object.assign({},story,{chartMetric:story.ctChartMetric,accentColor:story.ctAccentColor});
     trendSection+=`<div style="font-family:monospace;font-size:8px;color:#64748b;letter-spacing:.07em;padding:5px 10px 2px;background:#f1f5f9;display:flex;align-items:center;gap:6px;border-top:1px solid #e2e8f0;">
       <i class="fa-solid fa-chart-area" style="color:#10b981;font-size:8px;"></i>
       <span style="color:#059669;font-weight:600;">CT</span> · ${story.ctChartMetric}
@@ -3130,15 +3093,15 @@ function buildPACSPanel(ptIdx) {
         <!-- Tab bar -->
         <div style="padding:10px 16px 0;display:flex;gap:4px;background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0;">
           <button id="dqvtab-${ptIdx}-mining" onclick="switchDQVTab(${ptIdx},'mining')" style="padding:6px 14px;border-radius:6px 6px 0 0;border:1px solid var(--dq-border);border-bottom:2px solid var(--bg2);background:var(--bg2);color:var(--dq);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;">機會性探勘</button>
-          <button id="dqvtab-${ptIdx}-detect" onclick="switchDQVTab(${ptIdx},'detect')" style="padding:6px 14px;border-radius:6px 6px 0 0;border:1px solid transparent;background:transparent;color:var(--text3);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;">AI 偵測項目</button>
-          <button id="dqvtab-${ptIdx}-trend" onclick="switchDQVTab(${ptIdx},'trend')" style="padding:6px 14px;border-radius:6px 6px 0 0;border:1px solid transparent;background:transparent;color:var(--text3);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;">縱向趨勢追蹤</button>
+          <button id="dqvtab-${ptIdx}-detect" onclick="switchDQVTab(${ptIdx},'detect')" style="padding:6px 14px;border-radius:6px 6px 0 0;border:1px solid transparent;background:transparent;color:var(--text3);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;">幾何量測項目</button>
+          <button id="dqvtab-${ptIdx}-trend" onclick="switchDQVTab(${ptIdx},'trend')" style="padding:6px 14px;border-radius:6px 6px 0 0;border:1px solid transparent;background:transparent;color:var(--text3);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;">歷次數值彙整</button>
         </div>
         <!-- Tab content -->
         <div style="overflow-y:auto;padding:16px 18px;background:var(--bg2);scrollbar-width:thin;scrollbar-color:var(--bg4) transparent;">
           <!-- Tab: 機會性探勘 -->
           <div id="dqvpanel-${ptIdx}-mining">
             <div style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px;">
-              DeepQ Vision <strong style="color:var(--text1);">不需要新的影像</strong>——它直接重判患者既有的歷史影像，從被遺忘的舊 X 光與 CT 中找出早期 COPD 線索。
+              DeepQ Vision <strong style="color:var(--text1);">不需要新的影像</strong>——它直接量測患者既有的歷史影像，從被遺忘的舊 X 光與 CT 中計算出 HI 指數數值。
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div style="display:flex;align-items:flex-start;gap:10px;background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:11px 13px;">
@@ -3151,28 +3114,28 @@ function buildPACSPanel(ptIdx) {
               <div style="display:flex;align-items:flex-start;gap:10px;background:var(--am-dim);border:1px solid var(--am-border);border-radius:8px;padding:11px 13px;">
                 <i class="fa-solid fa-microscope" style="color:var(--amber);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
                 <div style="font-size:11px;color:var(--text2);line-height:1.65;">
-                  <strong style="color:var(--text1);">Deep Learning 推論</strong><br>
-                  以 ResNet / Vision Transformer 為基礎，輸出結構化影像發現與信心分數
+                  <strong style="color:var(--text1);">Deep Learning 幾何量測</strong><br>
+                  以 ResNet / Vision Transformer 為基礎，輸出肺野面積、橫膈膜位置等結構化幾何量測數值
                 </div>
               </div>
-              <div style="display:flex;align-items:flex-start;gap:10px;background:var(--da-dim);border:1px solid var(--da-border);border-radius:8px;padding:11px 13px;">
-                <i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
+              <div style="display:flex;align-items:flex-start;gap:10px;background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:11px 13px;">
+                <i class="fa-solid fa-circle-info" style="color:var(--dq);font-size:13px;margin-top:1px;flex-shrink:0;"></i>
                 <div style="font-size:11px;color:var(--text2);line-height:1.65;">
-                  <strong style="color:var(--text1);">原始報告未標記 ≠ 正常</strong><br>
-                  本 Demo 中三位患者的舊影像，原報告均為「無特殊發現」，DeepQ 重判後發現隱性變化
+                  <strong style="color:var(--text1);">純數據化輸出，不做臨床判讀</strong><br>
+                  DeepQ Vision 僅計算並輸出 HI 指數數值，不與原始放射科報告比較優劣，亦不產生診斷印象，最終判讀由醫師綜合決定
                 </div>
               </div>
             </div>
           </div>
-          <!-- Tab: AI 偵測項目 -->
+          <!-- Tab: 幾何量測項目 -->
           <div id="dqvpanel-${ptIdx}-detect" style="display:none;">
-            <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;letter-spacing:.06em;">胸部 X 光 / CT · COPD 相關偵測指標</div>
+            <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;letter-spacing:.06em;">胸部 X 光 · HI 指數幾何量測項目（不做臨床判讀）</div>
             ${[
-              ['fa-lungs','var(--amber)','肺過度充氣','Hyperinflation · 肺容積增加','早期指標','var(--am-dim)','var(--am-border)','var(--amber)'],
-              ['fa-cloud','var(--amber)','肺氣腫變化','Emphysema · 肺實質破壞','高特異性','var(--da-dim)','var(--da-border)','var(--danger)'],
-              ['fa-minus','var(--danger)','橫膈膜扁平','Diaphragm Flattening · 桶狀胸','高特異性','var(--da-dim)','var(--da-border)','var(--danger)'],
-              ['fa-expand','var(--dq)','肋間隙增寬','Rib Spacing · 胸廓重塑','輔助指標','var(--dq-dim)','var(--dq-border)','var(--dq)'],
-              ['fa-heart-pulse','var(--teal)','心臟垂直化','Vertical Heart · 繼發性改變','輔助指標','var(--tl-dim)','var(--tl-border)','var(--teal)'],
+              ['fa-lungs','var(--dq)','肺野面積','Lung Field Area · 對比胸廓總面積','幾何測量','var(--dq-dim)','var(--dq-border)','var(--dq)'],
+              ['fa-minus','#64748b','橫膈膜位置','Diaphragm Position · 對比肋骨定位點','幾何測量','var(--dq-dim)','var(--dq-border)','var(--dq)'],
+              ['fa-angle-up','#64748b','肋膈角角度','Costophrenic Angle · 角度計算','幾何測量','var(--dq-dim)','var(--dq-border)','var(--dq)'],
+              ['fa-expand','var(--dq)','心胸比','Cardiothoracic Ratio · 心影寬度 ÷ 胸廓寬度','幾何測量','var(--dq-dim)','var(--dq-border)','var(--dq)'],
+              ['fa-calculator','var(--teal)','HI 指數合成','綜合上述幾何量測值計算單一數值','輸出數值','var(--tl-dim)','var(--tl-border)','var(--teal)'],
             ].map(([ic,ic_c,name,sub,chip,chip_bg,chip_bd,chip_c])=>`
               <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
                 <div style="width:30px;height:30px;border-radius:6px;background:${chip_bg};border:1px solid ${chip_bd};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -3185,34 +3148,34 @@ function buildPACSPanel(ptIdx) {
                 <span style="font-size:10px;font-family:var(--mono);color:${chip_c};background:${chip_bg};border:1px solid ${chip_bd};padding:2px 8px;border-radius:4px;">${chip}</span>
               </div>`).join('')}
             <div style="margin-top:10px;background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:6px;padding:8px 12px;font-size:10px;color:var(--dq);font-family:var(--mono);">
-              輸出格式：結構化 JSON → HL7 FHIR · 信心分數 0–100%
+              輸出格式：結構化 JSON → HL7 FHIR · HI 指數（數值）
             </div>
           </div>
-          <!-- Tab: 縱向趨勢追蹤 -->
+          <!-- Tab: 歷次數值彙整 -->
           <div id="dqvpanel-${ptIdx}-trend" style="display:none;">
             <div style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px;">
-              單張影像只能看現況。DeepQ Vision 串接同一患者的<strong style="color:var(--text1);">跨年度影像序列</strong>，量化疾病進展速度。
+              單張影像只能看現況。DeepQ Vision 串接同一患者的<strong style="color:var(--text1);">跨年度影像序列</strong>，將 HI 指數依時間彙整呈現，供醫師參考。
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 13px;">
                 <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                  <i class="fa-solid fa-chart-line" style="color:var(--dq);"></i>AI 肺過度充氣指數 (HI) 縱向追蹤
+                  <i class="fa-solid fa-chart-line" style="color:var(--dq);"></i>CXR HI 指數歷次數值
                 </div>
                 <div style="display:flex;align-items:flex-end;gap:6px;height:52px;padding:0 4px;">
                   <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                    <div style="width:100%;height:22px;background:var(--amber);border-radius:3px 3px 0 0;opacity:.45;"></div>
+                    <div style="width:100%;height:22px;background:var(--dq);border-radius:3px 3px 0 0;opacity:.5;"></div>
                     <div style="font-size:9px;color:var(--text3);font-family:var(--mono);">2年前</div>
                   </div>
                   <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                    <div style="width:100%;height:33px;background:var(--amber);border-radius:3px 3px 0 0;opacity:.7;"></div>
+                    <div style="width:100%;height:33px;background:var(--dq);border-radius:3px 3px 0 0;opacity:.7;"></div>
                     <div style="font-size:9px;color:var(--text3);font-family:var(--mono);">1年前</div>
                   </div>
                   <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                    <div style="width:100%;height:44px;background:var(--danger);border-radius:3px 3px 0 0;"></div>
-                    <div style="font-size:9px;color:var(--danger);font-family:var(--mono);font-weight:600;">本次↑↑</div>
+                    <div style="width:100%;height:44px;background:var(--dq);border-radius:3px 3px 0 0;"></div>
+                    <div style="font-size:9px;color:var(--dq);font-family:var(--mono);font-weight:600;">本次</div>
                   </div>
                 </div>
-                <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:6px;">指數 0.61 → 0.74 → 0.82 · <span style="color:var(--danger);">進展超過年齡預期</span></div>
+                <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:6px;">指數 0.61 → 0.74 → 0.82（歷次實測數值）</div>
               </div>
               <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 13px;">
                 <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:5px;display:flex;align-items:center;gap:6px;">
@@ -3220,11 +3183,11 @@ function buildPACSPanel(ptIdx) {
                 </div>
                 <div style="font-size:11px;color:var(--text2);line-height:1.65;">以解剖標記點自動對齊不同時間點影像，排除體位差異，確保測量可比性</div>
               </div>
-              <div style="background:var(--am-dim);border:1px solid var(--am-border);border-radius:8px;padding:11px 13px;">
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 13px;">
                 <div style="font-size:11px;font-weight:500;color:var(--text1);margin-bottom:5px;display:flex;align-items:center;gap:6px;">
-                  <i class="fa-solid fa-bell" style="color:var(--amber);"></i>進展速度異常警示
+                  <i class="fa-solid fa-table-list" style="color:var(--dq);"></i>數值彙整原則
                 </div>
-                <div style="font-size:11px;color:var(--text2);line-height:1.65;">AI 計算個人化進展曲線，與同年齡族群基準比較，<strong style="color:var(--text1);">超過預期速度即觸發臨床警示</strong></div>
+                <div style="font-size:11px;color:var(--text2);line-height:1.65;">僅將歷次 HI 指數依時間排列呈現，<strong style="color:var(--text1);">不與常模或閾值比較，不做臨床判讀</strong>，數值意義由醫師綜合判斷</div>
               </div>
             </div>
           </div>
@@ -3268,63 +3231,26 @@ function buildPACSPanel(ptIdx) {
         </div>
       </div>
 
-      <!-- 右：放射科報告（原始 vs DeepQ 重判 雙 tab） -->
+      <!-- 右：DeepQ Vision 影像量測報告（純數據化輸出，不與原始報告比較） -->
       <div style="background:#fff;border-left:1px solid #e2e8f0;overflow-y:auto;display:flex;flex-direction:column;">
-
-        <!-- Tab bar -->
-        <div style="display:flex;border-bottom:2px solid #e2e8f0;flex-shrink:0;background:#f8fafc;">
-          <div id="rpt-tab-orig-${ptIdx}" onclick="switchRptTab(${ptIdx},'orig')"
-            style="flex:1;padding:7px 4px;text-align:center;font-family:monospace;font-size:10px;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;user-select:none;">
-            <i class="fa-solid fa-file-lines" style="font-size:9px;margin-right:3px;"></i>原始報告
+        <div style="padding:9px 13px;border-bottom:1px solid #bfdbfe;display:flex;align-items:center;gap:7px;background:#eff6ff;flex-shrink:0;">
+          <i class="fa-solid fa-ruler-combined" style="color:#0284c7;font-size:13px;"></i>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#0284c7;">DeepQ Vision 影像量測報告</div>
+            <div style="font-size:10px;font-family:monospace;color:#64748b;margin-top:1px;">${report.doctor}</div>
           </div>
-          <div id="rpt-tab-ai-${ptIdx}" onclick="switchRptTab(${ptIdx},'ai')"
-            style="flex:1;padding:7px 4px;text-align:center;font-family:monospace;font-size:10px;color:#0284c7;font-weight:700;cursor:pointer;border-bottom:2px solid #0284c7;margin-bottom:-2px;background:#fff;user-select:none;">
-            <i class="fa-solid fa-brain" style="font-size:9px;margin-right:3px;"></i>DeepQ 重判
-          </div>
+          <span style="margin-left:auto;font-family:monospace;font-size:8px;background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;padding:1px 6px;border-radius:3px;white-space:nowrap;">TFDA 核准</span>
         </div>
-
-        <!-- 原始報告 panel (預設隱藏) -->
-        <div id="rpt-panel-orig-${ptIdx}" style="display:none;flex-direction:column;flex:1;">
-          <div style="padding:9px 13px;border-bottom:1px solid #fecaca;display:flex;align-items:center;gap:7px;background:#fef2f2;flex-shrink:0;">
-            <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;font-size:13px;"></i>
-            <div>
-              <div style="font-size:11px;font-weight:700;color:#dc2626;">原始放射科報告</div>
-              <div style="font-size:10px;font-family:monospace;color:#64748b;margin-top:1px;">${report.originalReport.radiologist} · ${report.originalReport.date}</div>
+        <div style="padding:10px 13px;flex:1;overflow-y:auto;">
+          <div style="font-family:monospace;font-size:10px;font-weight:700;color:#0284c7;letter-spacing:.08em;margin-bottom:8px;">幾何量測結果</div>
+          <div id="${overlayId}-findings">${findingRows}</div>
+          <div style="font-family:monospace;font-size:10px;color:#64748b;margin:10px 0 6px;">HI 指數：</div>
+          <div id="${overlayId}-impression" style="margin-bottom:10px;">${impressionRows}</div>
+          <div style="background:rgba(${acRGB},0.07);border:1px solid rgba(${acRGB},0.25);border-radius:6px;padding:8px 10px;margin-top:8px;">
+            <div style="font-family:monospace;font-size:9px;font-weight:600;color:${ac};margin-bottom:4px;display:flex;align-items:center;gap:5px;">
+              <i class="fa-solid fa-ruler-combined" style="font-size:9px;"></i> DeepQ Vision Quantitative Analysis
             </div>
-          </div>
-          <div style="padding:10px 13px;flex:1;overflow-y:auto;">
-            <div style="font-family:monospace;font-size:10px;font-weight:700;color:#64748b;letter-spacing:.08em;margin-bottom:6px;">影像所見</div>
-            <div style="font-size:11px;color:#475569;line-height:1.75;padding:9px 11px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;margin-bottom:10px;">${report.originalReport.text}</div>
-            <div style="font-family:monospace;font-size:10px;font-weight:700;color:#64748b;letter-spacing:.08em;margin-bottom:6px;">結論</div>
-            <div style="font-size:12px;font-weight:600;color:#334155;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">${report.originalReport.impression}</div>
-            <div style="margin-top:12px;padding:9px 11px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;font-size:10px;color:#92400e;font-family:monospace;line-height:1.7;">
-              <i class="fa-solid fa-circle-info" style="margin-right:5px;"></i><strong>DeepQ AI 重判：發現與 COPD 相關之新增影像特徵</strong><br>
-              點擊「DeepQ 重判」分頁查看 AI 發現的影像變化
-            </div>
-          </div>
-        </div>
-
-        <!-- DeepQ AI 重判 panel (預設顯示) -->
-        <div id="rpt-panel-ai-${ptIdx}" style="display:flex;flex-direction:column;flex:1;">
-          <div style="padding:9px 13px;border-bottom:1px solid #bfdbfe;display:flex;align-items:center;gap:7px;background:#eff6ff;flex-shrink:0;">
-            <i class="fa-solid fa-brain" style="color:#0284c7;font-size:13px;"></i>
-            <div>
-              <div style="font-size:11px;font-weight:700;color:#0284c7;">DeepQ Vision AI 重判報告</div>
-              <div style="font-size:10px;font-family:monospace;color:#64748b;margin-top:1px;">${report.doctor}</div>
-            </div>
-            <span style="margin-left:auto;font-family:monospace;font-size:8px;background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;padding:1px 6px;border-radius:3px;white-space:nowrap;">TFDA 核准</span>
-          </div>
-          <div style="padding:10px 13px;flex:1;overflow-y:auto;">
-            <div style="font-family:monospace;font-size:10px;font-weight:700;color:#0284c7;letter-spacing:.08em;margin-bottom:8px;">DeepQ 重判 · 影像發現</div>
-            <div id="${overlayId}-findings">${findingRows}</div>
-            <div style="font-family:monospace;font-size:10px;color:#64748b;margin:10px 0 6px;">結論：</div>
-            <div id="${overlayId}-impression" style="margin-bottom:10px;">${impressionRows}</div>
-            <div style="background:rgba(${acRGB},0.07);border:1px solid rgba(${acRGB},0.25);border-radius:6px;padding:8px 10px;margin-top:8px;">
-              <div style="font-family:monospace;font-size:9px;font-weight:600;color:${ac};margin-bottom:4px;display:flex;align-items:center;gap:5px;">
-                <i class="fa-solid fa-brain" style="font-size:9px;"></i> DeepQ AI Quantitative Analysis
-              </div>
-              <div style="font-size:10px;color:#475569;line-height:1.65;">${report.aiNote}</div>
-            </div>
+            <div style="font-size:10px;color:#475569;line-height:1.65;">${report.aiNote}</div>
           </div>
         </div>
       </div>
@@ -3560,27 +3486,24 @@ function buildLabPage(ptIdx) {
       <text x="223" y="84" font-family="Arial" font-size="6" fill="#94a3b8">← 左移=充氣惡化</text>
     </svg>`;
 
-    /* AI FEV₁ % pred trend SVG (Post-BD): 67%→65%→62%→AI 58% */
+    /* 歷次 Post-BD FEV₁ % pred 數據可視化: 67%→65%→62%（僅呈現實測歷次數據，不做未來投影） */
     const p0TrendSVG = `<svg viewBox="0 0 255 78" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border:1px solid #e2e8f0;border-radius:4px;">
-      <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">DeepQ AI · Post-BD FEV₁% 追蹤趨勢</text>
+      <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">歷次 Post-BD FEV₁% 數據彙整</text>
       <line x1="45" y1="15" x2="45" y2="66" stroke="#ccc" stroke-width="1"/>
       <line x1="45" y1="66" x2="238" y2="66" stroke="#ccc" stroke-width="1"/>
       <!-- GOLD II/III 50% boundary -->
       <line x1="45" y1="66" x2="238" y2="66" stroke="#f97316" stroke-width=".8" stroke-dasharray="3,2" opacity=".7"/>
       <text x="43" y="69" font-family="monospace" font-size="6" fill="#f97316" text-anchor="end">50%</text>
       <text x="43" y="19" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">75%</text>
-      <!-- fy(p)=66-(p-50)*2; 75%→16, 67%→32, 65%→36, 62%→42, 58%→50 -->
-      <line x1="70" y1="32" x2="130" y2="36" stroke="#475569" stroke-width="1.5"/>
-      <line x1="130" y1="36" x2="185" y2="42" stroke="#475569" stroke-width="1.5"/>
-      <line x1="185" y1="42" x2="220" y2="50" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
-      <circle cx="70"  cy="32" r="4" fill="#22c55e"/><text x="70"  y="28" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">67%</text>
-      <circle cx="130" cy="36" r="4" fill="#f97316"/><text x="130" y="32" font-family="monospace" font-size="7" fill="#f97316" text-anchor="middle">65%</text>
-      <circle cx="185" cy="42" r="4.5" fill="#dc2626"/><text x="185" y="38" font-family="monospace" font-size="7" fill="#dc2626" text-anchor="middle">62%</text>
-      <circle cx="220" cy="50" r="3.5" fill="#dc2626" stroke="#fff" stroke-width="1" opacity=".7"/><text x="222" y="46" font-family="monospace" font-size="7" fill="#dc2626">~58%</text>
-      <text x="70"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2025/03</text>
-      <text x="130" y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2025/06</text>
-      <text x="185" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2026/02</text>
-      <text x="220" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">AI 投影</text>
+      <!-- fy(p)=66-(p-50)*2; 75%→16, 67%→32, 65%→36, 62%→42 -->
+      <line x1="90" y1="32" x2="163" y2="36" stroke="#475569" stroke-width="1.5"/>
+      <line x1="163" y1="36" x2="236" y2="42" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="90"  cy="32" r="4" fill="#22c55e"/><text x="90"  y="28" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">67%</text>
+      <circle cx="163" cy="36" r="4" fill="#f97316"/><text x="163" y="32" font-family="monospace" font-size="7" fill="#f97316" text-anchor="middle">65%</text>
+      <circle cx="236" cy="42" r="4.5" fill="#dc2626"/><text x="236" y="38" font-family="monospace" font-size="7" fill="#dc2626" text-anchor="middle">62%</text>
+      <text x="90"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2025/03</text>
+      <text x="163" y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2025/06</text>
+      <text x="236" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2026/02</text>
     </svg>`;
 
     /* Spirometry 3-session comparison table */
@@ -3771,25 +3694,21 @@ function buildLabPage(ptIdx) {
       <text x="225" y="84" font-family="Arial" font-size="6" fill="#94a3b8">← 左移=充氣惡化</text>
     </svg>`;
 
-    /* AI FEV₁ trend SVG (Pre-BD: 2023/04 72% → 2025/03 66% → projected 60%) */
+    /* 歷次 FEV₁% 數據可視化（Pre-BD）: 2023/04 72% → 2025/03 66%，僅呈現實測歷次數據 */
     const p1TrendSVG = `<svg viewBox="0 0 255 78" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border:1px solid #e2e8f0;border-radius:4px;">
-      <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">DeepQ AI · FEV₁% 追蹤趨勢（Pre-BD）</text>
+      <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">歷次 FEV₁%（Pre-BD）數據彙整</text>
       <line x1="45" y1="15" x2="45" y2="66" stroke="#ccc" stroke-width="1"/>
       <line x1="45" y1="66" x2="238" y2="66" stroke="#ccc" stroke-width="1"/>
       <text x="43" y="69" font-family="monospace" font-size="6" fill="#f97316" text-anchor="end">50%</text>
       <text x="43" y="19" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">75%</text>
-      <!-- fy(p)=66-(p-50)*2 → 72%→22, 66%→34, 60%→46 -->
-      <line x1="85"  y1="22" x2="170" y2="34" stroke="#475569" stroke-width="1.5"/>
-      <line x1="170" y1="34" x2="218" y2="46" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
-      <circle cx="85"  cy="22" r="4" fill="#22c55e"/>
-      <circle cx="170" cy="34" r="4.5" fill="#dc2626"/>
-      <circle cx="218" cy="46" r="3.5" fill="#dc2626" stroke="#fff" stroke-width="1" opacity=".7"/>
-      <text x="85"  y="18" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">72%</text>
-      <text x="170" y="30" font-family="monospace" font-size="7" fill="#dc2626" text-anchor="middle">66%</text>
-      <text x="220" y="42" font-family="monospace" font-size="7" fill="#dc2626">~60%</text>
-      <text x="85"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/04 外院</text>
-      <text x="170" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2025/03</text>
-      <text x="218" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">AI 投影</text>
+      <!-- fy(p)=66-(p-50)*2 → 72%→22, 66%→34 -->
+      <line x1="90" y1="22" x2="195" y2="34" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="90"  cy="22" r="4" fill="#22c55e"/>
+      <circle cx="195" cy="34" r="4.5" fill="#dc2626"/>
+      <text x="90"  y="18" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">72%</text>
+      <text x="195" y="30" font-family="monospace" font-size="7" fill="#dc2626" text-anchor="middle">66%</text>
+      <text x="90"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/04 外院</text>
+      <text x="195" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2025/03</text>
       <line x1="45" y1="66" x2="238" y2="66" stroke="#f97316" stroke-width=".8" stroke-dasharray="3,2" opacity=".6"/>
     </svg>`;
 
@@ -3903,11 +3822,10 @@ function buildLabPage(ptIdx) {
   /* F/V Loop SVG — GOLD I obstructive pattern (Pre-BD 3 attempts + Post-BD)
      ViewBox 290×215, plot area x:38–248 (210px=0–5L), y:100=zero-flow, y:12=+10L/s, y:188=-10L/s
      fy(f)=100-f*8.8, fx(v)=38+v*42 */
-  /* P2 F/V Loop: 2 confirmed Post-BD sessions (2023/03 green, 2023/09 orange) + AI projected dashed (2026, red)
+  /* P2 F/V Loop: 2 confirmed Post-BD sessions（2023/03 綠、2023/09 橙），僅呈現實測歷次數據，不做未來投影
      fx(v)=38+v*42, fy(f)=100-f*8.8
      2023/03 Post-BD: FVC 4.28→x=218, PEF 6.38→y=44 (GOLD I, mild scooping)
-     2023/09 Post-BD: FVC 4.22→x=215, PEF 6.18→y=46 (slight decline, follow-up)
-     2026 AI projected: FVC ~4.05→x=208, PEF ~5.6→y=51 (estimated GOLD II, more scooped, DASHED) */
+     2023/09 Post-BD: FVC 4.22→x=215, PEF 6.18→y=46 (slight decline, follow-up) */
   const fvLoopSVG = `<svg viewBox="0 0 290 215" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border-radius:4px;">
     <defs><marker id="arrowB" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#111"/></marker></defs>
     <text x="100" y="10" font-family="Arial" font-size="8.5" fill="#222" font-weight="600">F/V ex</text>
@@ -3930,32 +3848,25 @@ function buildLabPage(ptIdx) {
     <path d="M 38 100 C 40 63, 43 44, 46 44 C 76 42, 102 58, 132 71 C 165 84, 200 95, 218 100 C 210 121, 178 139, 143 142 C 107 144, 68 125, 38 100 Z" fill="none" stroke="#22c55e" stroke-width="2"/>
     <!-- 2023/09 Post-BD (orange, slightly narrower, mild worsening): FVC 4.22→x=215, PEF 6.18→y=46 -->
     <path d="M 38 100 C 40 64, 43 46, 46 46 C 75 44, 100 60, 130 73 C 162 86, 196 96, 215 100 C 207 121, 176 139, 141 142 C 106 144, 67 125, 38 100 Z" fill="none" stroke="#f97316" stroke-width="1.5"/>
-    <!-- 2026 AI Projected (red dashed, more scooped GOLD II): FVC ~4.05→x=208, PEF ~5.6→y=51 -->
-    <path d="M 38 100 C 39 66, 42 51, 44 51 C 68 49, 90 63, 116 74 C 148 85, 186 95, 208 100 C 200 120, 170 137, 137 140 C 104 142, 66 124, 38 100 Z" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,3"/>
-    <!-- Tidal loops (VT~0.5L) — left shift = increasing hyperinflation GOLD I→II -->
+    <!-- Tidal loops (VT~0.5L) -->
     <path d="M 141,100 C 141,96 163,96 163,100 C 163,104 141,104 141,100 Z" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="0.9"/>
     <path d="M 136,100 C 136,96.2 158,96.2 158,100 C 158,103.8 136,103.8 136,100 Z" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="0.9"/>
-    <path d="M 125,100 C 125,96.5 147,96.5 147,100 C 147,103.5 125,103.5 125,100 Z" fill="rgba(220,38,38,0.12)" stroke="#dc2626" stroke-width="0.9" stroke-dasharray="3,2"/>
     <text x="132" y="88" font-family="Arial" font-size="5.5" fill="#64748b" text-anchor="middle">← 潮氣環左移</text>
-    <!-- Arrows A (2023/03 peak) B (AI projected peak) -->
+    <!-- Arrow A (2023/03 peak) -->
     <line x1="65" y1="22" x2="47" y2="43" stroke="#111" stroke-width="1.2" marker-end="url(#arrowB)"/>
     <text x="67" y="20" font-family="Arial" font-size="10" fill="#111" font-weight="700">A</text>
-    <line x1="80" y1="30" x2="47" y2="50" stroke="#dc2626" stroke-width="1.2" marker-end="url(#arrowB)"/>
-    <text x="82" y="28" font-family="Arial" font-size="10" fill="#dc2626" font-weight="700">B</text>
-    <text x="90" y="38" font-family="Arial" font-size="7" fill="#dc2626" font-style="italic">AI 投影</text>
     <!-- Legend -->
-    <rect x="206" y="14" width="78" height="90" fill="#fff" stroke="#ccc" stroke-width="0.8" rx="2"/>
+    <rect x="206" y="14" width="78" height="78" fill="#fff" stroke="#ccc" stroke-width="0.8" rx="2"/>
     <line x1="208" y1="23" x2="220" y2="23" stroke="#22c55e" stroke-width="2"/><text x="223" y="26" font-family="Arial" font-size="7" fill="#222">2023/03 Post-BD</text>
     <line x1="208" y1="35" x2="220" y2="35" stroke="#f97316" stroke-width="1.5"/><text x="223" y="38" font-family="Arial" font-size="7" fill="#222">2023/09 Post-BD</text>
-    <line x1="208" y1="47" x2="220" y2="47" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/><text x="223" y="50" font-family="Arial" font-size="7" fill="#dc2626">2026 AI 估計</text>
-    <line x1="208" y1="59" x2="220" y2="59" stroke="#bbb" stroke-width="1" stroke-dasharray="3,2"/><text x="223" y="62" font-family="Arial" font-size="7" fill="#888">預測值</text>
-    <ellipse cx="214" cy="71" rx="6" ry="2.5" fill="rgba(100,116,139,0.12)" stroke="#64748b" stroke-width="0.8"/><text x="223" y="74" font-family="Arial" font-size="7" fill="#475569">潮氣環(VT)</text>
-    <text x="223" y="84" font-family="Arial" font-size="6" fill="#94a3b8">← 左移=充氣惡化</text>
+    <line x1="208" y1="47" x2="220" y2="47" stroke="#bbb" stroke-width="1" stroke-dasharray="3,2"/><text x="223" y="50" font-family="Arial" font-size="7" fill="#888">預測值（GLI 常模）</text>
+    <ellipse cx="214" cy="59" rx="6" ry="2.5" fill="rgba(100,116,139,0.12)" stroke="#64748b" stroke-width="0.8"/><text x="223" y="62" font-family="Arial" font-size="7" fill="#475569">潮氣環(VT)</text>
+    <text x="223" y="72" font-family="Arial" font-size="6" fill="#94a3b8">← 左移=充氣惡化</text>
   </svg>`;
 
-  /* P2 AI FEV₁ trend SVG (Post-BD: 2023/03=82%, 2023/09=80%, 3yr gap, AI 2026=~70%) */
+  /* P2 歷次 Post-BD FEV₁ 數據可視化: 2023/03=82%, 2023/09=80%，之後追蹤中斷、無新數據，不做未來投影 */
   const p2TrendSVG = `<svg viewBox="0 0 255 78" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff;border:1px solid #e2e8f0;border-radius:4px;">
-    <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">DeepQ AI · Post-BD FEV₁% 追蹤趨勢</text>
+    <text x="127" y="10" font-family="monospace" font-size="7.5" fill="#374151" text-anchor="middle" font-weight="600">歷次 Post-BD FEV₁% 數據彙整</text>
     <line x1="45" y1="15" x2="45" y2="66" stroke="#ccc" stroke-width="1"/>
     <line x1="45" y1="66" x2="238" y2="66" stroke="#ccc" stroke-width="1"/>
     <!-- GOLD I/II 80% boundary: fy(80)=66-(80-60)*2=26 -->
@@ -3963,34 +3874,29 @@ function buildLabPage(ptIdx) {
     <text x="43" y="29" font-family="monospace" font-size="6" fill="#f59e0b" text-anchor="end">80%</text>
     <text x="43" y="19" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">90%</text>
     <text x="43" y="46" font-family="monospace" font-size="6" fill="#64748b" text-anchor="end">70%</text>
-    <!-- fy(p)=66-(p-60)*2: 82%→22, 80%→26, 70%→46 -->
+    <!-- fy(p)=66-(p-60)*2: 82%→22, 80%→26 -->
     <line x1="75"  y1="22" x2="110" y2="26" stroke="#475569" stroke-width="1.5"/>
-    <!-- gap shading 2024-2025 -->
-    <rect x="110" y="15" width="80" height="51" fill="#f1f5f9" opacity=".8"/>
-    <text x="150" y="42" font-family="monospace" font-size="7" fill="#94a3b8" text-anchor="middle">追蹤中斷</text>
-    <line x1="190" y1="26" x2="190" y2="46" stroke="#dc2626" stroke-width=".8" stroke-dasharray="2,2" opacity=".5"/>
-    <line x1="190" y1="46" x2="225" y2="46" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <!-- gap shading：追蹤中斷至今，無新肺功能數據 -->
+    <rect x="110" y="15" width="115" height="51" fill="#f1f5f9" opacity=".8"/>
+    <text x="167" y="42" font-family="monospace" font-size="7" fill="#94a3b8" text-anchor="middle">追蹤中斷，無新數據</text>
     <circle cx="75"  cy="22" r="4" fill="#22c55e"/>
     <circle cx="110" cy="26" r="4" fill="#f97316"/>
-    <circle cx="225" cy="46" r="3.5" fill="#dc2626" stroke="#fff" stroke-width="1" opacity=".8"/>
     <text x="75"  y="18" font-family="monospace" font-size="7" fill="#22c55e" text-anchor="middle">82%</text>
     <text x="110" y="22" font-family="monospace" font-size="7" fill="#f97316" text-anchor="middle">80%</text>
-    <text x="226" y="42" font-family="monospace" font-size="7" fill="#dc2626">~70%?</text>
     <text x="75"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/03</text>
     <text x="110" y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/09</text>
-    <text x="225" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">AI 2026估</text>
   </svg>`;
 
   return header + `
     <div style="display:grid;grid-template-columns:285px 1fr;height:480px;border-radius:0 0 10px 10px;overflow:hidden;border:1px solid #0d9488;border-top:none;">
       <!-- 左：F/V Loop + metadata -->
       <div style="background:#f8fafc;padding:12px;overflow-y:auto;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;gap:10px;">
-        <div style="font-family:var(--mono);font-size:9px;color:#0f766e;letter-spacing:.08em;font-weight:600;">▌ 流量–容積環 · 2 次 Post-BD 追蹤疊圖（2023→AI估）</div>
+        <div style="font-family:var(--mono);font-size:9px;color:#0f766e;letter-spacing:.08em;font-weight:600;">▌ 流量–容積環 · 2 次 Post-BD 追蹤疊圖（2023/03、2023/09）</div>
         ${fvLoopSVG}
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:5px;padding:6px;font-family:var(--mono);font-size:7.5px;color:#14532d;line-height:1.9;">
           <span style="color:#22c55e;font-weight:600;">——— 2023/03：</span>Post-BD 最佳，FEV₁ 82%，FVC 4.28L（首次確診）<br>
-          <span style="color:#f97316;font-weight:600;">——— 2023/09：</span>Post-BD 追蹤，FEV₁ 80%，曲線略窄（輕度進展）<br>
-          <span style="color:#dc2626;font-weight:600;">- - - 2026 AI：</span>估算 FEV₁ ~70%，圖形凹陷加深，GOLD I→II 邊緣
+          <span style="color:#f97316;font-weight:600;">——— 2023/09：</span>Post-BD 追蹤，FEV₁ 80%，曲線略窄<br>
+          自 2023/09 後無新肺功能數據，建議重新安排 Spirometry 以取得最新數值
         </div>
         ${p2TrendSVG}
       </div>
@@ -4025,18 +3931,18 @@ function buildLabPage(ptIdx) {
             <div style="font-size:34px;font-weight:900;color:#16a34a;line-height:1;font-family:var(--mono);">I</div>
             <div style="font-size:10px;font-weight:700;color:#14532d;margin-top:3px;">輕度阻塞</div>
             <div style="margin-top:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:5px;padding:4px 6px;font-family:var(--mono);font-size:8px;color:#92400e;">
-              今日影像估算<br>⚠ 疑似 GOLD II
+              今日 CXR HI 指數<br>0.82（實測數值）
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;">
               <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
-                <i class="fa-solid fa-brain"></i>DeepQ AI 趨勢判讀
+                <i class="fa-solid fa-ruler-combined"></i>CXR 幾何量測數據
               </div>
               <div style="font-family:var(--mono);font-size:9.5px;color:#1e3a8a;line-height:1.75;">
-                CXR HI 指數 0.61（2023確診）→ 0.82（今日），3 年上升 34%，<strong>超過 GOLD I 自然衰退預期</strong>。<br><br>
-                結合自行停藥（LABA/ICS 中斷）+ 追蹤缺口，AI 估算目前 FEV₁ 約 68–72% pred，<span style="color:#f59e0b;font-weight:600;">疑似已進入 GOLD II</span>。<br><br>
-                <span style="color:#dc2626;font-weight:600;">術前需重新確認 GOLD 分級，影響麻醉科風險評估。</span>
+                CXR HI 指數（依肺野面積、橫膈膜位置等幾何量測計算）：0.61（2023/03）→ 0.82（今日）。<br><br>
+                自行停藥（LABA/ICS 中斷）後已 3 年無新肺功能數據，影像數值無法據以推算現行 GOLD 分級。<br><br>
+                <span style="color:#dc2626;font-weight:600;">建議重新安排 Post-BD Spirometry 以確認現況，供術前評估參考。</span>
               </div>
             </div>
             <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;">
@@ -4094,111 +4000,102 @@ function wsConfirm(ptIdx,btn){
   confirmed[ptIdx]=true;
 }
 
-/* ═══ per-patient PACS multi-image comparison data ═══ */
+/* ═══ per-patient PACS 歷次影像 HI 指數彙整（純幾何量測數據，不與原始報告比較、不產生臨床印象語句） ═══ */
 const PACS_DATA = [
   {
     scans:[
       {
-        date:'2024/03',label:'2年前',
-        finding:'輕微肺過度充氣（早期）',conf:61,origReport:'原報告：無特殊發現',origFlag:'miss',
+        date:'2024/03',label:'2年前', hi:0.61,
         lung:{cx1:55,cy1:42,rx1:36,ry1:32,cx2:115,cy2:42,rx2:36,ry2:32,diaph:72},
-        regions:[{x:30,y:20,w:24,h:26,color:'rgba(251,191,36,0.15)',stroke:'rgba(251,191,36,0.45)',lbl:'早期'}]
+        regions:[{x:30,y:20,w:24,h:26,color:'rgba(96,165,250,0.15)',stroke:'rgba(96,165,250,0.45)',lbl:'量測區'}]
       },
       {
-        date:'2025/08',label:'8個月前',
-        finding:'雙上肺葉肺氣腫進展',conf:74,origReport:'原報告：輕度充氣',origFlag:'miss',
+        date:'2025/08',label:'8個月前', hi:0.74,
         lung:{cx1:55,cy1:43,rx1:37,ry1:33,cx2:115,cy2:43,rx2:37,ry2:33,diaph:74},
         regions:[
-          {x:26,y:17,w:27,h:30,color:'rgba(251,191,36,0.20)',stroke:'rgba(251,191,36,0.60)',lbl:'進展↑'},
-          {x:107,y:17,w:27,h:30,color:'rgba(251,191,36,0.20)',stroke:'rgba(251,191,36,0.60)',lbl:'進展↑'},
+          {x:26,y:17,w:27,h:30,color:'rgba(96,165,250,0.20)',stroke:'rgba(96,165,250,0.60)',lbl:'量測區'},
+          {x:107,y:17,w:27,h:30,color:'rgba(96,165,250,0.20)',stroke:'rgba(96,165,250,0.60)',lbl:'量測區'},
         ]
       },
       {
-        date:'2026/02',label:'本次（最新）',
-        finding:'雙側早期肺氣腫＋橫膈膜輕度下移',conf:82,origReport:'原報告：無特殊發現',origFlag:'miss',
+        date:'2026/02',label:'本次（最新）', hi:0.82,
         lung:{cx1:55,cy1:44,rx1:38,ry1:34,cx2:115,cy2:44,rx2:38,ry2:34,diaph:76},
         regions:[
-          {x:24,y:14,w:30,h:34,color:'rgba(251,191,36,0.25)',stroke:'rgba(251,191,36,0.75)',lbl:'肺氣腫↑↑'},
-          {x:106,y:14,w:30,h:34,color:'rgba(251,191,36,0.25)',stroke:'rgba(251,191,36,0.75)',lbl:'肺氣腫↑↑'},
-          {x:20,y:66,w:130,h:10,color:'rgba(239,68,68,0.12)',stroke:'rgba(239,68,68,0.5)',lbl:'橫膈膜↓'},
+          {x:24,y:14,w:30,h:34,color:'rgba(96,165,250,0.25)',stroke:'rgba(96,165,250,0.75)',lbl:'肺野量測'},
+          {x:106,y:14,w:30,h:34,color:'rgba(96,165,250,0.25)',stroke:'rgba(96,165,250,0.75)',lbl:'肺野量測'},
+          {x:20,y:66,w:130,h:10,color:'rgba(100,116,139,0.15)',stroke:'rgba(100,116,139,0.5)',lbl:'橫膈膜量測'},
         ]
       }
     ],
-    aiTrend:'AI 縱向追蹤：2年內肺過度充氣指數 (HI) 從 0.61 → 0.82，<strong>進展速度超過年齡預期</strong>，符合早期 COPD 惡化模式。'
+    aiTrend:'歷次 HI 指數（依肺野面積、橫膈膜位置等幾何量測計算）：0.61 → 0.74 → 0.82。'
   },
   {
     scans:[
       {
-        date:'2023/11',label:'2年前',
-        finding:'雙肺紋理增加（非特異性）',conf:55,origReport:'原報告：無明顯異常',origFlag:'miss',
+        date:'2023/11',label:'2年前', hi:0.55,
         lung:{cx1:55,cy1:42,rx1:36,ry1:32,cx2:115,cy2:42,rx2:36,ry2:32,diaph:72},
-        regions:[{x:22,y:58,w:126,h:12,color:'rgba(239,68,68,0.08)',stroke:'rgba(239,68,68,0.3)',lbl:'紋理↑'}]
+        regions:[{x:22,y:58,w:126,h:12,color:'rgba(100,116,139,0.08)',stroke:'rgba(100,116,139,0.3)',lbl:'橫膈膜量測'}]
       },
       {
-        date:'2025/11',label:'本次（最新）',
-        finding:'過度充氣＋橫膈膜扁平，桶狀胸形態',conf:91,origReport:'原報告：無明顯異常（未使用AI）',origFlag:'miss',
+        date:'2025/11',label:'本次（最新）', hi:0.91,
         lung:{cx1:55,cy1:43,rx1:39,ry1:35,cx2:115,cy2:43,rx2:39,ry2:35,diaph:78},
         regions:[
-          {x:20,y:62,w:130,h:14,color:'rgba(239,68,68,0.18)',stroke:'rgba(239,68,68,0.65)',lbl:'橫膈膜扁平'},
-          {x:22,y:10,w:126,h:56,color:'rgba(251,191,36,0.10)',stroke:'rgba(251,191,36,0.40)',lbl:'過度充氣'},
+          {x:20,y:62,w:130,h:14,color:'rgba(100,116,139,0.18)',stroke:'rgba(100,116,139,0.65)',lbl:'橫膈膜量測'},
+          {x:22,y:10,w:126,h:56,color:'rgba(96,165,250,0.10)',stroke:'rgba(96,165,250,0.40)',lbl:'肺野量測'},
         ]
       }
     ],
-    aiTrend:'AI 跨年比較：橫膈膜角度從正常 → 扁平，肺容積增加 <strong>約 18%</strong>，兩次報告均標記「正常」——DeepQ 重判發現隱性進展。'
+    aiTrend:'歷次 HI 指數（依肺野面積、橫膈膜位置等幾何量測計算）：0.55 → 0.91。'
   },
   {
     scans:[
       {
-        date:'2023/03',label:'確診時',
-        finding:'COPD GOLD I 確診基準影像，FEV1/FVC=0.65',conf:95,origReport:'原報告：COPD 確診（胸腔科）',origFlag:'ok',
+        date:'2023/03',label:'確診時', hi:0.61,
         lung:{cx1:55,cy1:43,rx1:37,ry1:33,cx2:115,cy2:43,rx2:37,ry2:33,diaph:74},
-        regions:[{x:22,y:12,w:124,h:56,color:'rgba(16,185,129,0.12)',stroke:'rgba(16,185,129,0.50)',lbl:'GOLD I 基準'}]
+        regions:[{x:22,y:12,w:124,h:56,color:'rgba(16,185,129,0.12)',stroke:'rgba(16,185,129,0.50)',lbl:'基準影像'}]
       },
       {
-        date:'2026/05',label:'本次（3年後）',
-        finding:'肺容積增加，橫膈膜進一步下移，疑似惡化',conf:88,origReport:'AI 主動比對確診基準影像',origFlag:'miss',
+        date:'2026/05',label:'本次（3年後）', hi:0.82,
         lung:{cx1:55,cy1:45,rx1:39,ry1:36,cx2:115,cy2:45,rx2:39,ry2:36,diaph:79},
         regions:[
-          {x:22,y:10,w:124,h:58,color:'rgba(251,191,36,0.12)',stroke:'rgba(251,191,36,0.45)',lbl:'容積擴大'},
-          {x:20,y:67,w:130,h:12,color:'rgba(239,68,68,0.15)',stroke:'rgba(239,68,68,0.55)',lbl:'橫膈膜↓↓'},
+          {x:22,y:10,w:124,h:58,color:'rgba(96,165,250,0.12)',stroke:'rgba(96,165,250,0.45)',lbl:'肺野量測'},
+          {x:20,y:67,w:130,h:12,color:'rgba(100,116,139,0.15)',stroke:'rgba(100,116,139,0.55)',lbl:'橫膈膜量測'},
         ]
       }
     ],
-    aiTrend:'AI 縱向比對：與確診基準（2023）相比，肺容積增加、橫膈膜位置下降，<strong>3年追蹤中斷期間疾病持續進展</strong>。'
+    aiTrend:'歷次 HI 指數（依肺野面積、橫膈膜位置等幾何量測計算）：0.61（2023/03 基準）→ 0.82（本次）。'
   }
 ];
 
-/* ═══ DeepQ AI advantage data ═══ */
+/* ═══ DeepQ AI advantage data（純幾何量測 HI 指數彙整，不比較原始報告、不產生臨床印象語句） ═══ */
 const DEEPQ_ADV = [
   { // 王大明
-    scans: 3, missedByRad: 3,
-    findings: [
-      { label:'雙上肺葉肺氣腫', conf:82, missed:true },
-      { label:'肺過度充氣（進展）', conf:74, missed:true },
-      { label:'橫膈膜輕度下移', conf:68, missed:true }
+    scans: 3,
+    hiTrend: [
+      { date:'2024/03', hi:0.61 },
+      { date:'2025/08', hi:0.74 },
+      { date:'2026/02', hi:0.82 }
     ],
-    insight:'3 次影像均標記「正常」，DeepQ 偵測到 2 年內 AI 肺過度充氣指數 (HI) 從 0.61 升至 0.82，進展速度超過年齡預期。',
-    impact:'阻止「外觀正常偏誤」，提前介入減少 6–8 年確診延誤'
+    method:'HI 指數依歷次 CXR 之肺野面積、橫膈膜位置等幾何量測計算，僅呈現數值變化，不做臨床判讀',
+    impact:'將歷史影像轉為可比對的量化數據，供醫師鑑別診斷時參考'
   },
   { // 陳阿嬌
-    scans: 2, missedByRad: 2,
-    findings: [
-      { label:'肺過度充氣＋桶狀胸', conf:91, missed:true },
-      { label:'橫膈膜扁平', conf:88, missed:true },
-      { label:'肺容積增加 ~18%', conf:79, missed:true }
+    scans: 2,
+    hiTrend: [
+      { date:'2023/11', hi:0.55 },
+      { date:'2025/11', hi:0.91 }
     ],
-    insight:'原報告兩次均「無明顯異常」，DeepQ 重判發現橫膈膜角度扁平化，符合 COPD 慣性進展特徵。',
-    impact:'即時攔截 3 年診斷落差，在第 5 次就診時提供確診依據'
+    method:'HI 指數依歷次 CXR 之肺野面積、橫膈膜位置等幾何量測計算，僅呈現數值變化，不做臨床判讀',
+    impact:'將歷史影像轉為可比對的量化數據，供醫師鑑別診斷時參考'
   },
   { // 林志明
-    scans: 2, missedByRad: 1,
-    findings: [
-      { label:'GOLD I 確診基準（2023）', conf:95, missed:false },
-      { label:'肺容積持續擴大（3年後）', conf:88, missed:true },
-      { label:'橫膈膜進一步下移', conf:84, missed:true }
+    scans: 2,
+    hiTrend: [
+      { date:'2023/03', hi:0.61 },
+      { date:'2026/05', hi:0.82 }
     ],
-    insight:'確診時影像正常記錄，3 年追蹤中斷後 DeepQ 比對基準影像，發現容積增加與橫膈膜下移，疑似 GOLD I → II 惡化。',
-    impact:'跨科別接觸點（骨科）即時攔截，避免再次錯失追蹤'
+    method:'HI 指數依歷次 CXR 之肺野面積、橫膈膜位置等幾何量測計算，僅呈現數值變化，不做臨床判讀',
+    impact:'將歷史影像轉為可比對的量化數據，供醫師鑑別診斷時參考'
   }
 ];
 
@@ -4227,9 +4124,9 @@ const SPIRO_DATA = [
     history: [
       { date: '2023/03', fev1pct: 78, fvc: 3.8, fev1fvc: 0.65, gold: 'I', note: '確診基準' }
     ],
-    projected: { fev1pct: 68, gold: 'I–II', note: 'AI 估算（3年進展速率）' },
+    projected: { gapYears: 3 },
     callToAction: '重做 Post-BD Spirometry — 評估是否進展至 GOLD II',
-    note: '正常年齡相關 FEV1 下降約 30mL/年，本患者自行停藥且症狀惡化，下降速度可能加快'
+    note: '距上次檢查已 3 年且病患自行停藥，現況需以重新檢查確認，不做推估'
   }
 ];
 
@@ -4301,7 +4198,7 @@ const JOURNEY_DATA = [
         id:1, date:'2024–2026', phase:'診斷碼漂移',
         icon:'fa-rotate', color:'var(--danger)',
         title:'診斷碼漂移：氣喘→過敏→老年咳嗽',
-        detail:'4次就診診斷碼各不相同，COPD 可能性尚未被充分評估，PACS 舊影像未重判',
+        detail:'4次就診診斷碼各不相同，COPD 可能性尚未被充分評估，PACS 舊影像未量測',
         status:'blocked', statusLabel:'⚠ 目前卡關', statusColor:'var(--danger)',
         source:'HIS + PACS AI',
         current: true
@@ -4331,7 +4228,7 @@ const JOURNEY_DATA = [
         source:''
       }
     ],
-    aiSummary:'病患卡在「<strong>診斷碼反覆變動</strong>」的狀態中。PACS AI 重判舊影像已發現 COPD 特徵，今日是釐清診斷的關鍵窗口。'
+    aiSummary:'病患卡在「<strong>診斷碼反覆變動</strong>」的狀態中。PACS AI 已量測舊影像並輸出 HI 指數數值，今日是釐清診斷的關鍵窗口。'
   },
   {
     currentNode: 3,
@@ -4386,20 +4283,16 @@ const JOURNEY_DATA = [
 
 function buildDeepQAdvantage(i) {
   const d = DEEPQ_ADV[i];
-  const findingsHtml = d.findings.map(f => {
-    const barColor = f.missed ? (f.conf >= 85 ? 'var(--danger)' : f.conf >= 70 ? 'var(--amber)' : 'var(--dq)') : 'var(--lgreen)';
-    const badge = f.missed
-      ? `<span style="font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--am-dim);color:var(--amber);border:1px solid var(--am-border);">AI 新增發現</span>`
-      : `<span style="font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--lg-dim);color:var(--lgreen);border:1px solid var(--lg-border);">原報告記錄</span>`;
+  const trendHtml = d.hiTrend.map(t => {
+    const pct = Math.round(t.hi*100);
     return `
     <div style="margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-        <span style="font-size:11px;color:var(--text1);">${f.label}</span>
-        ${badge}
-        <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:${barColor};font-weight:600;">${f.conf}%</span>
+        <span style="font-size:11px;color:var(--text1);font-family:var(--mono);">${t.date}</span>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dq);font-weight:600;">HI ${t.hi.toFixed(2)}</span>
       </div>
       <div class="spiro-bar-wrap" style="gap:6px;">
-        <div class="spiro-bar"><div class="spiro-fill" style="width:${f.conf}%;background:${barColor};"></div></div>
+        <div class="spiro-bar"><div class="spiro-fill" style="width:${pct}%;background:var(--dq);"></div></div>
       </div>
     </div>`;
   }).join('');
@@ -4407,30 +4300,30 @@ function buildDeepQAdvantage(i) {
   return `
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
     <div style="background:#0f172a;padding:8px 12px;display:flex;align-items:center;gap:8px;">
-      <i class="fa-solid fa-brain" style="color:#60a5fa;font-size:13px;"></i>
-      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:#e2e8f0;">DeepQ Vision · AI 影像分析優勢</span>
+      <i class="fa-solid fa-ruler-combined" style="color:#60a5fa;font-size:13px;"></i>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:#e2e8f0;">DeepQ Vision · CXR 幾何量測</span>
       <span style="margin-left:auto;font-size:9px;font-family:var(--mono);color:#60a5fa;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);padding:1px 7px;border-radius:3px;">CORE TECHNOLOGY</span>
     </div>
     <div style="padding:10px 12px;">
       <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <div style="flex:1;background:var(--am-dim);border:1px solid var(--am-border);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--amber);">${d.missedByRad}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">AI 新增<br>發現項目</div>
-        </div>
-        <div style="flex:1;background:var(--lg-dim);border:1px solid var(--lg-border);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--lgreen);">${d.findings.length}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">AI 偵測<br>結構化發現</div>
-        </div>
         <div style="flex:1;background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:8px;padding:8px;text-align:center;">
           <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--dq);">${d.scans}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">歷史影像<br>機會性重判</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">歷史影像<br>已量測張數</div>
+        </div>
+        <div style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--text1);">${d.hiTrend[0].hi.toFixed(2)}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">最早 HI<br>指數</div>
+        </div>
+        <div style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--text1);">${d.hiTrend[d.hiTrend.length-1].hi.toFixed(2)}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">最新 HI<br>指數</div>
         </div>
       </div>
-      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:7px;">AI 偵測信心分數</div>
-      ${findingsHtml}
+      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:7px;">歷次 HI 指數（數值越高代表肺野透亮面積比例越高）</div>
+      ${trendHtml}
       <div style="background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:7px;padding:7px 10px;margin-top:4px;">
-        <div style="font-size:10px;font-family:var(--mono);color:var(--dq);font-weight:600;margin-bottom:3px;">AI 洞察</div>
-        <div style="font-size:11px;color:var(--text2);line-height:1.65;">${d.insight}</div>
+        <div style="font-size:10px;font-family:var(--mono);color:var(--dq);font-weight:600;margin-bottom:3px;">量測方法</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.65;">${d.method}</div>
         <div style="margin-top:5px;font-size:10px;font-family:var(--mono);color:var(--lgreen);"><i class="fa-solid fa-arrow-right" style="margin-right:4px;"></i>${d.impact}</div>
       </div>
     </div>
@@ -4475,9 +4368,9 @@ function buildSpirometry(i) {
           <div style="font-size:15px;font-weight:600;color:var(--teal);font-family:var(--mono);margin-top:2px;">GOLD ${h.gold}</div>
         </div>
         <div style="flex:2;background:var(--am-dim);border:1px solid var(--am-border);border-radius:6px;padding:7px 8px;">
-          <div style="font-size:9px;font-family:var(--mono);color:var(--amber);margin-bottom:2px;">AI 估算（3年後）</div>
-          <div style="font-size:11px;color:var(--text2);">FEV₁ ~${proj.fev1pct}%&nbsp;·&nbsp;GOLD <strong>${proj.gold}</strong></div>
-          <div style="font-size:9px;font-family:var(--mono);color:var(--text3);margin-top:2px;">自行停藥加速進展</div>
+          <div style="font-size:9px;font-family:var(--mono);color:var(--amber);margin-bottom:2px;">追蹤狀態</div>
+          <div style="font-size:11px;color:var(--text2);">距上次檢查已 <strong>${proj.gapYears} 年</strong>，無最新肺功能數據</div>
+          <div style="font-size:9px;font-family:var(--mono);color:var(--text3);margin-top:2px;">建議重新安排 Spirometry 確認現況</div>
         </div>
       </div>`;
   }
@@ -4527,15 +4420,14 @@ const SOAP_DATA = [
       ['sh','├─ O — Objective 客觀資料 ──────────────────────────────────┤'],
       ['sv','  生命徵象：HR 82 bpm｜RR 18/min｜SpO2 95%（室內空氣）'],
       ['sv','  理學檢查：呼吸音雙側略減弱，無明顯喘鳴聲，無明顯水泡音'],
-      ['sw','  DeepQ PACS AI 重判（2025/11 胸部 X 光）：'],
-      ['sw','    · 肺過度充氣（Hyperinflation）+ 橫膈膜扁平，信心分數 91%'],
-      ['sw','    · 肺容積較 2年前增加 ~18%'],
-      ['sd','    · 原始報告標記「無明顯異常」；建議納入本次鑑別診斷參考'],
+      ['sw','  DeepQ PACS AI 量測（2025/11 胸部 X 光）：'],
+      ['sw','    · HI 指數 91（依肺野面積、橫膈膜位置等幾何量測計算）'],
+      ['sw','    · 肺野面積測量數值較 2年前影像增加 ~18%'],
       ['sv','  Spirometry 執行紀錄：3年 5次就診，0次執行'],
       ['sh','├─ A — Assessment 臨床評估 ─────────────────────────────────┤'],
       ['sw','  高度疑似 COPD（職業性，J44.1）。'],
       ['sv','  3年反覆以氣喘記錄（J45.909），職業粉塵暴露為非吸菸型 COPD 重要危險因子。'],
-      ['sv','  影像特徵符合 COPD 過度充氣型，非單純老年性改變。'],
+      ['sv','  CXR HI 指數升高，臨床意義需結合 Spirometry 確認。'],
       ['sv','  差異診斷：氣喘 vs COPD，需 Post-BD Spirometry（FEV1/FVC<0.70）確認。'],
       ['sv','  GOLD 分期目前無法確定（Spirometry 缺如）。'],
       ['sh','├─ P — Plan 轉診目的與計畫 ─────────────────────────────────┤'],
@@ -4576,17 +4468,17 @@ const SOAP_DATA = [
       ['sv','  今日骨科就診，本次未執行呼吸系統理學檢查（非本科主訴）'],
       ['sg','  2023/03 Spirometry 基準值：'],
       ['sg','    FEV1 78% predicted｜FEV1/FVC = 0.65（Post-BD）→ GOLD I'],
-      ['sw','  DeepQ PACS AI 比對（2026/05 vs 2023/03）：'],
-      ['sw','    · 肺容積增加 +10–15%（與確診基準相比），信心分數 88%'],
-      ['sw','    · 橫膈膜進一步下移，弧線扁平化加重'],
-      ['sd','    · 停藥 3 年，AI 估算 FEV1 ~68%（基於進展曲線）'],
+      ['sw','  DeepQ PACS AI 量測（2026/05 vs 2023/03）：'],
+      ['sw','    · 肺野面積測量數值較確診基準增加 +10–15%'],
+      ['sw','    · 橫膈膜位置測量較基準下移，肋膈角角度增加'],
+      ['sd','    · 停藥 3 年，無最新肺功能數據可供比對'],
       ['sh','├─ A — Assessment 臨床評估 ─────────────────────────────────┤'],
       ['sw','  GOLD I COPD 確診後追蹤中斷 3 年，自行停用 LAMA。'],
-      ['sv','  影像比對提示病情進展（GOLD I → I–II 過渡可能）。'],
-      ['sv','  自行停藥加速 FEV1 下降風險；正常老化 ~30mL/年，停藥可能加速。'],
+      ['sv','  影像比對顯示肺容積與橫膈膜位置數值變化，臨床意義待肺功能複測確認。'],
+      ['sv','  自行停藥可能影響病情控制；正常老化相關 FEV1 下降約 30mL/年。'],
       ['sv','  今日骨科就診為跨科別接觸點，本轉診係 AI 系統識別後主動觸發。'],
       ['sh','├─ P — Plan 轉診目的與計畫 ─────────────────────────────────┤'],
-      ['sg','  1. 重做 Post-BD Spirometry → 更新 GOLD 分期（疑似進展至 II）'],
+      ['sg','  1. 重做 Post-BD Spirometry → 更新 GOLD 分期'],
       ['sg','  2. 評估重啟 LAMA（Tiotropium 18mcg/day）或升階 LABA/ICS 治療'],
       ['sg','  3. 完成 CAT 問卷 + mMRC 量表評估症狀嚴重度'],
       ['sg','  4. 建立定期追蹤計畫（每 3–6 個月 Spirometry 監測）'],
@@ -5061,7 +4953,7 @@ const HIS_DATA = [
   },
   {
     summary:'AI 跨診次分析：<strong>3年 4 次就診均診斷為氣喘</strong>，職業粉塵暴露 20 年從未被記錄。診斷碼漂移：氣喘 → 季節過敏 → 老年咳嗽。',
-    aiPattern:'偵測到「診斷碼反覆變動」：相同症狀反覆以不同診斷碼紀錄，COPD 可能性尚未被充分評估。PACS 舊影像從未重判。',
+    aiPattern:'偵測到「診斷碼反覆變動」：相同症狀反覆以不同診斷碼紀錄，COPD 可能性尚未被充分評估。PACS 舊影像從未量測。',
     rows:[
       {date:'2026/01',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'老年性咳嗽 / 喉嚨過敏',drug:'Loratadine · Ambroxol',flag:'r',flagTxt:'第4次不同診斷碼',miss:true,warn:false},
       {date:'2025/03',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'季節過敏 / 氣喘發作',drug:'Salbutamol · Fluticasone inh.',flag:'r',flagTxt:'職業史空白',miss:true,warn:false},
@@ -5104,28 +4996,25 @@ function buildPACS(ptIdx) {
   const scans = d.scans;
   const cols = scans.length;
   const scanCols = scans.map((s,si)=>{
-    const origColor = s.origFlag==='ok' ? '#10b981' : '#f87171';
-    const origIcon  = s.origFlag==='ok' ? '✓' : '✕';
     return `
     <div style="display:flex;flex-direction:column;gap:0;flex:1;min-width:0;">
       <div style="background:#0f172a;padding:4px 7px;font-family:monospace;font-size:9px;color:#94a3b8;display:flex;align-items:center;gap:5px;border-bottom:1px solid rgba(255,255,255,.06);">
         <span style="color:#e2e8f0;font-weight:600;">${s.date}</span>
         <span style="background:rgba(96,165,250,.12);color:#93c5fd;padding:1px 5px;border-radius:3px;border:1px solid rgba(96,165,250,.25);">${s.label}</span>
-        <span style="margin-left:auto;color:#64748b;">信心 <span style="color:#60a5fa;">${s.conf}%</span></span>
+        <span style="margin-left:auto;color:#64748b;">HI 指數 <span style="color:#60a5fa;">${s.hi.toFixed(2)}</span></span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;background:#111827;">
         <div style="position:relative;border-right:1px solid rgba(255,255,255,.06);">
-          <div style="position:absolute;top:3px;left:4px;font-size:8px;font-family:monospace;color:rgba(255,255,255,.4);z-index:2;">原始</div>
+          <div style="position:absolute;top:3px;left:4px;font-size:8px;font-family:monospace;color:rgba(255,255,255,.4);z-index:2;">原圖</div>
           <div style="height:90px;">${makeLungSVG(s,false)}</div>
         </div>
         <div style="position:relative;">
-          <div style="position:absolute;top:3px;left:4px;font-size:8px;font-family:monospace;color:rgba(96,165,250,.8);z-index:2;">AI標註</div>
+          <div style="position:absolute;top:3px;left:4px;font-size:8px;font-family:monospace;color:rgba(96,165,250,.8);z-index:2;">量測區標示</div>
           <div style="height:90px;">${makeLungSVG(s,true)}</div>
         </div>
       </div>
       <div style="background:#0f172a;padding:5px 7px;font-size:10px;color:#cbd5e1;font-family:monospace;line-height:1.55;border-top:1px solid rgba(255,255,255,.06);">
-        ${s.finding}
-        <div style="margin-top:3px;font-size:9px;color:${origColor};">${origIcon} ${s.origReport}</div>
+        HI 指數：${s.hi.toFixed(2)}（依肺野面積、橫膈膜位置幾何量測計算）
       </div>
     </div>`;
   }).join(`<div style="width:2px;background:#0f172a;flex-shrink:0;"></div>`);
@@ -5134,18 +5023,18 @@ function buildPACS(ptIdx) {
   <div class="pacs-panel">
     <div class="pacs-header">
       <i class="fa-solid fa-x-ray" style="color:#60a5fa"></i>
-      <strong>PACS AI 縱向影像比較</strong>
+      <strong>PACS 歷次影像 HI 指數量測</strong>
       <span style="margin-left:4px;color:#64748b;">${cols} 次影像</span>
       <span style="margin-left:auto;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:1px 8px;border-radius:4px;">DeepQ Vision v2</span>
     </div>
     <div style="display:flex;background:#0f172a;">${scanCols}</div>
     <div class="pacs-legend">
-      <div class="leg-item"><div class="leg-dot" style="background:rgba(251,191,36,.6);border:1px solid rgba(251,191,36,.8)"></div>肺氣腫/充氣異常</div>
-      <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,.5);border:1px solid rgba(239,68,68,.7)"></div>橫膈膜異常</div>
-      <div class="leg-item"><div class="leg-dot" style="background:rgba(16,185,129,.5);border:1px solid rgba(16,185,129,.7)"></div>確診基準線</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(96,165,250,.6);border:1px solid rgba(96,165,250,.8)"></div>肺野量測區</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(100,116,139,.5);border:1px solid rgba(100,116,139,.7)"></div>橫膈膜量測區</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(16,185,129,.5);border:1px solid rgba(16,185,129,.7)"></div>基準影像</div>
     </div>
     <div class="pacs-finding">
-      <i class="fa-solid fa-arrow-trend-up" style="color:#60a5fa;margin-right:5px;"></i>${d.aiTrend}
+      <i class="fa-solid fa-ruler-combined" style="color:#60a5fa;margin-right:5px;"></i>${d.aiTrend}
     </div>
   </div>`
 }
@@ -5191,7 +5080,7 @@ const EMR_CHIEF = [
 ];
 const EMR_AI_SUGGEST = [
   '⚡ AI 即時比對：本次主訴「喘 + 咳嗽」與 HIS 歷史紀錄高度一致。偵測到 40 PY 吸菸史 + 5 次就診 0 次肺功能。建議確認 Spirometry 優先序。',
-  '⚡ AI 即時比對：「慢性咳嗽 + 走路喘」與歷史 4 次氣喘診斷模式相符，但職業粉塵暴露 20 年未被鑑別。PACS 重判提示 COPD 可能性高。',
+  '⚡ AI 即時比對：「慢性咳嗽 + 走路喘」與歷史 4 次氣喘診斷模式相符，但職業粉塵暴露 20 年未被鑑別。PACS 影像已量測 HI 指數，建議納入鑑別診斷參考。',
   '⚡ AI 跨科別偵測：本次主訴為腰痛（骨科），但 HIS 存有 GOLD I COPD 確診（2023），距上次胸腔科回診已 3 年。COPD 追蹤中斷警示已啟動。'
 ];
 
@@ -5310,7 +5199,7 @@ function buildEMR(i, aiGenerated) {
     <div class="emr-body">
       <div style="background:var(--dq-dim);border:1px solid var(--dq-border);border-radius:7px;padding:7px 10px;margin-bottom:10px;font-size:11px;font-family:var(--mono);color:var(--dq);display:flex;align-items:center;gap:7px;">
         <i class="fa-solid fa-bolt"></i>
-        <strong>掛號前</strong>已完成：LINE 問診結構化 + PACS AI 重判 + HIS 跨診次聚合 · 不需醫師操作
+        <strong>掛號前</strong>已完成：LINE 問診結構化 + PACS AI 量測 + HIS 跨診次聚合 · 不需醫師操作
       </div>
       <div class="emr-field">
         <div class="emr-field-lbl">
