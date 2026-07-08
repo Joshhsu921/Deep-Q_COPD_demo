@@ -1026,8 +1026,8 @@ const PTS=[
    referralOrdIdx: -1,
    icd:{
      his:[
-       {code:'J06.9',desc:'急性上呼吸道感染，未指明',enDesc:'Acute upper respiratory infection, unspecified',type:'主診斷',flag:'wrong',note:'誤判碼（最近急診）'},
-       {code:'J45.909',desc:'氣喘，未指明，無併發症',enDesc:'Unspecified asthma, uncomplicated',type:'次診斷',flag:'wrong',note:'歷史誤判 × 3次'},
+       {code:'J06.9',desc:'急性上呼吸道感染，未指明',enDesc:'Acute upper respiratory infection, unspecified',type:'主診斷',flag:'wrong',note:'建議重新鑑別（最近急診）'},
+       {code:'J45.909',desc:'氣喘，未指明，無併發症',enDesc:'Unspecified asthma, uncomplicated',type:'次診斷',flag:'wrong',note:'歷史反覆記錄 × 3次'},
      ],
      ai:[
        {code:'J44.1',desc:'COPD 急性惡化',enDesc:'COPD with acute exacerbation',type:'AI建議',flag:'suspect',note:'待 Spirometry 確認'},
@@ -1045,18 +1045,18 @@ const PTS=[
    gap:"缺口 2 · 未確診 COPD",gapC:"cb-danger",
    actionPath:'A', copdps:{score:8,items:['呼吸困難·常常: 2分','每天咳痰: 2分','活動明顯受限: 2分','未吸菸: 0分','年齡≥70歲: 2分']},
    kpis:[{l:"COPD-PS 評分",v:"8分 · 陽性",c:"color:var(--danger);font-weight:600"},{l:"COPD 診斷狀態",v:"疑似 COPD",c:"color:var(--danger)"},{l:"肺功能紀錄",v:"從未檢測",c:"color:var(--danger)"}],
-   ac:"ab-danger",at:"Undiagnosed COPD · 慣性誤診主動攔截",atc:"abt-danger",cb:"cb-danger",ai:"fa-shield-exclamation",aic:"var(--danger)",
-   conf:"3年4次門診均誤判為氣喘",
+   ac:"ab-danger",at:"Undiagnosed COPD · AI 主動偵測風險",atc:"abt-danger",cb:"cb-danger",ai:"fa-shield-exclamation",aic:"var(--danger)",
+   conf:"3年4次門診反覆以氣喘分類記錄",
    ev:[{src:"HIS 歷史門診彙整（AI 跨診次）",ic:"fa-solid fa-notes-medical",icol:"var(--amber)",body:"3年內4次「季節性咳嗽/老化氣喘」診斷<br>每次開立支氣管擴張劑，<strong>從未轉介肺功能</strong><br>LINE 問診揭露：<strong>職業粉塵暴露 20年</strong>",cite:""},
        {src:"PACS AI · 歷史影像重新判讀",ic:"fa-solid fa-x-ray",icol:"var(--dq)",body:"來源：<strong>2025/11 肺炎追蹤胸部 X 光</strong><br>DeepQ 重判：<strong>過度充氣 + 橫膈膜扁平</strong><br>原報告：「無明顯異常」（未用 AI）",cite:"Lamprecht et al., Lancet 2015"}],
    emr:[{k:"主訴",v:"老毛病又犯了，咳嗽咳了快一個月，走平路也有點喘。",src:"掛號時填寫",pre:true},{k:"過去處置（3年跨診次）",v:"每次診斷「氣喘/老年性咳嗽」，開立 Salbutamol PRN。",src:"HIS 歷史紀錄",pre:true}],
-   int:"三年來的慣性診斷掩蓋了真正的 COPD。AI 整合跨診次 HIS 資料並重新判讀舊影像，在第 5 次就診時主動打斷誤診迴圈。職業粉塵暴露是非吸菸者 COPD 的重要危險因子。\n\n注意：GOLD 分級需以 Post-BD Spirometry 確認（FEV1/FVC < 0.70），目前 mMRC ≥2 為症狀嚴重度評估，GOLD 分期待肺功能確認後補登。",
+   int:"三年來相似症狀反覆以氣喘記錄，可能掩蓋了 COPD 的可能性。AI 整合跨診次 HIS 資料並重新判讀舊影像，在第 5 次就診時主動提出重新鑑別診斷的建議。職業粉塵暴露是非吸菸者 COPD 的重要危險因子。\n\n注意：GOLD 分級需以 Post-BD Spirometry 確認（FEV1/FVC < 0.70），目前 mMRC ≥2 為症狀嚴重度評估，GOLD 分期待肺功能確認後補登。",
    tags:[{t:"職業粉塵暴露20年",c:"tag-r"},{t:"慢性咳嗽",c:"tag-a"},{t:"走路喘 mMRC≥2",c:"tag-a"},{t:"3年未做Spirometry",c:"tag-r"}],
    referralOrdIdx: 1,
    icd:{
      his:[
-       {code:'J45.909',desc:'氣喘，未指明，無併發症',enDesc:'Unspecified asthma, uncomplicated',type:'主診斷',flag:'wrong',note:'慣性誤診 × 4次'},
-       {code:'J30.9', desc:'過敏性鼻炎，未指明',enDesc:'Allergic rhinitis, unspecified',type:'次診斷',flag:'wrong',note:'2025/03 誤記'},
+       {code:'J45.909',desc:'氣喘，未指明，無併發症',enDesc:'Unspecified asthma, uncomplicated',type:'主診斷',flag:'wrong',note:'反覆以此碼記錄 × 4次'},
+       {code:'J30.9', desc:'過敏性鼻炎，未指明',enDesc:'Allergic rhinitis, unspecified',type:'次診斷',flag:'wrong',note:'2025/03 記錄'},
      ],
      ai:[
        {code:'J44.1',desc:'COPD 急性惡化（職業性）',enDesc:'COPD with acute exacerbation',type:'AI建議',flag:'suspect',note:'待 Spirometry 確認'},
@@ -1080,7 +1080,7 @@ const PTS=[
    ev:[{src:"HIS 診斷碼追蹤（AI 主動掃描）",ic:"fa-solid fa-stethoscope",icol:"var(--teal)",body:"<strong>2023/03 確診 GOLD I COPD</strong><br>確診後僅回診 1 次，此後 3 年無胸腔科紀錄<br>今日以「腰痛」掛骨科——接觸點出現",cite:""},
        {src:"LINE Chatbot 近況問卷",ic:"fa-brands fa-line",icol:"var(--lgreen)",body:"自述「近半年爬樓梯更喘」<br>用藥已自行停止（「覺得沒差」）<br>未做過 <strong>CAT 問卷</strong> 或 <strong>mMRC 評估</strong>",cite:"Vestbo et al., AJRCCM 2022"}],
    emr:[{k:"本次就診主訴",v:"腰椎退化，下背痛 3 個月，要求止痛藥。",src:"掛號時填寫",pre:true},{k:"骨科醫師診療計畫",v:"腰椎 MRI 排程，鎮痛治療計畫。",src:"今日問診",pre:false}],
-   int:"COPD 病患不一定掛胸腔科。此病患今日以「腰痛」掛骨科，若無 AI 跨科預警，追蹤中斷將繼續被忽略。骨科醫師只需 30 秒確認提醒，不影響本次骨科診療。",
+   int:"COPD 病患不一定掛胸腔科。此病患今日以「腰痛」掛骨科，若無 AI 跨科預警，追蹤中斷恐不會被留意到。骨科醫師只需 30 秒確認提醒，不影響本次骨科診療。",
    tags:[{t:"GOLD I 確診",c:"tag-t"},{t:"追蹤中斷3年",c:"tag-r"},{t:"症狀惡化",c:"tag-a"},{t:"自行停藥",c:"tag-r"}],
    referralOrdIdx: 1,
    icd:{
@@ -1240,6 +1240,15 @@ const WS_MEDS=[
    {code:'MUS',  name:'Muscle Relaxant 450mg',route:'PO',freq:'TID',days:7, qty:21,note:'肌肉放鬆'},
    {code:'PPI40',name:'Pantoprazole 40mg',route:'PO',freq:'QD', days:14,qty:14,note:'腸胃保護'}]
 ];
+/* ── AI 藥物建議（依 SOAP 評估 + COPD-PS 產生，仿 ASUS xHIS 用藥建議模式）── */
+const WS_MED_SUGGEST=[
+  { name:'Tiotropium/Olodaterol（LAMA/LABA 複方吸入劑）', dose:'2.5mcg/2.5mcg，1 吸 INH QD',
+    rationale:'GOLD II、mMRC ≥2：依 GOLD 指引建議起始雙重支氣管擴張劑維持治療，取代現行僅 PRN 之 Salbutamol' },
+  { name:'Tiotropium/Olodaterol（LAMA/LABA 複方吸入劑）', dose:'2.5mcg/2.5mcg，1 吸 INH QD',
+    rationale:'已確診 COPD GOLD II：現行 Salbutamol BID 為氣喘用藥模式，建議調整為 COPD 雙重支氣管擴張劑維持治療' },
+  { name:'Tiotropium/Olodaterol（LAMA/LABA 複方吸入劑）', dose:'2.5mcg/2.5mcg，1 吸 INH QD',
+    rationale:'2023 年曾開立 LABA/ICS 後自行停藥，追蹤中斷 3 年且症狀惡化：建議恢復維持治療並升級為雙重支氣管擴張劑' }
+];
 const WS_VISITS=[
   [{date:'2026/02/14',dept:'急診',icd:'J06.9',dr:'急診值班',dx:'急性上呼吸道感染'},
    {date:'2025/09/20',dept:'胸腔內科',icd:'J45.9',dr:'林醫師',dx:'氣喘追蹤'},
@@ -1256,105 +1265,78 @@ const WS_VISITS=[
 ];
 /* ── DeepQ LLM 自動生成之臨床摘要 ── */
 const WS_AI_SUMMARY=[
-  /* 王大明 */
+  /* 王大明 —— AI 彙整歷次就診紀錄 + 影像 + 肺功能，生成 SOAP 格式病史摘要 */
   {
     sections:[
-      { title:'診斷評估', icon:'fa-stethoscope', items:[
+      { title:'S · 主觀（症狀與歷次主訴）', icon:'fa-comment-medical', items:[
         '活動性呼吸困難伴痰性咳嗽，症狀漸進惡化 6 個月（mMRC 第 2 級）',
         'COPD-PS 篩查 <strong>9/10（陽性）</strong>：活動後喘、每日有痰、活動受限、年齡 ≥60、吸菸史 40 包-年',
-        '現行診斷碼 J06.9（急性上呼吸道感染）<strong>未能反映</strong>潛在阻塞性肺病型態'
+        '歷次主訴：2024/03 陣發性咳嗽（胸腔科）；2024/09 喉嚨痛流鼻水（家醫科）；2025/06 呼吸困難加劇（急診）'
       ]},
-      { title:'病史摘要', icon:'fa-clock-rotate-left', items:[
-        '2024/03 胸腔科：急性支氣管炎（J20.9）；開立 Salbutamol PRN',
-        '2024/09 家醫科：上呼吸道感染（J06.9）；抗生素療程，未追蹤影像',
-        '2025/06 急診：呼吸困難加劇；CXR 報告無異常；帶 Salbutamol 出院',
-        '<strong>歷次就診均未安排支氣管擴張後肺功能檢查（Post-BD Spirometry）</strong>'
+      { title:'O · 客觀（影像與肺功能彙整）', icon:'fa-chart-line', items:[
+        'CXR 2026/02（DeepQ 重判）：雙上肺野<strong>過度充氣</strong>，HI 指數 82（原始報告標記「無特殊發現」）',
+        '雙側橫膈膜扁平化，符合氣體滯留表現；無浸潤或積液',
+        'Post-BD Spirometry 3 次追蹤（2025/03、2025/06、2026/02）：FEV₁ <strong>67%→65%→62%</strong>，年均下降 2.5% pred/yr',
+        'Body Plethysmography（RV 166%、RV/TLC 44%）與 DLCO（68%）：氣體陷閉及擴散功能數值，詳見「檢驗報告」分頁'
       ]},
-      { title:'影像判讀', icon:'fa-x-ray', items:[
-        'CXR 2026/02（DeepQ 重判）：雙上肺野<strong>過度充氣</strong>，HI 指數 82（COPD 風險閾值 ≥75）',
-        '原始放射科報告標記為「無特殊發現」—— DeepQ AI 偵測出隱性病灶',
-        '雙側橫膈膜扁平化，符合氣體滯留表現；無浸潤或積液'
+      { title:'A · 評估（綜合判讀）', icon:'fa-stethoscope', items:[
+        '現行診斷碼 J06.9（急性上呼吸道感染）；院內客觀資料（3 次 Post-BD Spirometry、CXR 過度充氣）<strong>符合 GOLD II</strong>',
+        '症狀、影像、肺功能三方一致指向慢性阻塞性肺病'
       ]},
-      { title:'肺功能評估', icon:'fa-flask-vial', items:[
-        '<strong>今日已排定 Post-BD Spirometry</strong>（候診室等候執行中）',
-        '確診標準：Post-BD FEV₁/FVC &lt; 0.70；GOLD 分級依 FEV₁ % 預測值',
-        '過去就診紀錄中<strong>從未安排肺功能</strong>——本次為首次評估',
-        '結果預計 1 小時內完成，將直接回傳醫師工作站'
-      ]},
-      { title:'處置計畫', icon:'fa-list-check', items:[
-        '本次就診安排支氣管擴張後肺功能（確認 FEV₁/FVC &lt; 0.70 以確診 COPD）',
-        '待肺功能結果確認後更新診斷碼為 J44.1 並制定 GOLD 分級對應治療方案',
-        '4 週後門診追蹤肺功能結果及症狀再評估'
+      { title:'P · 計畫（AI 建議）', icon:'fa-list-check', items:[
+        '依 COPD-PS 9/10 陽性及上述客觀資料，建議更正診斷碼並啟動 GOLD II 對應治療（詳見下方診斷碼建議與行動項目）'
       ]}
     ],
     icdCurrent:'J06.9 — 急性上呼吸道感染（歷次診斷）',
-    icdAI:'J44.1 — 慢性阻塞性肺病急性惡化（待肺功能確認）',
+    icdAI:'J44.1 — 慢性阻塞性肺病，GOLD II（3 次 Post-BD Spirometry 已確診，診斷碼待更正）',
     icdFlag:'wrong'
   },
-  /* 陳阿嬌 */
+  /* 陳阿嬌 —— AI 彙整歷次就診紀錄 + 影像 + 肺功能，生成 SOAP 格式病史摘要 */
   {
     sections:[
-      { title:'診斷評估', icon:'fa-stethoscope', items:[
+      { title:'S · 主觀（症狀與歷次主訴）', icon:'fa-comment-medical', items:[
         '慢性咳嗽 1 個月；走平路即喘（mMRC ≥2）；<strong>非吸菸者但職業粉塵暴露 20 年</strong>（紡織業）',
         'COPD-PS 篩查 <strong>8/10（陽性）</strong>：慢性咳嗽、每日有痰、活動後喘、有哮鳴音病史',
-        '3 年 4 次就診反覆診斷 J45.9（氣喘），<strong>從未安排肺功能確認</strong>'
+        '3 年 4 次就診主訴：2022/11 慢性咳嗽；2023/04 咳嗽伴哮鳴音；2024/02 肺炎後追蹤；2025/03 呼吸困難惡化——歷次均診斷 J45.9（氣喘）'
       ]},
-      { title:'病史摘要', icon:'fa-clock-rotate-left', items:[
-        '2022/11 家醫科：慢性咳嗽；給予 J45.9；Salbutamol PRN',
-        '2023/04 家醫科：咳嗽伴哮鳴音；維持 J45.9；未轉介',
-        '2024/02 家醫科：肺炎後追蹤 CXR；報告正常；繼續 J45.9',
-        '2025/03 家醫科（本系列）：呼吸困難惡化；<strong>3 年內從未安排肺功能</strong>'
+      { title:'O · 客觀（影像與肺功能彙整）', icon:'fa-chart-line', items:[
+        'CXR 2025/11（DeepQ 重判）：<strong>雙側過度充氣合併橫膈膜扁平（桶狀胸型態）</strong>（原始報告「無明顯異常」）',
+        '無肋膜積液，心臟輪廓正常，整體符合阻塞性肺病影像表現',
+        '2025/03 正式 Post-BD Spirometry：FEV₁/FVC <strong>56%</strong>（&lt; 0.70）；支氣管擴張劑反應 +5.5%（&lt; 12%）',
+        'F/V 環疊圖：2023/04 外院（僅 Pre-BD）vs 2025/03（曲線左移、凹陷加深）→ 2 年內阻塞加重，詳見「檢驗報告」分頁'
       ]},
-      { title:'影像判讀', icon:'fa-x-ray', items:[
-        'CXR 2025/11（DeepQ 重判）：<strong>雙側過度充氣合併橫膈膜扁平（桶狀胸型態）</strong>',
-        '原始報告：「無明顯異常」—— DeepQ AI 偵測到被漏報的阻塞性型態',
-        '無肋膜積液，心臟輪廓正常，整體符合阻塞性肺病影像表現'
+      { title:'A · 評估（綜合判讀）', icon:'fa-stethoscope', items:[
+        '現行診斷碼 J45.909（氣喘）；院內客觀資料（Post-BD Spirometry、CXR 過度充氣）<strong>符合 GOLD II COPD</strong>',
+        '支氣管擴張劑反應 &lt;12%（不可逆）與氣喘表現不符'
       ]},
-      { title:'肺功能評估', icon:'fa-flask-vial', items:[
-        '<strong>今日已排定 Post-BD Spirometry</strong>（3 年來首次肺功能評估）',
-        '確診標準：Post-BD FEV₁/FVC &lt; 0.70；與氣喘鑑別：支氣管擴張劑反應 &lt; 12% 提示 COPD',
-        '歷次 4 次就診以 J45.9 開立，均<strong>未安排肺功能確認</strong>',
-        '結果將決定是否轉介胸腔科及用藥調整方向'
-      ]},
-      { title:'處置計畫', icon:'fa-list-check', items:[
-        '安排支氣管擴張後肺功能——鑑別 COPD 與氣喘之第一線檢查',
-        'FEV₁/FVC &lt; 0.70 確診後轉介胸腔科；評估職業性肺病路徑（紡織業粉塵暴露 20 年）',
-        '確認吸入劑使用技巧與用藥遵從性'
+      { title:'P · 計畫（AI 建議）', icon:'fa-list-check', items:[
+        '依 COPD-PS 8/10 陽性及上述客觀資料，建議更正診斷碼、轉診胸腔內科並評估職業性肺病路徑（詳見下方診斷碼建議與行動項目）'
       ]}
     ],
     icdCurrent:'J45.909 — 氣喘，未指明（3年 4次就診）',
-    icdAI:'J44.1 — 慢性阻塞性肺病，職業性（待肺功能確認）',
+    icdAI:'J44.1 — 慢性阻塞性肺病，職業性，GOLD II（2025/03 Post-BD Spirometry 已確診，診斷碼待更正）',
     icdFlag:'wrong'
   },
-  /* 林志明 */
+  /* 林志明 —— AI 彙整歷次就診紀錄 + 影像 + 肺功能，生成 SOAP 格式病史摘要 */
   {
     sections:[
-      { title:'診斷評估', icon:'fa-stethoscope', items:[
+      { title:'S · 主觀（症狀與歷次主訴）', icon:'fa-comment-medical', items:[
         '本次主訴：<strong>腰椎退化 / 下背痛</strong>（骨科就診）',
-        '背景：2023/03 確診 COPD GOLD I（FEV₁ 78% 預測值）；<strong>確診後 3 年無胸腔科追蹤</strong>',
-        'COPD-PS <strong>7/10（陽性）</strong>：活動後喘加重、自行停用吸入劑'
+        '病患自訴近半年活動後喘加重，已自行停用吸入劑（「感覺沒差」）',
+        'COPD-PS <strong>7/10（陽性）</strong>；2023/03 確診 COPD GOLD I 後僅回診 1 次，此後 3 年無胸腔科追蹤'
       ]},
-      { title:'病史摘要', icon:'fa-clock-rotate-left', items:[
-        '2023/03 胸腔科：肺功能確診 COPD GOLD I；開立 LABA/ICS',
-        '2023/09 胸腔科：1 次追蹤就診；藥物遵從性尚可',
-        '2024 年起：無胸腔科就診紀錄；病患自行停藥（「感覺沒差」）',
-        '2026/05（今日）：骨科下背痛門診；術前 CXR 觸發 AI 警示'
+      { title:'O · 客觀（影像與肺功能彙整）', icon:'fa-chart-line', items:[
+        '今日 CXR vs. 2023 年基線：<strong>肺容積增加、橫膈膜持續下移</strong>；HI 指數 0.61 → 0.82',
+        '無急性浸潤、積液或氣胸；術前胸部無其他急性發現',
+        '最近一次 Spirometry：2023/03/15（距今 3 年）——Post-BD FEV₁/FVC 67%、Post-BD FEV₁ 82% pred（GOLD I）',
+        '2023/09 後無胸腔科追蹤紀錄，無新肺功能數據'
       ]},
-      { title:'影像判讀', icon:'fa-x-ray', items:[
-        '今日 CXR vs. 2023 年基線：<strong>肺容積增加、橫膈膜持續下移，疾病進展中</strong>',
-        '影像型態提示可能由 GOLD I 進展至 GOLD II',
-        '無急性浸潤、積液或氣胸；術前胸部無其他急性發現'
+      { title:'A · 評估（綜合判讀）', icon:'fa-stethoscope', items:[
+        '2023/03 確診 COPD GOLD I（J44.1）；今日影像變化與症狀加重<strong>提示可能已進展至 GOLD II</strong>',
+        '追蹤中斷 3 年缺乏新肺功能佐證，GOLD 指引建議重新執行 Spirometry 確認分期'
       ]},
-      { title:'肺功能評估', icon:'fa-flask-vial', items:[
-        '最近一次 Spirometry：<strong>2023/03/15（距今 3 年）</strong>',
-        'Post-BD FEV₁/FVC = 67%（&lt; 70%）→ 確認氣流阻塞；Post-BD FEV₁ = 82% pred → <strong>GOLD I</strong>',
-        '今日術前 CXR：HI 指數 0.61 → 0.82，影像提示疾病可能由 GOLD I 進展至 GOLD II',
-        'GOLD 指引建議追蹤中斷者重新執行 Spirometry 確認分級'
-      ]},
-      { title:'處置計畫', icon:'fa-list-check', items:[
-        '通知胸腔科重新評估 COPD——<strong>不影響今日骨科診療進行</strong>',
-        '胸腔科門診重做 Post-BD Spirometry 及 CAT 問卷評分，確認 GOLD 分級',
-        '重新啟動吸入劑治療；視新肺功能結果評估是否需升級治療方案'
+      { title:'P · 計畫（AI 建議）', icon:'fa-list-check', items:[
+        '依 COPD-PS 7/10 陽性及追蹤中斷情形，建議通知胸腔科重新評估並安排 Spirometry 確認分期（詳見下方行動項目）'
       ]}
     ],
     icdCurrent:'M54.50 — 下背痛（本次主訴）',
@@ -1379,8 +1361,8 @@ const WS_PE=[
   'Vitals: BP 132/80, HR 76, RR 17, SpO₂ 96% RA, T 36.7°C\nBack: Lumbar tenderness L4-L5. Limited flexion ROM.\nChest: Clear. No adventitious sounds.'
 ];
 const WS_SOAP_ASSESS=[
-  '主診斷：急性上呼吸道感染（J06.9）。\n本次 COPD-PS 篩查 9/10 陽性，合併 CXR 影像過度充氣（HI 82），臨床高度懷疑早期慢性阻塞性肺病（GOLD I）。\n鑑別診斷：氣喘（可能性較低，無過敏體質、無支氣管可逆性紀錄）；心因性呼吸困難（SpO₂ 95%，無水腫，暫不支持）。\n本次安排 Post-BD Spirometry，俟肺功能結果確認後更新診斷碼及治療計畫。',
-  '工作診斷：疑似慢性阻塞性肺病（職業性，待確認）。\n病患非吸菸者，有 20 年紡織業粉塵暴露史；過去 3 年 4 次就診以 J45.9 氣喘診斷，均未安排肺功能確認。\n本次 COPD-PS 篩查 8/10，CXR 呈雙側過度充氣合併橫膈膜扁平，氣喘診斷有待肺功能重新釐清。\n鑑別診斷：氣喘 COPD 重疊症候群（ACO）；職業性過敏性肺炎。本次安排 Post-BD Spirometry。',
+  '主診斷：急性上呼吸道感染（J06.9）。\n本次 COPD-PS 篩查 9/10 陽性，合併 CXR 影像過度充氣（HI 82）及院內既有 3 次 Post-BD Spirometry（GOLD II，FEV₁ 67%→65%→62%），臨床應更正為慢性阻塞性肺病（GOLD II）。\n鑑別診斷：氣喘（可能性較低，Post-BD 改善均 &lt;4%，不可逆）；心因性呼吸困難（SpO₂ 95%，無水腫，暫不支持）。\n依既有肺功能結果，更新診斷碼為 J44.1 並制定 GOLD II 對應治療方案，無需重新安排檢查。',
+  '主診斷：慢性阻塞性肺病（職業性，GOLD II）。\n病患非吸菸者，有 20 年紡織業粉塵暴露史；2025/03 已完成正式 Post-BD Spirometry（FEV₁/FVC 56%，GOLD II），惟過去 3 年 4 次就診仍持續以 J45.9 氣喘診斷。\n本次 COPD-PS 篩查 8/10，CXR 呈雙側過度充氣合併橫膈膜扁平，與既有肺功能結果一致。\n鑑別診斷：氣喘 COPD 重疊症候群（ACO）已排除（Post-BD 改善 +5.5%，&lt;12% 不可逆）；職業性過敏性肺炎。依既有結果更新診斷碼為 J44.1，無需重新安排檢查。',
   '本次主診斷：腰椎退化性病變 / 慢性下背痛（M54.50）。\n病患 2023 年有 COPD GOLD I 確診紀錄（J44.1），確診後 3 年無胸腔科回診，據述已自行停用吸入劑。\n今日術前 CXR 與 2023 年基線比對，肺容積增加、橫膈膜位置下移，疾病可能有所進展。\n骨科診療計畫不變，另建請病患至胸腔科重新評估 COPD 控制狀況。'
 ];
 /* ── 護理站量測生命徵象（結構化，供工作站顯示） ── */
@@ -1415,6 +1397,7 @@ function openWorkstation(ptIdx){
   const actionColor=[p.aic,p.aic,p.aic][0]||'#d97706';
 
   const aiSum = WS_AI_SUMMARY[ptIdx];
+  const medSug = WS_MED_SUGGEST[ptIdx];
 
   // Build visit history
   const visitRows=visits.map(v=>`
@@ -1574,7 +1557,7 @@ function openWorkstation(ptIdx){
                 <div style="font-size:12px;color:#0369a1;font-weight:600;">${aiSum.icdAI}</div>
                 ${aiSum.icdFlag === 'info'
                   ? `<div style="font-size:10px;color:#475569;margin-top:3px;">本次掛號主訴為骨科疾患，COPD 為<strong>共病</strong>，建議以次診斷加入本次病歷。</div>`
-                  : `<div style="font-size:10px;color:#dc2626;margin-top:3px;">現行診斷碼疑似<strong>誤判</strong>，AI 建議以正確碼取代。</div>`
+                  : `<div style="font-size:10px;color:#dc2626;margin-top:3px;">現行診斷碼與最新臨床資料<strong>不一致</strong>，建議重新鑑別診斷並考慮以此碼取代。</div>`
                 }
               </div>
             </div>
@@ -1588,6 +1571,33 @@ function openWorkstation(ptIdx){
               <button id="ws-icd-add-btn-${ptIdx}" onclick="addAIIcdSecondary(${ptIdx})" style="flex:1;padding:5px 8px;border-radius:5px;border:1px solid #93c5fd;background:#fff;color:#0369a1;font-size:10px;font-family:var(--mono);cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:4px;"><i class="fa-solid fa-plus"></i> 加次診斷</button>
               `}
               <button id="ws-icd-dismiss-btn-${ptIdx}" onclick="dismissAIIcd(${ptIdx})" style="padding:5px 8px;border-radius:5px;border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:10px;font-family:var(--mono);cursor:pointer;flex-shrink:0;" title="忽略建議"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI 建議行動（檢查/轉診勾選，緊接摘要與診斷碼建議之後，避免被忽略） -->
+        <div style="margin-top:10px;padding:10px 12px;border-radius:7px;border:1px solid #fde68a;background:#fffbeb;">
+          <div style="font-size:9px;font-family:var(--mono);color:#d97706;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+            <i class="fa-solid fa-brain" style="font-size:9px;"></i>AI 建議行動
+          </div>
+          ${aiActions}
+        </div>
+
+        <!-- AI 藥物建議（依 SOAP 評估 + COPD-PS 產生，仿 xHIS 用藥建議模式） -->
+        <div style="margin-top:10px;">
+          <div style="font-size:9px;font-family:var(--mono);color:#94a3b8;margin-bottom:6px;letter-spacing:.06em;">AI 藥物建議</div>
+          <div id="ws-med-suggest-box-${ptIdx}" style="padding:9px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
+            <div style="display:flex;align-items:flex-start;gap:7px;margin-bottom:8px;">
+              <i class="fa-solid fa-pills" style="color:#0284c7;font-size:12px;margin-top:2px;flex-shrink:0;"></i>
+              <div style="flex:1;">
+                <div style="font-size:12px;color:#0369a1;font-weight:600;">${medSug.name}</div>
+                <div style="font-size:10px;font-family:var(--mono);color:#0369a1;margin-top:2px;">${medSug.dose}</div>
+                <div style="font-size:10px;color:#475569;margin-top:4px;line-height:1.5;">${medSug.rationale}</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button id="ws-med-add-btn-${ptIdx}" onclick="confirmMedSuggest(${ptIdx})" style="flex:2;padding:5px 10px;border-radius:5px;border:none;background:#0284c7;color:#fff;font-size:10px;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:700;white-space:nowrap;"><i class="fa-solid fa-plus"></i> 加入處方</button>
+              <button id="ws-med-dismiss-btn-${ptIdx}" onclick="dismissMedSuggest(${ptIdx})" style="padding:5px 8px;border-radius:5px;border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:10px;font-family:var(--mono);cursor:pointer;flex-shrink:0;" title="忽略建議"><i class="fa-solid fa-xmark"></i></button>
             </div>
           </div>
         </div>
@@ -1691,7 +1701,7 @@ function openWorkstation(ptIdx){
       <div style="padding:7px 12px 4px;font-family:var(--mono);font-size:9px;color:#64748b;letter-spacing:.08em;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:5px;">
         <i class="fa-solid fa-pills" style="font-size:9px;color:#0284c7;"></i>目前用藥清單（藥歷）
       </div>
-      <div style="padding:6px 12px 8px;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
+      <div id="ws-medlist-${ptIdx}" style="padding:6px 12px 8px;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
         ${meds.map(m=>`
         <div style="display:flex;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9;align-items:flex-start;">
           <i class="fa-solid fa-capsules" style="color:#0284c7;font-size:9px;margin-top:3px;flex-shrink:0;"></i>
@@ -1700,17 +1710,6 @@ function openWorkstation(ptIdx){
             <div style="font-size:9px;font-family:var(--mono);color:#64748b;margin-top:1px;">${m.route} · ${m.freq} · ${m.days}天 <span style="color:#94a3b8;">｜ ${m.note}</span></div>
           </div>
         </div>`).join('')}
-      </div>
-
-      <!-- ── AI 建議行動 ── -->
-      <div style="padding:7px 12px 4px;font-family:var(--mono);font-size:9px;color:#64748b;letter-spacing:.08em;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:5px;">
-        <i class="fa-solid fa-brain" style="font-size:9px;color:#d97706;"></i>AI 建議行動
-      </div>
-      <div style="padding:8px 12px 10px;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
-        ${aiActions}
-        <button onclick="wsSnooze(${ptIdx},this)" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:10px;cursor:pointer;font-family:var(--mono);display:flex;align-items:center;justify-content:center;gap:5px;">
-          <i class="fa-solid fa-clock"></i> 本次就診暫緩提醒
-        </button>
       </div>
 
       <!-- ── 就診記錄 ── -->
@@ -1873,6 +1872,39 @@ function dismissAIIcd(ptIdx) {
   }
 }
 
+function confirmMedSuggest(ptIdx) {
+  const medSug = WS_MED_SUGGEST[ptIdx];
+  const list = document.getElementById(`ws-medlist-${ptIdx}`);
+  if (list) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9;align-items:flex-start;';
+    row.innerHTML = `<i class="fa-solid fa-capsules" style="color:#16a34a;font-size:9px;margin-top:3px;flex-shrink:0;"></i>
+      <div style="flex:1;">
+        <div style="font-size:11px;color:#0f172a;font-weight:500;">${medSug.name}</div>
+        <div style="font-size:9px;font-family:var(--mono);color:#64748b;margin-top:1px;">${medSug.dose} <span style="color:#16a34a;">｜ AI 建議新增</span></div>
+      </div>`;
+    list.appendChild(row);
+  }
+  const box = document.getElementById(`ws-med-suggest-box-${ptIdx}`);
+  if (box) {
+    box.style.background = '#f0fdf4';
+    box.style.borderColor = '#bbf7d0';
+    box.innerHTML = `<div style="font-size:10px;font-family:var(--mono);color:#16a34a;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-check-circle"></i> 已加入處方，將於本次醫囑一併開立</div>`;
+  }
+}
+
+function dismissMedSuggest(ptIdx) {
+  const box = document.getElementById(`ws-med-suggest-box-${ptIdx}`);
+  if (box) {
+    box.style.opacity = '0.45';
+    box.style.pointerEvents = 'none';
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:10px;font-family:var(--mono);color:#94a3b8;margin-top:4px;';
+    note.textContent = '已忽略 AI 建議';
+    box.appendChild(note);
+  }
+}
+
 function _orderSlipHTML(ptIdx, type) {
   const p = PTS[ptIdx];
   const aiSum = WS_AI_SUMMARY[ptIdx];
@@ -2022,8 +2054,8 @@ function _orderSlipHTML(ptIdx, type) {
     const clinicalBullets = aiSum && aiSum.sections && aiSum.sections[0]
       ? aiSum.sections[0].items.map(i=>i.replace(/<[^>]+>/g,'')).join('；')
       : '';
-    const imagingBullets = aiSum && aiSum.sections && aiSum.sections[2]
-      ? aiSum.sections[2].items.map(i=>i.replace(/<[^>]+>/g,'')).join('；')
+    const imagingBullets = aiSum && aiSum.sections && aiSum.sections[1]
+      ? aiSum.sections[1].items.map(i=>i.replace(/<[^>]+>/g,'')).join('；')
       : '';
     const currentMeds = [
       'Salbutamol（Ventolin）100 mcg pMDI PRN',
@@ -3265,9 +3297,9 @@ function buildPACSPanel(ptIdx) {
             <div style="font-size:11px;color:#475569;line-height:1.75;padding:9px 11px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;margin-bottom:10px;">${report.originalReport.text}</div>
             <div style="font-family:monospace;font-size:10px;font-weight:700;color:#64748b;letter-spacing:.08em;margin-bottom:6px;">結論</div>
             <div style="font-size:12px;font-weight:600;color:#334155;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">${report.originalReport.impression}</div>
-            <div style="margin-top:12px;padding:9px 11px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:10px;color:#991b1b;font-family:monospace;line-height:1.7;">
-              <i class="fa-solid fa-circle-xmark" style="margin-right:5px;"></i><strong>DeepQ AI 重判：此報告遺漏了 COPD 相關影像異常</strong><br>
-              點擊「DeepQ 重判」分頁查看 AI 發現的隱性病變
+            <div style="margin-top:12px;padding:9px 11px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;font-size:10px;color:#92400e;font-family:monospace;line-height:1.7;">
+              <i class="fa-solid fa-circle-info" style="margin-right:5px;"></i><strong>DeepQ AI 重判：發現與 COPD 相關之新增影像特徵</strong><br>
+              點擊「DeepQ 重判」分頁查看 AI 發現的影像變化
             </div>
           </div>
         </div>
@@ -3455,10 +3487,10 @@ function buildLabPage(ptIdx) {
 
   /* ── 共用 header ── */
   const [headerBadge, headerNote] = [
-    ['<span style="font-family:var(--mono);font-size:9px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);border-radius:3px;padding:1px 7px;">⚠ 從未執行 Spirometry</span>',
-     '呼吸功能指標追蹤 · 2024–2026'],
-    ['<span style="font-family:var(--mono);font-size:9px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);border-radius:3px;padding:1px 7px;">⚠ 從未確認可逆性</span>',
-     'Peak Flow 追蹤 · 3年4次就診紀錄'],
+    ['<span style="font-family:var(--mono);font-size:9px;background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.3);border-radius:3px;padding:1px 7px;">GOLD II 確診 · 3 次追蹤</span><span style="font-family:var(--mono);font-size:9px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);border-radius:3px;padding:1px 7px;margin-left:6px;">⚠ 診斷碼未更新（仍為 J06.9）</span>',
+     '呼吸功能指標追蹤 · 2025–2026'],
+    ['<span style="font-family:var(--mono);font-size:9px;background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.3);border-radius:3px;padding:1px 7px;">GOLD II 確診 · 2025/03/14</span><span style="font-family:var(--mono);font-size:9px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);border-radius:3px;padding:1px 7px;margin-left:6px;">⚠ 診斷碼未更新（仍為 J45.9）</span>',
+     'Spirometry 追蹤 · 3年4次就診紀錄'],
     ['<span style="font-family:var(--mono);font-size:9px;background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.3);border-radius:3px;padding:1px 7px;">GOLD I 確診 · 2023/03/15</span><span style="font-family:var(--mono);font-size:9px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);border-radius:3px;padding:1px 7px;margin-left:6px;">⚠ 距今 3 年未複測</span>',
      'Spirometry 歷史追蹤 · FEV₁ 趨勢預測'],
   ][ptIdx];
@@ -3756,7 +3788,7 @@ function buildLabPage(ptIdx) {
       <text x="170" y="30" font-family="monospace" font-size="7" fill="#dc2626" text-anchor="middle">66%</text>
       <text x="220" y="42" font-family="monospace" font-size="7" fill="#dc2626">~60%</text>
       <text x="85"  y="75" font-family="monospace" font-size="6.5" fill="#64748b" text-anchor="middle">2023/04 外院</text>
-      <text x="170" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2025/03 今日</text>
+      <text x="170" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">2025/03</text>
       <text x="218" y="75" font-family="monospace" font-size="6.5" fill="#dc2626" text-anchor="middle">AI 投影</text>
       <line x1="45" y1="66" x2="238" y2="66" stroke="#f97316" stroke-width=".8" stroke-dasharray="3,2" opacity=".6"/>
     </svg>`;
@@ -3797,7 +3829,7 @@ function buildLabPage(ptIdx) {
         </div>
         ${p1TrendSVG}
       </div>
-      <!-- 右：今日 Spirometry + PEF 歷史 + AI -->
+      <!-- 右：正式 Spirometry 報告 + PEF 歷史 + AI -->
       <div style="background:#fff;overflow-y:auto;display:flex;flex-direction:column;">
         <div style="padding:9px 14px;border-bottom:1px solid #e2e8f0;background:#f8fafc;flex-shrink:0;">
           <div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:2px;">正式肺功能報告（2025/03/14）· ATS/ERS Grade A</div>
@@ -3827,7 +3859,7 @@ function buildLabPage(ptIdx) {
             <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-bottom:5px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-brain"></i>DeepQ AI 判讀</div>
             <div style="font-family:var(--mono);font-size:9.5px;color:#1e3a8a;line-height:1.8;">
               <strong style="color:#dc2626;">FEV₁ 2 年下降 6%（72%→66%），且 F/V 環疊圖顯示曲線進行性左移與凹陷加深。</strong><br><br>
-              · 2023/04 外院圖形（綠）vs 2025/03 今日（紅）：FVC 縮小、mid-flow 更低，表示 2 年內阻塞加重<br>
+              · 2023/04 外院圖形（綠）vs 2025/03（紅）：FVC 縮小、mid-flow 更低，表示 2 年內阻塞加重<br>
               · Post-BD 藍色曲線幾乎與紅色重疊 → FEV₁ 改善 +5.5%（&lt;12%）→ <span style="color:#dc2626;">排除氣喘，COPD 確診</span><br>
             </div>
           </div>
@@ -4062,11 +4094,6 @@ function wsConfirm(ptIdx,btn){
   confirmed[ptIdx]=true;
 }
 
-function wsSnooze(ptIdx,btn){
-  btn.style.background='#fef3c7';
-  btn.style.color='#d97706';
-  snoozed[ptIdx]=true;
-}
 /* ═══ per-patient PACS multi-image comparison data ═══ */
 const PACS_DATA = [
   {
@@ -4161,7 +4188,7 @@ const DEEPQ_ADV = [
       { label:'肺容積增加 ~18%', conf:79, missed:true }
     ],
     insight:'原報告兩次均「無明顯異常」，DeepQ 重判發現橫膈膜角度扁平化，符合 COPD 慣性進展特徵。',
-    impact:'打斷 3 年慣性誤診迴圈，在第 5 次就診時提供確診依據'
+    impact:'即時攔截 3 年診斷落差，在第 5 次就診時提供確診依據'
   },
   { // 林志明
     scans: 2, missedByRad: 1,
@@ -4224,9 +4251,9 @@ const JOURNEY_DATA = [
       {
         id:1, date:'2024–2025', phase:'診斷碼',
         icon:'fa-rotate', color:'var(--danger)',
-        title:'3次誤判為季節性咳嗽 / 氣喘',
+        title:'3次記錄為季節性咳嗽 / 氣喘',
         detail:'家醫科 × 2、內科 × 1，每次開 Salbutamol PRN，無 COPD 鑑別',
-        status:'miss', statusLabel:'慣性誤診', statusColor:'var(--danger)',
+        status:'miss', statusLabel:'診斷待釐清', statusColor:'var(--danger)',
         source:'HIS 跨診次'
       },
       {
@@ -4259,7 +4286,7 @@ const JOURNEY_DATA = [
   },
   {
     currentNode: 1,
-    stuckLabel: '卡關：3年慣性誤診，從未做肺功能',
+    stuckLabel: '卡關：3年診斷未釐清，缺乏肺功能數據',
     stuckColor: 'var(--danger)',
     nodes:[
       {
@@ -4274,7 +4301,7 @@ const JOURNEY_DATA = [
         id:1, date:'2024–2026', phase:'診斷碼漂移',
         icon:'fa-rotate', color:'var(--danger)',
         title:'診斷碼漂移：氣喘→過敏→老年咳嗽',
-        detail:'4次就診診斷碼各不相同，掩蓋 COPD 可能，PACS 舊影像未重判',
+        detail:'4次就診診斷碼各不相同，COPD 可能性尚未被充分評估，PACS 舊影像未重判',
         status:'blocked', statusLabel:'⚠ 目前卡關', statusColor:'var(--danger)',
         source:'HIS + PACS AI',
         current: true
@@ -4291,7 +4318,7 @@ const JOURNEY_DATA = [
         id:3, date:'待完成', phase:'鑑別診斷',
         icon:'fa-magnifying-glass', color:'var(--text3)',
         title:'氣喘 vs COPD 鑑別 → 正確診斷碼',
-        detail:'Post-BD Spirometry + 職業史完整記錄 → 改正診斷，建立正確用藥計畫',
+        detail:'Post-BD Spirometry + 職業史完整記錄 → 更新診斷，建立對應用藥計畫',
         status:'pending', statusLabel:'待執行', statusColor:'var(--text3)',
         source:''
       },
@@ -4304,7 +4331,7 @@ const JOURNEY_DATA = [
         source:''
       }
     ],
-    aiSummary:'病患卡在「<strong>診斷碼慣性誤判</strong>」迴圈中。PACS AI 重判舊影像已發現 COPD 特徵，今日是打斷 3 年誤診的關鍵窗口。'
+    aiSummary:'病患卡在「<strong>診斷碼反覆變動</strong>」的狀態中。PACS AI 重判舊影像已發現 COPD 特徵，今日是釐清診斷的關鍵窗口。'
   },
   {
     currentNode: 3,
@@ -4362,7 +4389,7 @@ function buildDeepQAdvantage(i) {
   const findingsHtml = d.findings.map(f => {
     const barColor = f.missed ? (f.conf >= 85 ? 'var(--danger)' : f.conf >= 70 ? 'var(--amber)' : 'var(--dq)') : 'var(--lgreen)';
     const badge = f.missed
-      ? `<span style="font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--da-dim);color:var(--danger);border:1px solid var(--da-border);">原報告遺漏</span>`
+      ? `<span style="font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--am-dim);color:var(--amber);border:1px solid var(--am-border);">AI 新增發現</span>`
       : `<span style="font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--lg-dim);color:var(--lgreen);border:1px solid var(--lg-border);">原報告記錄</span>`;
     return `
     <div style="margin-bottom:8px;">
@@ -4386,9 +4413,9 @@ function buildDeepQAdvantage(i) {
     </div>
     <div style="padding:10px 12px;">
       <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <div style="flex:1;background:var(--da-dim);border:1px solid var(--da-border);border-radius:8px;padding:8px;text-align:center;">
-          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--danger);">${d.missedByRad}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;">原報告<br>遺漏發現</div>
+        <div style="flex:1;background:var(--am-dim);border:1px solid var(--am-border);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--amber);">${d.missedByRad}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">AI 新增<br>發現項目</div>
         </div>
         <div style="flex:1;background:var(--lg-dim);border:1px solid var(--lg-border);border-radius:8px;padding:8px;text-align:center;">
           <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--lgreen);">${d.findings.length}</div>
@@ -4485,7 +4512,7 @@ const SOAP_DATA = [
       ['sv','  病患：陳阿嬌　|　72歲 / 女　|　病歷號：A0234567'],
       ['sh','├─ 診斷碼（ICD-10-CM）────────────────────────────────────┤'],
       ['sd','  ⚠ 現行記錄（待更正）'],
-      ['sd','    J45.909  氣喘，未指明，無併發症（慣性誤診 × 4次）'],
+      ['sd','    J45.909  氣喘，未指明，無併發症（4次就診記錄）'],
       ['sw','  → AI 建議更正碼'],
       ['sw','    J44.1    COPD 急性惡化（待 Spirometry 確認後正式登錄）'],
       ['sv','  伴隨診斷碼'],
@@ -4503,11 +4530,11 @@ const SOAP_DATA = [
       ['sw','  DeepQ PACS AI 重判（2025/11 胸部 X 光）：'],
       ['sw','    · 肺過度充氣（Hyperinflation）+ 橫膈膜扁平，信心分數 91%'],
       ['sw','    · 肺容積較 2年前增加 ~18%'],
-      ['sd','    · 原始報告標記「無明顯異常」—— 影像發現未被臨床採納'],
+      ['sd','    · 原始報告標記「無明顯異常」；建議納入本次鑑別診斷參考'],
       ['sv','  Spirometry 執行紀錄：3年 5次就診，0次執行'],
       ['sh','├─ A — Assessment 臨床評估 ─────────────────────────────────┤'],
       ['sw','  高度疑似 COPD（職業性，J44.1）。'],
-      ['sv','  3年慣性誤診氣喘（J45.909），職業粉塵暴露為非吸菸型 COPD 重要危險因子。'],
+      ['sv','  3年反覆以氣喘記錄（J45.909），職業粉塵暴露為非吸菸型 COPD 重要危險因子。'],
       ['sv','  影像特徵符合 COPD 過度充氣型，非單純老年性改變。'],
       ['sv','  差異診斷：氣喘 vs COPD，需 Post-BD Spirometry（FEV1/FVC<0.70）確認。'],
       ['sv','  GOLD 分期目前無法確定（Spirometry 缺如）。'],
@@ -5034,9 +5061,9 @@ const HIS_DATA = [
   },
   {
     summary:'AI 跨診次分析：<strong>3年 4 次就診均診斷為氣喘</strong>，職業粉塵暴露 20 年從未被記錄。診斷碼漂移：氣喘 → 季節過敏 → 老年咳嗽。',
-    aiPattern:'偵測到「慣性誤診迴圈」：相同症狀反覆以不同診斷碼紀錄，掩蓋 COPD 可能性。PACS 舊影像從未重判。',
+    aiPattern:'偵測到「診斷碼反覆變動」：相同症狀反覆以不同診斷碼紀錄，COPD 可能性尚未被充分評估。PACS 舊影像從未重判。',
     rows:[
-      {date:'2026/01',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'老年性咳嗽 / 喉嚨過敏',drug:'Loratadine · Ambroxol',flag:'r',flagTxt:'第4次誤診碼',miss:true,warn:false},
+      {date:'2026/01',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'老年性咳嗽 / 喉嚨過敏',drug:'Loratadine · Ambroxol',flag:'r',flagTxt:'第4次不同診斷碼',miss:true,warn:false},
       {date:'2025/03',dept:'家醫科',ic:'fa-solid fa-house-medical',icol:'var(--lgreen)',dx:'季節過敏 / 氣喘發作',drug:'Salbutamol · Fluticasone inh.',flag:'r',flagTxt:'職業史空白',miss:true,warn:false},
       {date:'2024/08',dept:'耳鼻喉科',ic:'fa-solid fa-head-side-cough',icol:'var(--amber)',dx:'慢性喉炎 / 胃食道逆流',drug:'PPI · Prednisolone短程',flag:'a',flagTxt:'跨科別未整合',miss:false,warn:true},
       {date:'2023/11',dept:'內科門診',ic:'fa-solid fa-stethoscope',icol:'var(--dq)',dx:'支氣管氣喘（初診）',drug:'Salbutamol PRN · SABA',flag:'r',flagTxt:'COPD 未鑑別診斷',miss:true,warn:false},
